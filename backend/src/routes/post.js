@@ -3,11 +3,14 @@ const router = express.Router();
 const prisma = require('../utils/prisma');
 const { authenticateToken } = require('../middleware/auth');
 
-// GET all posts
+// GET all posts (excluding removed posts for non-mods)
 router.get('/', async (req, res) => {
   try {
     console.log('Fetching posts...');
     const posts = await prisma.post.findMany({
+      where: {
+        isRemoved: false // Only show non-removed posts
+      },
       include: { 
         author: {
           select: {
@@ -17,7 +20,11 @@ router.get('/', async (req, res) => {
             createdAt: true
           }
         }, 
-        comments: true, 
+        comments: {
+          where: {
+            isRemoved: false // Only count non-removed comments
+          }
+        }, 
         votes: true 
       },
       orderBy: { createdAt: 'desc' }
@@ -45,11 +52,45 @@ router.get('/:id', async (req, res) => {
             createdAt: true
           }
         }, 
-        comments: true, 
+        comments: {
+          where: {
+            isRemoved: false // Only show non-removed comments
+          }
+        }, 
         votes: true 
       }
     });
     if (!post) return res.status(404).json({ error: 'Post not found' });
+    
+    // If post is removed, only show to mods or author
+    if (post.isRemoved) {
+      const token = req.headers.authorization?.split(' ')[1];
+      if (token) {
+        try {
+          const jwt = require('jsonwebtoken');
+          const { JWT_SECRET } = require('../config');
+          const decoded = jwt.verify(token, JWT_SECRET);
+          
+          // Check if user is author or moderator
+          const isModerator = await prisma.subredditModerator.findFirst({
+            where: {
+              subreddit: post.subreddit,
+              userId: decoded.userId,
+              isActive: true
+            }
+          });
+          
+          if (decoded.userId !== post.authorId && !isModerator) {
+            return res.status(404).json({ error: 'Post not found' });
+          }
+        } catch {
+          return res.status(404).json({ error: 'Post not found' });
+        }
+      } else {
+        return res.status(404).json({ error: 'Post not found' });
+      }
+    }
+    
     res.json(post);
   } catch (err) {
     console.error('Error fetching post:', err);
@@ -86,6 +127,29 @@ router.post('/', authenticateToken, async (req, res) => {
         }
       }
     });
+    
+    // If this is the first post in the subreddit, make the author a moderator
+    const existingMods = await prisma.subredditModerator.findFirst({
+      where: {
+        subreddit: post.subreddit,
+        isActive: true
+      }
+    });
+    
+    if (!existingMods) {
+      await prisma.subredditModerator.create({
+        data: {
+          subreddit: post.subreddit,
+          userId: userId,
+          permissions: JSON.stringify({
+            managePosts: true,
+            manageUsers: true,
+            manageSettings: true
+          }),
+          assignedBy: userId
+        }
+      });
+    }
     
     res.status(201).json(post);
   } catch (err) {

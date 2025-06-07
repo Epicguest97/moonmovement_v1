@@ -31,6 +31,10 @@ model User {
   // Friendship relations
   friendships     Friendship[] @relation("UserFriendships")
   friendOf        Friendship[] @relation("FriendOf")
+  
+  // Moderation relations
+  moderatedSubreddits SubredditModerator[]
+  moderationActions   ModerationAction[]
 }
 
 model Post {
@@ -46,6 +50,15 @@ model Post {
   comments  Comment[]
   votes     Vote[]
   createdAt DateTime  @default(now())
+  
+  // Moderation fields
+  isRemoved Boolean @default(false)
+  removalReason String?
+  removedBy Int?
+  removedAt DateTime?
+  
+  // Moderation actions
+  moderationActions ModerationAction[]
 }
 
 model Comment {
@@ -57,6 +70,12 @@ model Comment {
   authorId  Int
   parentId  Int?      // for nested comments
   createdAt DateTime  @default(now())
+  
+  // Moderation fields
+  isRemoved Boolean @default(false)
+  removalReason String?
+  removedBy Int?
+  removedAt DateTime?
 }
 
 model Vote {
@@ -181,4 +200,31 @@ model Message {
   attachmentUrl String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+// Moderation models
+model SubredditModerator {
+  id          Int      @id @default(autoincrement())
+  subreddit   String
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+  permissions String   // JSON string of permissions
+  assignedAt  DateTime @default(now())
+  assignedBy  Int      // User ID who assigned this mod
+  isActive    Boolean  @default(true)
+  
+  @@unique([subreddit, userId])
+}
+
+model ModerationAction {
+  id          Int      @id @default(autoincrement())
+  moderator   User     @relation(fields: [moderatorId], references: [id])
+  moderatorId Int
+  post        Post?    @relation(fields: [postId], references: [id])
+  postId      Int?
+  subreddit   String
+  action      String   // 'remove_post', 'approve_post', 'ban_user', 'add_moderator', etc.
+  reason      String?
+  details     String?  // JSON string for additional details
+  createdAt   DateTime @default(now())
 }

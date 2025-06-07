@@ -4,7 +4,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import MainLayout from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Eye } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Users, Eye, Settings } from 'lucide-react';
+import ModerationPanel from '@/components/moderation/ModerationPanel';
 
 interface Community {
   id: number;
@@ -27,23 +29,24 @@ const Community = () => {
   const [error, setError] = useState<string | null>(null);
   const [isMember, setIsMember] = useState(false);
   const [membershipLoading, setMembershipLoading] = useState(false);
+  const [moderationInfo, setModerationInfo] = useState<{ isModerator: boolean; permissions: any } | null>(null);
 
   const fetchWithTimeout = async (url: string, options = {}, timeout = 10000) => {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-  
-  try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal
-    });
-    clearTimeout(id);
-    return response;
-  } catch (err) {
-    clearTimeout(id);
-    throw err;
-  }
-};
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal
+      });
+      clearTimeout(id);
+      return response;
+    } catch (err) {
+      clearTimeout(id);
+      throw err;
+    }
+  };
 
   useEffect(() => {
     const fetchCommunity = async () => {
@@ -115,6 +118,21 @@ const Community = () => {
           if (membershipResponse.ok) {
             const membershipData = await membershipResponse.json();
             setIsMember(membershipData.isMember);
+          }
+        }
+        
+        // Check moderation status for the subreddit name
+        if (isLoggedIn && communityName) {
+          const token = localStorage.getItem('token');
+          const modResponse = await fetch(`https://moonmovement.onrender.com/api/moderation/${communityName}/check`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (modResponse.ok) {
+            const modData = await modResponse.json();
+            setModerationInfo(modData);
           }
         }
         
@@ -248,55 +266,80 @@ const Community = () => {
           </CardContent>
         </Card>
 
-        {/* Community Actions */}
-        <div className="flex gap-4 mb-6">
-          {isLoggedIn ? (
-            <Button 
-              onClick={handleJoinLeave}
-              disabled={membershipLoading}
-              className={isMember 
-                ? "bg-gray-600 hover:bg-gray-700 text-white" 
-                : "bg-sidebar-primary hover:bg-sidebar-primary/90 text-white"
-              }
-            >
-              {membershipLoading ? 'Loading...' : (isMember ? 'Leave Community' : 'Join Community')}
-            </Button>
-          ) : (
-            <Button 
-              onClick={() => window.location.href = '/auth'}
-              className="bg-sidebar-primary hover:bg-sidebar-primary/90 text-white"
-            >
-              Login to Join
-            </Button>
-          )}
-          
-          {isLoggedIn ? (
-            <Button variant="outline" className="border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent">
-              Create Post
-            </Button>
-          ) : (
-            <Button 
-              onClick={() => window.location.href = '/auth'}
-              variant="outline" 
-              className="border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent"
-            >
-              Login to Post
-            </Button>
-          )}
-        </div>
+        <Tabs defaultValue="posts" className="w-full">
+          <TabsList className="bg-sidebar border border-sidebar-border">
+            <TabsTrigger value="posts" className="data-[state=active]:bg-sidebar-accent text-sidebar-foreground">
+              Posts
+            </TabsTrigger>
+            {moderationInfo?.isModerator && (
+              <TabsTrigger value="moderation" className="data-[state=active]:bg-sidebar-accent text-sidebar-foreground">
+                <Settings size={16} className="mr-2" />
+                Moderation
+              </TabsTrigger>
+            )}
+          </TabsList>
 
-        {/* Community Content */}
-        <Card className="bg-sidebar border-sidebar-border">
-          <CardHeader>
-            <h2 className="text-xl font-semibold text-sidebar-foreground">Posts</h2>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-gray-400">
-              <p>No posts yet in this community.</p>
-              <p className="text-sm mt-2">Be the first to create a post!</p>
+          <TabsContent value="posts" className="space-y-6">
+            {/* Community Actions */}
+            <div className="flex gap-4">
+              {isLoggedIn ? (
+                <Button 
+                  onClick={handleJoinLeave}
+                  disabled={membershipLoading}
+                  className={isMember 
+                    ? "bg-gray-600 hover:bg-gray-700 text-white" 
+                    : "bg-sidebar-primary hover:bg-sidebar-primary/90 text-white"
+                  }
+                >
+                  {membershipLoading ? 'Loading...' : (isMember ? 'Leave Community' : 'Join Community')}
+                </Button>
+              ) : (
+                <Button 
+                  onClick={() => window.location.href = '/auth'}
+                  className="bg-sidebar-primary hover:bg-sidebar-primary/90 text-white"
+                >
+                  Login to Join
+                </Button>
+              )}
+              
+              {isLoggedIn ? (
+                <Button variant="outline" className="border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent">
+                  Create Post
+                </Button>
+              ) : (
+                <Button 
+                  onClick={() => window.location.href = '/auth'}
+                  variant="outline" 
+                  className="border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent"
+                >
+                  Login to Post
+                </Button>
+              )}
             </div>
-          </CardContent>
-        </Card>
+
+            {/* Community Content */}
+            <Card className="bg-sidebar border-sidebar-border">
+              <CardHeader>
+                <h2 className="text-xl font-semibold text-sidebar-foreground">Posts</h2>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-gray-400">
+                  <p>No posts yet in this community.</p>
+                  <p className="text-sm mt-2">Be the first to create a post!</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {moderationInfo?.isModerator && (
+            <TabsContent value="moderation">
+              <ModerationPanel 
+                subreddit={communityName!} 
+                userPermissions={moderationInfo.permissions} 
+              />
+            </TabsContent>
+          )}
+        </Tabs>
       </div>
     </MainLayout>
   );

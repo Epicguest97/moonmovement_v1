@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { MessageSquare, Share } from 'lucide-react';
 import VoteControls from './VoteControls';
 import PostContent from './PostContent';
+import PostModerationActions from '../moderation/PostModerationActions';
 
 export interface Post {
   id: string;
@@ -29,15 +30,41 @@ export interface Post {
 
 interface PostCardProps {
   post: Post;
+  onPostUpdate?: () => void;
 }
 
-const PostCard = ({ post }: PostCardProps) => {
+const PostCard = ({ post, onPostUpdate }: PostCardProps) => {
   // Handle both author object and string formats
   const authorName = typeof post.author === 'string' ? post.author : post.author.username;
   
   // Voting state
   const [voteStatus, setVoteStatus] = useState<'up' | 'down' | null>(null);
   const [voteScore, setVoteScore] = useState(post.voteScore);
+  const [moderationInfo, setModerationInfo] = useState<{ isModerator: boolean; permissions: any } | null>(null);
+  
+  useEffect(() => {
+    const checkModeratorStatus = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        const response = await fetch(`https://moonmovement.onrender.com/api/moderation/${post.subreddit}/check`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setModerationInfo(data);
+        }
+      } catch (err) {
+        console.error('Failed to check moderator status:', err);
+      }
+    };
+
+    checkModeratorStatus();
+  }, [post.subreddit]);
   
   const handleVote = async (direction: 'up' | 'down') => {
     const username = localStorage.getItem('username');
@@ -67,6 +94,15 @@ const PostCard = ({ post }: PostCardProps) => {
   
   return (
     <Card className="post-card overflow-hidden mb-4 bg-sidebar border-sidebar-border">
+      {moderationInfo?.isModerator && moderationInfo.permissions?.managePosts && (
+        <PostModerationActions 
+          postId={post.id}
+          subreddit={post.subreddit}
+          canManagePosts={moderationInfo.permissions.managePosts}
+          onPostRemoved={onPostUpdate}
+        />
+      )}
+      
       <div className="flex">
         <VoteControls 
           score={voteScore} 
