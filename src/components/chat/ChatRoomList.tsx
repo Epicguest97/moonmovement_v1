@@ -70,46 +70,45 @@ const ChatRoomList = ({ rooms, selectedRoom, onRoomSelect, currentUserId }: Chat
   };
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-0">
       {rooms.map((room) => (
         <div
           key={room.id}
-          className={`p-3 cursor-pointer hover:bg-sidebar-accent transition-colors ${
+          className={`p-4 cursor-pointer hover:bg-sidebar-accent transition-colors border-b border-gray-100 last:border-b-0 ${
             selectedRoom?.id === room.id ? 'bg-sidebar-accent' : ''
           }`}
           onClick={() => onRoomSelect(room)}
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              <div className="relative">
-                <div className="w-10 h-10 bg-sidebar-primary rounded-full flex items-center justify-center text-white font-semibold">
-                  {getRoomName(room).charAt(0).toUpperCase()}
-                </div>
-                {isUserOnline(room) && (
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-sidebar"></div>
+          <div className="flex items-center gap-3">
+            <div className="relative flex-shrink-0">
+              <div className="w-12 h-12 bg-sidebar-primary rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                {getRoomName(room).charAt(0).toUpperCase()}
+              </div>
+              {isUserOnline(room) && (
+                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+              )}
+            </div>
+            
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between mb-1">
+                <p className="font-semibold text-sidebar-foreground truncate text-base">
+                  {getRoomName(room)}
+                </p>
+                {room.messages.length > 0 && (
+                  <p className="text-xs text-gray-500 flex-shrink-0 ml-2">
+                    {getLastMessageTime(room)}
+                  </p>
                 )}
               </div>
               
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between">
-                  <p className="font-medium text-sidebar-foreground truncate">
-                    {getRoomName(room)}
-                  </p>
-                  {room._count.messages > 0 && (
-                    <Badge variant="secondary" className="ml-2 bg-sidebar-primary text-white text-xs">
-                      {room._count.messages}
-                    </Badge>
-                  )}
-                </div>
-                
-                <p className="text-sm text-gray-400 truncate">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-500 truncate flex-1">
                   {getLastMessage(room)}
                 </p>
-                
-                {room.messages.length > 0 && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    {getLastMessageTime(room)}
-                  </p>
+                {room._count.messages > 0 && (
+                  <Badge variant="secondary" className="ml-2 bg-sidebar-primary text-white text-xs h-5 min-w-5 rounded-full flex items-center justify-center">
+                    {room._count.messages > 99 ? '99+' : room._count.messages}
+                  </Badge>
                 )}
               </div>
             </div>
@@ -118,9 +117,9 @@ const ChatRoomList = ({ rooms, selectedRoom, onRoomSelect, currentUserId }: Chat
       ))}
       
       {rooms.length === 0 && (
-        <div className="p-4 text-center text-gray-400">
-          <p>No chats yet</p>
-          <p className="text-sm mt-1">Start a conversation with someone!</p>
+        <div className="p-8 text-center text-gray-400">
+          <p className="text-base mb-2">No chats yet</p>
+          <p className="text-sm">Start a conversation with someone!</p>
         </div>
       )}
     </div>

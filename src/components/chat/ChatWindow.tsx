@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, MoreVertical } from 'lucide-react';
+import { Send, MoreVertical, ArrowLeft } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface Message {
@@ -35,9 +35,11 @@ interface ChatWindowProps {
   room: ChatRoom;
   currentUserId?: number;
   onMessageSent: () => void;
+  onBack?: () => void;
+  isMobile?: boolean;
 }
 
-const ChatWindow = ({ room, currentUserId, onMessageSent }: ChatWindowProps) => {
+const ChatWindow = ({ room, currentUserId, onMessageSent, onBack, isMobile = false }: ChatWindowProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
@@ -134,24 +136,59 @@ const ChatWindow = ({ room, currentUserId, onMessageSent }: ChatWindowProps) => 
   return (
     <div className="h-full flex flex-col">
       {/* Chat Header */}
-      <div className="p-4 border-b border-sidebar-border">
+      <div className={`p-4 border-b border-sidebar-border ${isMobile ? 'bg-sidebar-primary' : ''}`}>
         <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-semibold text-sidebar-foreground">{getRoomName()}</h3>
-            {!room.isGroup && (
-              <p className="text-sm text-gray-400">{getOtherUserStatus()}</p>
+          <div className="flex items-center gap-3">
+            {isMobile && onBack && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onBack}
+                className={isMobile ? 'text-white hover:bg-white/10' : ''}
+              >
+                <ArrowLeft size={20} />
+              </Button>
             )}
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
+                  isMobile ? 'bg-white/20 text-white' : 'bg-sidebar-primary text-white'
+                }`}>
+                  {getRoomName().charAt(0).toUpperCase()}
+                </div>
+                {!room.isGroup && (() => {
+                  const otherUser = room.users.find(u => u.user.id !== currentUserId);
+                  return otherUser?.user.isOnline && (
+                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-sidebar"></div>
+                  );
+                })()}
+              </div>
+              <div>
+                <h3 className={`font-semibold ${isMobile ? 'text-white text-lg' : 'text-sidebar-foreground'}`}>
+                  {getRoomName()}
+                </h3>
+                {!room.isGroup && (
+                  <p className={`text-sm ${isMobile ? 'text-white/80' : 'text-gray-400'}`}>
+                    {getOtherUserStatus()}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
-          <Button variant="ghost" size="sm">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className={isMobile ? 'text-white hover:bg-white/10' : ''}
+          >
             <MoreVertical size={16} />
           </Button>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50">
         {loading ? (
-          <div className="text-center text-gray-400">Loading messages...</div>
+          <div className="text-center text-gray-400 py-8">Loading messages...</div>
         ) : (
           <>
             {messages.map((message) => (
@@ -159,22 +196,24 @@ const ChatWindow = ({ room, currentUserId, onMessageSent }: ChatWindowProps) => 
                 key={message.id}
                 className={`flex ${message.sender.id === currentUserId ? 'justify-end' : 'justify-start'}`}
               >
-                <div
-                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                    message.sender.id === currentUserId
-                      ? 'bg-sidebar-primary text-white'
-                      : 'bg-sidebar-accent text-sidebar-foreground'
-                  }`}
-                >
-                  {message.sender.id !== currentUserId && (
-                    <p className="text-xs text-gray-300 mb-1">{message.sender.username}</p>
-                  )}
-                  <p className="text-sm">{message.content}</p>
-                  <p className={`text-xs mt-1 ${
-                    message.sender.id === currentUserId ? 'text-gray-200' : 'text-gray-500'
-                  }`}>
-                    {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
-                  </p>
+                <div className="max-w-[80%]">
+                  <div
+                    className={`px-4 py-2 rounded-2xl ${
+                      message.sender.id === currentUserId
+                        ? 'bg-sidebar-primary text-white rounded-br-md'
+                        : 'bg-white text-gray-800 rounded-bl-md shadow-sm'
+                    }`}
+                  >
+                    {message.sender.id !== currentUserId && room.isGroup && (
+                      <p className="text-xs text-gray-500 mb-1 font-medium">{message.sender.username}</p>
+                    )}
+                    <p className="text-sm leading-relaxed">{message.content}</p>
+                    <p className={`text-xs mt-1 ${
+                      message.sender.id === currentUserId ? 'text-white/70' : 'text-gray-500'
+                    }`}>
+                      {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}
@@ -184,21 +223,22 @@ const ChatWindow = ({ room, currentUserId, onMessageSent }: ChatWindowProps) => 
       </div>
 
       {/* Message Input */}
-      <div className="p-4 border-t border-sidebar-border">
-        <form onSubmit={sendMessage} className="flex gap-2">
+      <div className="p-3 border-t border-sidebar-border bg-white">
+        <form onSubmit={sendMessage} className="flex gap-2 items-end">
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Type a message..."
-            className="flex-1 bg-sidebar-accent border-sidebar-border text-sidebar-foreground"
+            className="flex-1 bg-gray-100 border-0 rounded-full px-4 py-3 text-sidebar-foreground resize-none"
             disabled={sending}
+            style={{ minHeight: '44px' }}
           />
           <Button
             type="submit"
             disabled={!newMessage.trim() || sending}
-            className="bg-sidebar-primary hover:bg-sidebar-primary/80"
+            className="bg-sidebar-primary hover:bg-sidebar-primary/80 rounded-full w-12 h-12 p-0"
           >
-            <Send size={16} />
+            <Send size={18} />
           </Button>
         </form>
       </div>
