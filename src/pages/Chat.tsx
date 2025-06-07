@@ -1,13 +1,15 @@
+
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, MessageSquare, Plus, ArrowLeft } from 'lucide-react';
+import { Search, MessageSquare, Plus, ArrowLeft, Users } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import ChatRoomList from '@/components/chat/ChatRoomList';
 import ChatWindow from '@/components/chat/ChatWindow';
 import StartChatDialog from '@/components/chat/StartChatDialog';
+import CreateGroupDialog from '@/components/chat/CreateGroupDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ChatRoom {
@@ -43,6 +45,8 @@ const Chat = () => {
   const [selectedRoom, setSelectedRoom] = useState<ChatRoom | null>(null);
   const [loading, setLoading] = useState(true);
   const [showStartChat, setShowStartChat] = useState(false);
+  const [showCreateGroup, setShowCreateGroup] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -127,6 +131,40 @@ const Chat = () => {
     }
   };
 
+  const handleCreateGroup = async (name: string, userIds: number[]) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://moonmovement.onrender.com/api/chat/groups/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ name, userIds })
+      });
+
+      if (response.ok) {
+        const newGroup = await response.json();
+        await fetchChatRooms();
+        setSelectedRoom(newGroup);
+        setShowCreateGroup(false);
+      }
+    } catch (error) {
+      console.error('Error creating group:', error);
+    }
+  };
+
+  const filteredRooms = chatRooms.filter(room => {
+    if (!searchQuery) return true;
+    
+    if (room.isGroup) {
+      return room.name?.toLowerCase().includes(searchQuery.toLowerCase());
+    } else {
+      const otherUser = room.users.find(u => u.user.id !== Number(user?.id));
+      return otherUser?.user.username.toLowerCase().includes(searchQuery.toLowerCase());
+    }
+  });
+
   if (!isLoggedIn) {
     return (
       <MainLayout>
@@ -150,16 +188,35 @@ const Chat = () => {
             {!selectedRoom ? (
               /* Chat List View */
               <Card className="flex-1 bg-sidebar border-sidebar-border rounded-none border-x-0 border-b-0">
-                <div className="p-4 border-b border-sidebar-border">
+                <div className="p-4 border-b border-sidebar-border bg-sidebar-primary">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold text-sidebar-foreground">Chats</h2>
-                    <Button
-                      size="sm"
-                      onClick={() => setShowStartChat(true)}
-                      className="bg-sidebar-primary hover:bg-sidebar-primary/80"
-                    >
-                      <Plus size={18} />
-                    </Button>
+                    <h2 className="text-xl font-semibold text-white">Chats</h2>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => setShowCreateGroup(true)}
+                        className="bg-white/20 hover:bg-white/30 text-white"
+                      >
+                        <Users size={18} />
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => setShowStartChat(true)}
+                        className="bg-white/20 hover:bg-white/30 text-white"
+                      >
+                        <Plus size={18} />
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="relative">
+                    <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <Input
+                      placeholder="Search chats..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10 bg-white/20 border-0 text-white placeholder-white/70"
+                    />
                   </div>
                 </div>
                 
@@ -168,7 +225,7 @@ const Chat = () => {
                     <div className="p-4 text-center text-gray-400">Loading chats...</div>
                   ) : (
                     <ChatRoomList
-                      rooms={chatRooms}
+                      rooms={filteredRooms}
                       selectedRoom={selectedRoom}
                       onRoomSelect={handleRoomSelect}
                       currentUserId={user?.id ? Number(user.id) : undefined}
@@ -190,65 +247,95 @@ const Chat = () => {
             )}
           </div>
         ) : (
-          /* Desktop Layout */
-          <div className="max-w-7xl mx-auto px-4 py-6 h-full">
-            <div className="flex gap-6 h-[calc(100vh-200px)]">
-              {/* Chat Room List */}
-              <Card className="w-80 bg-sidebar border-sidebar-border">
-                <div className="p-4 border-b border-sidebar-border">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-sidebar-foreground">Messages</h2>
+          /* WhatsApp Web-like Desktop Layout */
+          <div className="h-full flex">
+            {/* Chat Room List - WhatsApp Web Style */}
+            <div className="w-96 bg-sidebar border-r border-sidebar-border flex flex-col">
+              {/* Header */}
+              <div className="p-4 border-b border-sidebar-border bg-sidebar">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-sidebar-foreground">Chats</h2>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => setShowCreateGroup(true)}
+                      className="bg-sidebar-primary hover:bg-sidebar-primary/80"
+                      title="Create Group"
+                    >
+                      <Users size={16} />
+                    </Button>
                     <Button
                       size="sm"
                       onClick={() => setShowStartChat(true)}
                       className="bg-sidebar-primary hover:bg-sidebar-primary/80"
+                      title="New Chat"
                     >
                       <Plus size={16} />
                     </Button>
                   </div>
                 </div>
                 
-                <div className="flex-1 overflow-y-auto">
-                  {loading ? (
-                    <div className="p-4 text-center text-gray-400">Loading chats...</div>
-                  ) : (
-                    <ChatRoomList
-                      rooms={chatRooms}
-                      selectedRoom={selectedRoom}
-                      onRoomSelect={handleRoomSelect}
-                      currentUserId={user?.id ? Number(user.id) : undefined}
-                    />
-                  )}
-                </div>
-              </Card>
-
-              {/* Chat Window */}
-              <Card className="flex-1 bg-sidebar border-sidebar-border">
-                {selectedRoom ? (
-                  <ChatWindow
-                    room={selectedRoom}
-                    currentUserId={user?.id ? Number(user.id) : undefined}
-                    onMessageSent={fetchChatRooms}
-                    isMobile={false}
+                {/* Search */}
+                <div className="relative">
+                  <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <Input
+                    placeholder="Search or start new chat"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 bg-sidebar-accent border-sidebar-border text-sidebar-foreground"
                   />
+                </div>
+              </div>
+              
+              {/* Chat List */}
+              <div className="flex-1 overflow-y-auto">
+                {loading ? (
+                  <div className="p-4 text-center text-gray-400">Loading chats...</div>
                 ) : (
-                  <div className="h-full flex items-center justify-center">
-                    <div className="text-center text-gray-400">
-                      <MessageSquare size={48} className="mx-auto mb-4 opacity-50" />
-                      <p>Select a chat to start messaging</p>
-                    </div>
-                  </div>
+                  <ChatRoomList
+                    rooms={filteredRooms}
+                    selectedRoom={selectedRoom}
+                    onRoomSelect={handleRoomSelect}
+                    currentUserId={user?.id ? Number(user.id) : undefined}
+                  />
                 )}
-              </Card>
+              </div>
+            </div>
+
+            {/* Chat Window */}
+            <div className="flex-1 bg-gray-50 flex flex-col">
+              {selectedRoom ? (
+                <ChatWindow
+                  room={selectedRoom}
+                  currentUserId={user?.id ? Number(user.id) : undefined}
+                  onMessageSent={fetchChatRooms}
+                  isMobile={false}
+                />
+              ) : (
+                <div className="h-full flex items-center justify-center bg-sidebar">
+                  <div className="text-center text-gray-400">
+                    <MessageSquare size={64} className="mx-auto mb-4 opacity-30" />
+                    <h3 className="text-xl font-medium mb-2 text-sidebar-foreground">WhatsApp Web</h3>
+                    <p className="text-sm">Send and receive messages without keeping your phone online.</p>
+                    <p className="text-sm mt-2">Use WhatsApp on up to 4 linked devices and 1 phone at the same time.</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* Start Chat Dialog */}
+        {/* Dialogs */}
         <StartChatDialog
           open={showStartChat}
           onClose={() => setShowStartChat(false)}
           onStartChat={handleNewChat}
+        />
+
+        <CreateGroupDialog
+          open={showCreateGroup}
+          onClose={() => setShowCreateGroup(false)}
+          onCreateGroup={handleCreateGroup}
         />
       </div>
     </MainLayout>

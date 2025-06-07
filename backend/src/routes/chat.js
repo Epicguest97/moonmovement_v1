@@ -1,4 +1,3 @@
-
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const { authenticateToken } = require('../middleware/auth');
@@ -68,6 +67,180 @@ router.get('/rooms', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Error fetching chat rooms:', error);
     res.status(500).json({ error: 'Failed to fetch chat rooms' });
+  }
+});
+
+// Add friend
+router.post('/friends/add', authenticateToken, async (req, res) => {
+  try {
+    const { username } = req.body;
+    const currentUserId = req.user.userId;
+
+    // Find the user to add as friend
+    const targetUser = await prisma.user.findUnique({
+      where: { username }
+    });
+
+    if (!targetUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (targetUser.id === currentUserId) {
+      return res.status(400).json({ error: 'Cannot add yourself as friend' });
+    }
+
+    // Check if friendship already exists
+    const existingFriendship = await prisma.friendship.findFirst({
+      where: {
+        OR: [
+          { userId: currentUserId, friendId: targetUser.id },
+          { userId: targetUser.id, friendId: currentUserId }
+        ]
+      }
+    });
+
+    if (existingFriendship) {
+      return res.status(400).json({ error: 'Already friends or request pending' });
+    }
+
+    // Create friendship
+    const friendship = await prisma.friendship.create({
+      data: {
+        userId: currentUserId,
+        friendId: targetUser.id,
+        status: 'accepted' // For simplicity, auto-accept
+      },
+      include: {
+        friend: {
+          select: {
+            id: true,
+            username: true,
+            isOnline: true,
+            lastSeen: true
+          }
+        }
+      }
+    });
+
+    res.json(friendship);
+  } catch (error) {
+    console.error('Error adding friend:', error);
+    res.status(500).json({ error: 'Failed to add friend' });
+  }
+});
+
+// Get friends list
+router.get('/friends', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const friendships = await prisma.friendship.findMany({
+      where: {
+        OR: [
+          { userId: userId, status: 'accepted' },
+          { friendId: userId, status: 'accepted' }
+        ]
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            isOnline: true,
+            lastSeen: true
+          }
+        },
+        friend: {
+          select: {
+            id: true,
+            username: true,
+            isOnline: true,
+            lastSeen: true
+          }
+        }
+      }
+    });
+
+    // Map to get the friend data (not current user)
+    const friends = friendships.map(friendship => {
+      return friendship.userId === userId ? friendship.friend : friendship.user;
+    });
+
+    res.json(friends);
+  } catch (error) {
+    console.error('Error fetching friends:', error);
+    res.status(500).json({ error: 'Failed to fetch friends' });
+  }
+});
+
+// Create group chat
+router.post('/groups/create', authenticateToken, async (req, res) => {
+  try {
+    const { name, userIds } = req.body;
+    const currentUserId = req.user.userId;
+
+    if (!name || !userIds || userIds.length === 0) {
+      return res.status(400).json({ error: 'Group name and users are required' });
+    }
+
+    // Create group chat room
+    const chatRoom = await prisma.chatRoom.create({
+      data: {
+        name: name,
+        isGroup: true,
+        users: {
+          create: [
+            { userId: currentUserId },
+            ...userIds.map(userId => ({ userId: parseInt(userId) }))
+          ]
+        }
+      },
+      include: {
+        users: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                isOnline: true,
+                lastSeen: true
+              }
+            }
+          }
+        },
+        messages: {
+          orderBy: {
+            createdAt: 'desc'
+          },
+          take: 1,
+          include: {
+            sender: {
+              select: {
+                id: true,
+                username: true
+              }
+            }
+          }
+        },
+        _count: {
+          select: {
+            messages: {
+              where: {
+                isRead: false,
+                senderId: {
+                  not: currentUserId
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    res.json(chatRoom);
+  } catch (error) {
+    console.error('Error creating group:', error);
+    res.status(500).json({ error: 'Failed to create group' });
   }
 });
 

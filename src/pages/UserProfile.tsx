@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -6,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Cake, MapPin, MessageSquare, Users, TrendingUp } from 'lucide-react';
+import { Calendar, Cake, MapPin, MessageSquare, Users, TrendingUp, UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UserProfileData {
@@ -56,6 +57,7 @@ const UserProfile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [startingChat, setStartingChat] = useState(false);
+  const [addingFriend, setAddingFriend] = useState(false);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -127,6 +129,40 @@ const UserProfile = () => {
     }
   };
 
+  const handleAddFriend = async () => {
+    if (!username) return;
+    
+    if (!isLoggedIn) {
+      alert("Please log in to add friends");
+      return;
+    }
+    
+    try {
+      setAddingFriend(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://moonmovement.onrender.com/api/chat/friends/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ username })
+      });
+
+      if (response.ok) {
+        alert(`${username} has been added as a friend!`);
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Failed to add friend');
+      }
+    } catch (error) {
+      console.error('Error adding friend:', error);
+      alert('Failed to add friend');
+    } finally {
+      setAddingFriend(false);
+    }
+  };
+
   const isCurrentUser = isLoggedIn && currentUser?.username === username;
 
   if (loading) {
@@ -178,15 +214,26 @@ const UserProfile = () => {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2">
                   <h1 className="text-2xl sm:text-3xl font-bold text-sidebar-foreground">u/{profile.username}</h1>
                   {!isCurrentUser && (
-                    <Button
-                      onClick={handleStartChat}
-                      disabled={startingChat}
-                      className="bg-sidebar-primary hover:bg-sidebar-primary/80 text-white text-sm sm:text-base"
-                      size="sm"
-                    >
-                      <MessageSquare size={16} className="mr-2" />
-                      {startingChat ? 'Starting Chat...' : 'Start Chat'}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleAddFriend}
+                        disabled={addingFriend}
+                        className="bg-green-600 hover:bg-green-700 text-white text-sm sm:text-base"
+                        size="sm"
+                      >
+                        <UserPlus size={16} className="mr-2" />
+                        {addingFriend ? 'Adding...' : 'Add Friend'}
+                      </Button>
+                      <Button
+                        onClick={handleStartChat}
+                        disabled={startingChat}
+                        className="bg-sidebar-primary hover:bg-sidebar-primary/80 text-white text-sm sm:text-base"
+                        size="sm"
+                      >
+                        <MessageSquare size={16} className="mr-2" />
+                        {startingChat ? 'Starting Chat...' : 'Start Chat'}
+                      </Button>
+                    </div>
                   )}
                 </div>
                 
