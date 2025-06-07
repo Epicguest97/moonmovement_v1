@@ -101,10 +101,10 @@ const Index = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-sidebar p-8 border border-sidebar-border rounded-md text-center">
-            <h2 className="text-xl font-bold mb-2 text-white">Loading posts...</h2>
-            <p className="text-gray-300">Please wait while we fetch the latest content.</p>
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="bg-sidebar p-6 md:p-8 border border-sidebar-border rounded-md text-center">
+            <h2 className="text-lg md:text-xl font-bold mb-2 text-white">Loading posts...</h2>
+            <p className="text-sm md:text-base text-gray-300">Please wait while we fetch the latest content.</p>
           </div>
         </div>
       </MainLayout>
@@ -114,11 +114,11 @@ const Index = () => {
   if (error) {
     return (
       <MainLayout>
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-sidebar p-8 border border-sidebar-border rounded-md text-center">
-            <h2 className="text-xl font-bold mb-2 text-red-400">Error</h2>
-            <p className="text-gray-300 mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()}>
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="bg-sidebar p-6 md:p-8 border border-sidebar-border rounded-md text-center">
+            <h2 className="text-lg md:text-xl font-bold mb-2 text-red-400">Error</h2>
+            <p className="text-sm md:text-base text-gray-300 mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()} size="sm" className="md:size-default">
               Try Again
             </Button>
           </div>
@@ -129,20 +129,20 @@ const Index = () => {
 
   return (
     <MainLayout>
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto px-4">
         <CreatePostCard />
         
         <Tabs defaultValue="posts" className="mb-4">
-          <TabsList className="bg-sidebar border border-sidebar-border rounded-md p-1 h-auto">
+          <TabsList className="bg-sidebar border border-sidebar-border rounded-md p-1 h-auto w-full">
             <TabsTrigger 
               value="posts"
-              className="data-[state=active]:bg-sidebar-accent text-sidebar-foreground py-2 h-auto"
+              className="data-[state=active]:bg-sidebar-accent text-sidebar-foreground py-2 h-auto flex-1 text-sm md:text-base"
             >
               Posts
             </TabsTrigger>
             <TabsTrigger 
               value="trending"
-              className="data-[state=active]:bg-sidebar-accent text-sidebar-foreground py-2 h-auto"
+              className="data-[state=active]:bg-sidebar-accent text-sidebar-foreground py-2 h-auto flex-1 text-sm md:text-base"
             >
               Trending
             </TabsTrigger>
@@ -151,32 +151,32 @@ const Index = () => {
           <TabsContent value="posts">
             {/* Sort Controls */}
             <div className="bg-sidebar border border-sidebar-border rounded-md mb-4">
-              <div className="flex p-2 gap-1">
+              <div className="flex p-2 gap-1 overflow-x-auto">
                 <Button 
                   variant={sortBy === 'hot' ? 'default' : 'ghost'} 
                   size="sm" 
-                  className={sortBy === 'hot' ? 'bg-sidebar-accent text-sidebar-foreground' : 'text-sidebar-foreground hover:bg-sidebar-accent'}
+                  className={`${sortBy === 'hot' ? 'bg-sidebar-accent text-sidebar-foreground' : 'text-sidebar-foreground hover:bg-sidebar-accent'} flex-shrink-0 text-xs md:text-sm`}
                   onClick={() => handleSortChange('hot')}
                 >
-                  <Flame size={16} className="mr-1" />
+                  <Flame size={14} className="mr-1" />
                   Hot
                 </Button>
                 <Button 
                   variant={sortBy === 'new' ? 'default' : 'ghost'} 
                   size="sm" 
-                  className={sortBy === 'new' ? 'bg-sidebar-accent text-sidebar-foreground' : 'text-sidebar-foreground hover:bg-sidebar-accent'}
+                  className={`${sortBy === 'new' ? 'bg-sidebar-accent text-sidebar-foreground' : 'text-sidebar-foreground hover:bg-sidebar-accent'} flex-shrink-0 text-xs md:text-sm`}
                   onClick={() => handleSortChange('new')}
                 >
-                  <Clock size={16} className="mr-1" />
+                  <Clock size={14} className="mr-1" />
                   New
                 </Button>
                 <Button 
                   variant={sortBy === 'top' ? 'default' : 'ghost'} 
                   size="sm" 
-                  className={sortBy === 'top' ? 'bg-sidebar-accent text-sidebar-foreground' : 'text-sidebar-foreground hover:bg-sidebar-accent'}
+                  className={`${sortBy === 'top' ? 'bg-sidebar-accent text-sidebar-foreground' : 'text-sidebar-foreground hover:bg-sidebar-accent'} flex-shrink-0 text-xs md:text-sm`}
                   onClick={() => handleSortChange('top')}
                 >
-                  <TrendingUp size={16} className="mr-1" />
+                  <TrendingUp size={14} className="mr-1" />
                   Top
                 </Button>
               </div>
@@ -185,7 +185,7 @@ const Index = () => {
             {/* Search Results Info */}
             {searchQuery && (
               <div className="bg-sidebar border border-sidebar-border rounded-md mb-4 p-3">
-                <p className="text-sidebar-foreground text-sm">
+                <p className="text-sidebar-foreground text-xs md:text-sm break-words">
                   Showing results for: <span className="font-semibold">"{searchQuery}"</span>
                   {sortedPosts.length > 0 && (
                     <span className="text-gray-400 ml-2">({sortedPosts.length} results)</span>
@@ -202,14 +202,15 @@ const Index = () => {
                 ))}
               </div>
             ) : (
-              <div className="bg-sidebar p-8 border border-sidebar-border rounded-md text-center">
-                <p className="text-gray-400">
+              <div className="bg-sidebar p-6 md:p-8 border border-sidebar-border rounded-md text-center">
+                <p className="text-gray-400 text-sm md:text-base">
                   {searchQuery ? 'No posts match your search.' : 'No posts available yet.'}
                 </p>
                 {searchQuery && (
                   <Button 
                     variant="ghost" 
                     className="mt-2" 
+                    size="sm"
                     onClick={() => navigate('/home')}
                   >
                     Clear search
@@ -221,7 +222,7 @@ const Index = () => {
           
           <TabsContent value="trending">
             <div className="bg-sidebar border border-sidebar-border rounded-md">
-              <h3 className="text-lg font-medium p-4 border-b border-sidebar-border text-sidebar-foreground">
+              <h3 className="text-base md:text-lg font-medium p-4 border-b border-sidebar-border text-sidebar-foreground">
                 Trending Communities
               </h3>
               <div className="p-2">
@@ -229,15 +230,15 @@ const Index = () => {
                   subreddits.slice(0, 5).map((subreddit, index) => (
                     <div 
                       key={subreddit} 
-                      className="p-2 hover:bg-sidebar-accent rounded-md cursor-pointer transition-colors"
+                      className="p-3 hover:bg-sidebar-accent rounded-md cursor-pointer transition-colors"
                       onClick={() => handleCommunityClick(subreddit)}
                     >
                       <div className="flex items-center">
-                        <div className="w-8 h-8 bg-sidebar-primary text-sidebar-primary-foreground rounded-full flex items-center justify-center mr-3">
-                          <span className="font-bold">{index + 1}</span>
+                        <div className="w-6 h-6 md:w-8 md:h-8 bg-sidebar-primary text-sidebar-primary-foreground rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                          <span className="font-bold text-xs md:text-sm">{index + 1}</span>
                         </div>
-                        <div>
-                          <div className="font-medium hover:underline text-sidebar-foreground">
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium hover:underline text-sidebar-foreground text-sm md:text-base truncate">
                             r/{subreddit}
                           </div>
                           <p className="text-xs text-gray-400">
@@ -248,7 +249,7 @@ const Index = () => {
                     </div>
                   ))
                 ) : (
-                  <div className="p-4 text-center text-gray-400">
+                  <div className="p-4 text-center text-gray-400 text-sm md:text-base">
                     No communities available yet.
                   </div>
                 )}

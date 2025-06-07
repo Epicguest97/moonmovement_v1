@@ -87,22 +87,22 @@ const IndianDistricts = () => {
 
   return (
     <MainLayout>
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6 px-4">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-white mb-2">Indian Startup Districts</h1>
-          <p className="text-gray-300">Explore startups across different districts in India</p>
+          <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Indian Startup Districts</h1>
+          <p className="text-sm md:text-base text-gray-300">Explore startups across different districts in India</p>
         </div>
 
         {/* Interactive India Map */}
         <Card className="bg-sidebar border-sidebar-border overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-white flex items-center gap-2 text-lg md:text-xl">
               <MapPin className="w-5 h-5" />
               Interactive District Map
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="relative bg-gradient-to-br from-blue-900 to-green-900 h-96 overflow-hidden">
+            <div className="relative bg-gradient-to-br from-blue-900 to-green-900 h-64 md:h-96 overflow-hidden">
               {/* SVG Map Container */}
               <svg 
                 viewBox="0 0 800 500" 
@@ -128,7 +128,7 @@ const IndianDistricts = () => {
                       <circle
                         cx={x}
                         cy={y}
-                        r={hoveredDistrict === district.id ? 12 : 8}
+                        r={hoveredDistrict === district.id ? 10 : 6}
                         fill={district.color}
                         stroke="white"
                         strokeWidth="2"
@@ -144,12 +144,12 @@ const IndianDistricts = () => {
                       {/* District Label */}
                       <text
                         x={x}
-                        y={y - 15}
+                        y={y - 12}
                         textAnchor="middle"
                         fill="white"
-                        fontSize="12"
+                        fontSize="10"
                         fontWeight="bold"
-                        className="pointer-events-none"
+                        className="pointer-events-none hidden md:block"
                         style={{
                           textShadow: '1px 1px 2px rgba(0,0,0,0.7)',
                           opacity: hoveredDistrict === district.id ? 1 : 0.8
@@ -163,7 +163,7 @@ const IndianDistricts = () => {
                         <circle
                           cx={x}
                           cy={y}
-                          r="20"
+                          r="15"
                           fill="none"
                           stroke={district.color}
                           strokeWidth="3"
@@ -177,16 +177,16 @@ const IndianDistricts = () => {
               </svg>
               
               {/* Legend */}
-              <div className="absolute bottom-4 left-4 bg-black bg-opacity-70 p-3 rounded-lg">
-                <h3 className="text-white font-semibold mb-2">Districts</h3>
-                <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="absolute bottom-2 left-2 md:bottom-4 md:left-4 bg-black bg-opacity-70 p-2 md:p-3 rounded-lg">
+                <h3 className="text-white font-semibold mb-2 text-xs md:text-sm">Districts</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-1 md:gap-2 text-xs">
                   {districts.slice(0, 6).map((district) => (
                     <div key={district.id} className="flex items-center gap-1">
                       <div 
-                        className="w-3 h-3 rounded-full" 
+                        className="w-2 h-2 md:w-3 md:h-3 rounded-full flex-shrink-0" 
                         style={{ backgroundColor: district.color }}
                       />
-                      <span className="text-white">{district.name}</span>
+                      <span className="text-white text-xs truncate">{district.name}</span>
                     </div>
                   ))}
                 </div>
@@ -196,51 +196,51 @@ const IndianDistricts = () => {
         </Card>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card className="bg-sidebar border-sidebar-border">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">Total Districts</p>
-                  <p className="text-2xl font-bold text-white">{districts.length}</p>
+                  <p className="text-gray-400 text-xs md:text-sm">Total Districts</p>
+                  <p className="text-lg md:text-2xl font-bold text-white">{districts.length}</p>
                 </div>
-                <MapPin className="w-8 h-8 text-sidebar-primary" />
+                <MapPin className="w-6 h-6 md:w-8 md:h-8 text-sidebar-primary" />
               </div>
             </CardContent>
           </Card>
           
           <Card className="bg-sidebar border-sidebar-border">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">Total Startups</p>
-                  <p className="text-2xl font-bold text-white">{startups.length}</p>
+                  <p className="text-gray-400 text-xs md:text-sm">Total Startups</p>
+                  <p className="text-lg md:text-2xl font-bold text-white">{startups.length}</p>
                 </div>
-                <Building2 className="w-8 h-8 text-sidebar-primary" />
+                <Building2 className="w-6 h-6 md:w-8 md:h-8 text-sidebar-primary" />
               </div>
             </CardContent>
           </Card>
           
           <Card className="bg-sidebar border-sidebar-border">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">Unicorns</p>
-                  <p className="text-2xl font-bold text-white">{startups.filter(s => s.isUnicorn).length}</p>
+                  <p className="text-gray-400 text-xs md:text-sm">Unicorns</p>
+                  <p className="text-lg md:text-2xl font-bold text-white">{startups.filter(s => s.isUnicorn).length}</p>
                 </div>
-                <TrendingUp className="w-8 h-8 text-sidebar-primary" />
+                <TrendingUp className="w-6 h-6 md:w-8 md:h-8 text-sidebar-primary" />
               </div>
             </CardContent>
           </Card>
           
           <Card className="bg-sidebar border-sidebar-border">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">States Covered</p>
-                  <p className="text-2xl font-bold text-white">{new Set(districts.map(d => d.state)).size}</p>
+                  <p className="text-gray-400 text-xs md:text-sm">States Covered</p>
+                  <p className="text-lg md:text-2xl font-bold text-white">{new Set(districts.map(d => d.state)).size}</p>
                 </div>
-                <Users className="w-8 h-8 text-sidebar-primary" />
+                <Users className="w-6 h-6 md:w-8 md:h-8 text-sidebar-primary" />
               </div>
             </CardContent>
           </Card>
@@ -249,17 +249,17 @@ const IndianDistricts = () => {
         {/* District Modal */}
         {selectedDistrict && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-sidebar border-sidebar-border rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden">
-              <div className="flex items-center justify-between p-6 border-b border-sidebar-border">
+            <div className="bg-sidebar border-sidebar-border rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+              <div className="flex items-center justify-between p-4 md:p-6 border-b border-sidebar-border">
                 <div>
-                  <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                  <h2 className="text-lg md:text-2xl font-bold text-white flex items-center gap-2">
                     <div 
-                      className="w-4 h-4 rounded-full" 
+                      className="w-3 h-3 md:w-4 md:h-4 rounded-full" 
                       style={{ backgroundColor: selectedDistrict.color }}
                     />
-                    {selectedDistrict.name}, {selectedDistrict.state}
+                    <span className="truncate">{selectedDistrict.name}, {selectedDistrict.state}</span>
                   </h2>
-                  <p className="text-gray-400">
+                  <p className="text-gray-400 text-xs md:text-sm">
                     {filteredStartups.length} startups found in this district
                   </p>
                 </div>
@@ -268,7 +268,7 @@ const IndianDistricts = () => {
                 </Button>
               </div>
               
-              <div className="p-6 max-h-96 overflow-y-auto">
+              <div className="p-4 md:p-6 max-h-80 md:max-h-96 overflow-y-auto">
                 {loading ? (
                   <div className="text-center py-8">
                     <p className="text-gray-400">Loading startups...</p>
@@ -283,17 +283,17 @@ const IndianDistricts = () => {
                               <img 
                                 src={startup.logoUrl} 
                                 alt={startup.name}
-                                className="w-12 h-12 rounded-lg object-cover"
+                                className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover flex-shrink-0"
                               />
                             )}
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-white">{startup.name}</h3>
-                              <p className="text-sm text-gray-400 mb-2">{startup.description}</p>
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs bg-sidebar-primary text-sidebar-primary-foreground px-2 py-1 rounded">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-white text-sm md:text-base truncate">{startup.name}</h3>
+                              <p className="text-xs md:text-sm text-gray-400 mb-2 line-clamp-2">{startup.description}</p>
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-xs bg-sidebar-primary text-sidebar-primary-foreground px-2 py-1 rounded truncate">
                                   {startup.sector}
                                 </span>
-                                <span className="text-sm font-bold text-sidebar-primary">
+                                <span className="text-xs md:text-sm font-bold text-sidebar-primary truncate">
                                   {startup.valuation}
                                 </span>
                               </div>
