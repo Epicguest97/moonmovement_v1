@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -97,7 +98,6 @@ const UserProfile = () => {
   const handleStartChat = async () => {
     if (!username) return;
     
-    // For testing: Allow starting chat even if not logged in (will show appropriate message later)
     if (!isLoggedIn) {
       alert("Please log in to start a chat");
       return;
@@ -133,7 +133,7 @@ const UserProfile = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
           <div className="text-center">
             <p className="text-sidebar-foreground">Loading profile...</p>
           </div>
@@ -145,12 +145,12 @@ const UserProfile = () => {
   if (error || !profile) {
     return (
       <MainLayout>
-        <div className="max-w-3xl mx-auto p-4">
-          <div className="bg-sidebar p-10 rounded-md border border-sidebar-border text-center">
-            <h2 className="text-2xl font-bold mb-2 text-sidebar-foreground">
+        <div className="max-w-3xl mx-auto p-2 sm:p-4">
+          <div className="bg-sidebar p-6 sm:p-10 rounded-md border border-sidebar-border text-center">
+            <h2 className="text-xl sm:text-2xl font-bold mb-2 text-sidebar-foreground">
               {error === 'User not found' ? 'User Not Found' : 'Error Loading Profile'}
             </h2>
-            <p className="text-gray-300">
+            <p className="text-gray-300 text-sm sm:text-base">
               {error === 'User not found' 
                 ? `The user u/${username} doesn't exist or has deleted their account.`
                 : 'Unable to load the user profile. Please try again later.'
@@ -164,25 +164,26 @@ const UserProfile = () => {
 
   return (
     <MainLayout>
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
         {/* Profile Header */}
-        <Card className="mb-6 bg-sidebar border-sidebar-border">
-          <CardContent className="p-6">
-            <div className="flex items-start gap-6">
-              <Avatar className="h-24 w-24">
-                <AvatarFallback className="bg-sidebar-primary text-white text-2xl">
+        <Card className="mb-4 sm:mb-6 bg-sidebar border-sidebar-border">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+              <Avatar className="h-16 w-16 sm:h-24 sm:w-24 mx-auto sm:mx-0">
+                <AvatarFallback className="bg-sidebar-primary text-white text-lg sm:text-2xl">
                   {profile.username.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-2">
-                  <h1 className="text-3xl font-bold text-sidebar-foreground">u/{profile.username}</h1>
+              <div className="flex-1 text-center sm:text-left w-full">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-sidebar-foreground">u/{profile.username}</h1>
                   {!isCurrentUser && (
                     <Button
                       onClick={handleStartChat}
                       disabled={startingChat}
-                      className="bg-sidebar-primary hover:bg-sidebar-primary/80 text-white"
+                      className="bg-sidebar-primary hover:bg-sidebar-primary/80 text-white text-sm sm:text-base"
+                      size="sm"
                     >
                       <MessageSquare size={16} className="mr-2" />
                       {startingChat ? 'Starting Chat...' : 'Start Chat'}
@@ -194,13 +195,13 @@ const UserProfile = () => {
                   <p className="text-sm text-sidebar-primary mb-2">This is your profile</p>
                 )}
                 
-                <div className="flex items-center gap-4 text-gray-300 mb-4">
-                  <div className="flex items-center gap-1">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-gray-300 mb-4 text-sm">
+                  <div className="flex items-center justify-center sm:justify-start gap-1">
                     <Calendar size={16} />
                     <span>Joined {formatDate(profile.createdAt)}</span>
                   </div>
                   {profile.location && (
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center justify-center sm:justify-start gap-1">
                       <MapPin size={16} />
                       <span>{profile.location}</span>
                     </div>
@@ -208,7 +209,7 @@ const UserProfile = () => {
                 </div>
                 
                 {profile.bio && (
-                  <p className="text-gray-300">{profile.bio}</p>
+                  <p className="text-gray-300 text-sm sm:text-base">{profile.bio}</p>
                 )}
               </div>
             </div>
@@ -216,75 +217,75 @@ const UserProfile = () => {
         </Card>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
           <Card className="bg-sidebar border-sidebar-border">
-            <CardContent className="p-4 text-center">
+            <CardContent className="p-3 sm:p-4 text-center">
               <div className="flex items-center justify-center mb-2">
-                <TrendingUp size={20} className="text-sidebar-primary" />
+                <TrendingUp size={16} sm:size={20} className="text-sidebar-primary" />
               </div>
-              <div className="text-2xl font-bold text-sidebar-foreground">{profile.karma}</div>
-              <div className="text-gray-300 text-sm">Karma</div>
+              <div className="text-lg sm:text-2xl font-bold text-sidebar-foreground">{profile.karma}</div>
+              <div className="text-gray-300 text-xs sm:text-sm">Karma</div>
             </CardContent>
           </Card>
           
           <Card className="bg-sidebar border-sidebar-border">
-            <CardContent className="p-4 text-center">
+            <CardContent className="p-3 sm:p-4 text-center">
               <div className="flex items-center justify-center mb-2">
-                <MessageSquare size={20} className="text-blue-400" />
+                <MessageSquare size={16} sm:size={20} className="text-blue-400" />
               </div>
-              <div className="text-2xl font-bold text-sidebar-foreground">{profile._count.posts}</div>
-              <div className="text-gray-300 text-sm">Posts</div>
+              <div className="text-lg sm:text-2xl font-bold text-sidebar-foreground">{profile._count.posts}</div>
+              <div className="text-gray-300 text-xs sm:text-sm">Posts</div>
             </CardContent>
           </Card>
           
           <Card className="bg-sidebar border-sidebar-border">
-            <CardContent className="p-4 text-center">
+            <CardContent className="p-3 sm:p-4 text-center">
               <div className="flex items-center justify-center mb-2">
-                <MessageSquare size={20} className="text-green-400" />
+                <MessageSquare size={16} sm:size={20} className="text-green-400" />
               </div>
-              <div className="text-2xl font-bold text-sidebar-foreground">{profile._count.comments}</div>
-              <div className="text-gray-300 text-sm">Comments</div>
+              <div className="text-lg sm:text-2xl font-bold text-sidebar-foreground">{profile._count.comments}</div>
+              <div className="text-gray-300 text-xs sm:text-sm">Comments</div>
             </CardContent>
           </Card>
           
           <Card className="bg-sidebar border-sidebar-border">
-            <CardContent className="p-4 text-center">
+            <CardContent className="p-3 sm:p-4 text-center">
               <div className="flex items-center justify-center mb-2">
-                <Users size={20} className="text-purple-400" />
+                <Users size={16} sm:size={20} className="text-purple-400" />
               </div>
-              <div className="text-2xl font-bold text-sidebar-foreground">{profile._count.communityMemberships}</div>
-              <div className="text-gray-300 text-sm">Communities</div>
+              <div className="text-lg sm:text-2xl font-bold text-sidebar-foreground">{profile._count.communityMemberships}</div>
+              <div className="text-gray-300 text-xs sm:text-sm">Communities</div>
             </CardContent>
           </Card>
         </div>
 
         {/* Content Tabs */}
         <Tabs defaultValue="posts" className="space-y-4">
-          <TabsList className="bg-sidebar border border-sidebar-border">
-            <TabsTrigger value="posts" className="data-[state=active]:bg-sidebar-accent text-sidebar-foreground">
+          <TabsList className="bg-sidebar border border-sidebar-border w-full grid grid-cols-3">
+            <TabsTrigger value="posts" className="data-[state=active]:bg-sidebar-accent text-sidebar-foreground text-xs sm:text-sm">
               Posts ({profile.posts.length})
             </TabsTrigger>
-            <TabsTrigger value="comments" className="data-[state=active]:bg-sidebar-accent text-sidebar-foreground">
+            <TabsTrigger value="comments" className="data-[state=active]:bg-sidebar-accent text-sidebar-foreground text-xs sm:text-sm">
               Comments ({profile.comments.length})
             </TabsTrigger>
-            <TabsTrigger value="communities" className="data-[state=active]:bg-sidebar-accent text-sidebar-foreground">
+            <TabsTrigger value="communities" className="data-[state=active]:bg-sidebar-accent text-sidebar-foreground text-xs sm:text-sm">
               Communities ({profile.communityMemberships.length})
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="posts">
             <Card className="bg-sidebar border-sidebar-border">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 {profile.posts.length > 0 ? (
                   <div className="space-y-4">
                     {profile.posts.map((post) => (
                       <div key={post.id} className="border-b border-sidebar-border pb-4 last:border-b-0">
-                        <h3 className="font-semibold text-sidebar-foreground mb-2">{post.title}</h3>
+                        <h3 className="font-semibold text-sidebar-foreground mb-2 text-sm sm:text-base">{post.title}</h3>
                         {post.content && (
-                          <p className="text-gray-300 text-sm mb-2 line-clamp-3">{post.content.substring(0, 200)}...</p>
+                          <p className="text-gray-300 text-xs sm:text-sm mb-2 line-clamp-3">{post.content.substring(0, 200)}...</p>
                         )}
-                        <div className="flex items-center gap-4 text-sm text-gray-400">
-                          <Badge variant="outline" className="border-sidebar-border text-gray-300">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-gray-400">
+                          <Badge variant="outline" className="border-sidebar-border text-gray-300 text-xs">
                             r/{post.subreddit}
                           </Badge>
                           <span>{formatDate(post.createdAt)}</span>
@@ -296,7 +297,7 @@ const UserProfile = () => {
                 ) : (
                   <div className="text-center py-8 text-gray-400">
                     <MessageSquare size={48} className="mx-auto mb-4 opacity-50" />
-                    <p>{isCurrentUser ? "You haven't posted anything yet." : "No posts yet."}</p>
+                    <p className="text-sm sm:text-base">{isCurrentUser ? "You haven't posted anything yet." : "No posts yet."}</p>
                   </div>
                 )}
               </CardContent>
@@ -305,7 +306,7 @@ const UserProfile = () => {
           
           <TabsContent value="comments">
             <Card className="bg-sidebar border-sidebar-border">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 {profile.comments.length > 0 ? (
                   <div className="space-y-4">
                     {profile.comments.map((comment) => (
@@ -313,7 +314,7 @@ const UserProfile = () => {
                         <div className="text-xs text-gray-400 mb-2">
                           Commented on "{comment.post.title}" in r/{comment.post.subreddit}
                         </div>
-                        <p className="text-sidebar-foreground text-sm mb-2">{comment.content}</p>
+                        <p className="text-sidebar-foreground text-xs sm:text-sm mb-2">{comment.content}</p>
                         <div className="text-xs text-gray-500">{formatDate(comment.createdAt)}</div>
                       </div>
                     ))}
@@ -321,7 +322,7 @@ const UserProfile = () => {
                 ) : (
                   <div className="text-center py-8 text-gray-400">
                     <MessageSquare size={48} className="mx-auto mb-4 opacity-50" />
-                    <p>{isCurrentUser ? "You haven't commented yet." : "No comments yet."}</p>
+                    <p className="text-sm sm:text-base">{isCurrentUser ? "You haven't commented yet." : "No comments yet."}</p>
                   </div>
                 )}
               </CardContent>
@@ -330,20 +331,20 @@ const UserProfile = () => {
           
           <TabsContent value="communities">
             <Card className="bg-sidebar border-sidebar-border">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 {profile.communityMemberships.length > 0 ? (
                   <div className="grid gap-4">
                     {profile.communityMemberships.map((membership) => (
-                      <div key={membership.community.id} className="p-4 border border-sidebar-border rounded-lg">
-                        <h3 className="font-semibold text-sidebar-foreground">r/{membership.community.name}</h3>
-                        <p className="text-gray-300 text-sm">{membership.community.description}</p>
+                      <div key={membership.community.id} className="p-3 sm:p-4 border border-sidebar-border rounded-lg">
+                        <h3 className="font-semibold text-sidebar-foreground text-sm sm:text-base">r/{membership.community.name}</h3>
+                        <p className="text-gray-300 text-xs sm:text-sm">{membership.community.description}</p>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="text-center py-8 text-gray-400">
                     <Users size={48} className="mx-auto mb-4 opacity-50" />
-                    <p>{isCurrentUser ? "You haven't joined any communities yet." : "No communities joined yet."}</p>
+                    <p className="text-sm sm:text-base">{isCurrentUser ? "You haven't joined any communities yet." : "No communities joined yet."}</p>
                   </div>
                 )}
               </CardContent>
