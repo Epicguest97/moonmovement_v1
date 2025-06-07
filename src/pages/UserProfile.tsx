@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -221,7 +220,7 @@ const UserProfile = () => {
           <Card className="bg-sidebar border-sidebar-border">
             <CardContent className="p-3 sm:p-4 text-center">
               <div className="flex items-center justify-center mb-2">
-                <TrendingUp size={16} sm:size={20} className="text-sidebar-primary" />
+                <TrendingUp size={24} className="text-blue-400 sm:h-8 sm:w-8" />
               </div>
               <div className="text-lg sm:text-2xl font-bold text-sidebar-foreground">{profile.karma}</div>
               <div className="text-gray-300 text-xs sm:text-sm">Karma</div>
@@ -231,7 +230,7 @@ const UserProfile = () => {
           <Card className="bg-sidebar border-sidebar-border">
             <CardContent className="p-3 sm:p-4 text-center">
               <div className="flex items-center justify-center mb-2">
-                <MessageSquare size={16} sm:size={20} className="text-blue-400" />
+                <MessageSquare size={24} className="text-green-400 sm:h-8 sm:w-8" />
               </div>
               <div className="text-lg sm:text-2xl font-bold text-sidebar-foreground">{profile._count.posts}</div>
               <div className="text-gray-300 text-xs sm:text-sm">Posts</div>
@@ -241,7 +240,7 @@ const UserProfile = () => {
           <Card className="bg-sidebar border-sidebar-border">
             <CardContent className="p-3 sm:p-4 text-center">
               <div className="flex items-center justify-center mb-2">
-                <MessageSquare size={16} sm:size={20} className="text-green-400" />
+                <MessageSquare size={24} className="text-green-400 sm:h-8 sm:w-8" />
               </div>
               <div className="text-lg sm:text-2xl font-bold text-sidebar-foreground">{profile._count.comments}</div>
               <div className="text-gray-300 text-xs sm:text-sm">Comments</div>
@@ -251,7 +250,7 @@ const UserProfile = () => {
           <Card className="bg-sidebar border-sidebar-border">
             <CardContent className="p-3 sm:p-4 text-center">
               <div className="flex items-center justify-center mb-2">
-                <Users size={16} sm:size={20} className="text-purple-400" />
+                <Users size={24} className="text-purple-400 sm:h-8 sm:w-8" />
               </div>
               <div className="text-lg sm:text-2xl font-bold text-sidebar-foreground">{profile._count.communityMemberships}</div>
               <div className="text-gray-300 text-xs sm:text-sm">Communities</div>
