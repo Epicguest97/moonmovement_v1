@@ -15,7 +15,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   // Only show sidebar on home page and not on mobile
   const showSidebar = !isMobile && location.pathname === '/';
 
-  // Prevent body overscrolling
+  // Prevent body overscrolling and hide scrollbar
   useEffect(() => {
     // Save original overflow style
     const originalStyle = window.getComputedStyle(document.body).overflow;
@@ -29,11 +29,29 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       mainContent.style.overflow = 'auto';
       mainContent.style.height = '100vh';
       mainContent.style.position = 'relative';
+      
+      // Hide scrollbar across different browsers
+      (mainContent.style as any).msOverflowStyle = 'none';  // IE and Edge
+      mainContent.style.scrollbarWidth = 'none';   // Firefox
+      
+      // For WebKit browsers (Chrome, Safari, newer Edge)
+      const style = document.createElement('style');
+      style.textContent = `
+        main::-webkit-scrollbar {
+          display: none;
+        }
+      `;
+      document.head.appendChild(style);
     }
     
     return () => {
       // Restore original overflow style when component unmounts
       document.body.style.overflow = originalStyle;
+      // Remove the added style element
+      const addedStyle = document.querySelector('style');
+      if (addedStyle) {
+        addedStyle.remove();
+      }
     };
   }, []);
 
@@ -42,15 +60,17 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       <div className="fixed top-0 left-0 right-0 z-50 bg-background">
         <Header />
       </div>
-      <div className="flex flex-1 pt-16"> {/* Add padding-top to prevent content from being hidden behind the fixed header */}
+      <div className="flex flex-1 pt-16"> 
         {showSidebar && <LeftSidebar />}
-        <main className={`flex-1 min-w-0 relative ${showSidebar ? 'ml-72' : ''}`}>
-          <div className={`container mx-auto px-4 py-6 ${showSidebar ? 'max-w-4xl mr-80' : ''}`}>
-            <div className="overflow-hidden overscroll-none">
-              {children}
+        <div className="w-full flex justify-center">
+          <main className={`w-[50%] min-w-0 relative overflow-auto`}>
+            <div className="py-6">
+              <div className="overflow-hidden overscroll-none">
+                {children}
+              </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );
