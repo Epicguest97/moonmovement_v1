@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Card } from '@/components/ui/card';
@@ -180,29 +179,29 @@ const Chat = () => {
   }
 
   return (
-    <MainLayout>
-      <div className="h-screen flex flex-col">
+    <MainLayout className="bg-black">
+      <div className="h-screen flex flex-col bg-black">
         {/* Mobile Layout */}
         {isMobile ? (
           <div className="flex-1 flex flex-col">
             {!selectedRoom ? (
               /* Chat List View */
-              <Card className="flex-1 bg-sidebar border-sidebar-border rounded-none border-x-0 border-b-0">
-                <div className="p-4 border-b border-sidebar-border bg-sidebar-primary">
+              <Card className="flex-1 bg-black border-gray-800 rounded-none border-x-0 border-b-0">
+                <div className="p-4 border-b border-gray-800 bg-black">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold text-white">Chats</h2>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
                         onClick={() => setShowCreateGroup(true)}
-                        className="bg-white/20 hover:bg-white/30 text-white"
+                        className="bg-gray-800 hover:bg-gray-700 text-white"
                       >
                         <Users size={18} />
                       </Button>
                       <Button
                         size="sm"
                         onClick={() => setShowStartChat(true)}
-                        className="bg-white/20 hover:bg-white/30 text-white"
+                        className="bg-gray-800 hover:bg-gray-700 text-white"
                       >
                         <Plus size={18} />
                       </Button>
@@ -215,12 +214,12 @@ const Chat = () => {
                       placeholder="Search chats..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 bg-white/20 border-0 text-white placeholder-white/70"
+                      className="pl-10 bg-gray-800 border-0 text-white placeholder-gray-400"
                     />
                   </div>
                 </div>
                 
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto bg-black">
                   {loading ? (
                     <div className="p-4 text-center text-gray-400">Loading chats...</div>
                   ) : (
@@ -235,7 +234,7 @@ const Chat = () => {
               </Card>
             ) : (
               /* Chat Window View */
-              <Card className="flex-1 bg-sidebar border-sidebar-border rounded-none border-x-0 border-b-0">
+              <Card className="flex-1 bg-black border-gray-800 rounded-none border-x-0 border-b-0">
                 <ChatWindow
                   room={selectedRoom}
                   currentUserId={user?.id ? Number(user.id) : undefined}
@@ -250,16 +249,16 @@ const Chat = () => {
           /* WhatsApp Web-like Desktop Layout */
           <div className="h-full flex">
             {/* Chat Room List - WhatsApp Web Style */}
-            <div className="w-96 bg-sidebar border-r border-sidebar-border flex flex-col">
+            <div className="w-96 bg-black border-r border-gray-800 flex flex-col">
               {/* Header */}
-              <div className="p-4 border-b border-sidebar-border bg-sidebar">
+              <div className="p-4 border-b border-gray-800 bg-black">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-sidebar-foreground">Chats</h2>
+                  <h2 className="text-lg font-semibold text-white">Chats</h2>
                   <div className="flex gap-2">
                     <Button
                       size="sm"
                       onClick={() => setShowCreateGroup(true)}
-                      className="bg-sidebar-primary hover:bg-sidebar-primary/80"
+                      className="bg-gray-800 hover:bg-gray-700 text-white"
                       title="Create Group"
                     >
                       <Users size={16} />
@@ -267,7 +266,7 @@ const Chat = () => {
                     <Button
                       size="sm"
                       onClick={() => setShowStartChat(true)}
-                      className="bg-sidebar-primary hover:bg-sidebar-primary/80"
+                      className="bg-gray-800 hover:bg-gray-700 text-white"
                       title="New Chat"
                     >
                       <Plus size={16} />
@@ -282,13 +281,13 @@ const Chat = () => {
                     placeholder="Search or start new chat"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-sidebar-accent border-sidebar-border text-sidebar-foreground"
+                    className="pl-10 bg-gray-800 border-gray-700 text-white"
                   />
                 </div>
               </div>
               
               {/* Chat List */}
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto bg-black">
                 {loading ? (
                   <div className="p-4 text-center text-gray-400">Loading chats...</div>
                 ) : (
@@ -303,7 +302,7 @@ const Chat = () => {
             </div>
 
             {/* Chat Window */}
-            <div className="flex-1 bg-gray-50 flex flex-col">
+            <div className="flex-1 bg-black flex flex-col">
               {selectedRoom ? (
                 <ChatWindow
                   room={selectedRoom}
@@ -312,10 +311,10 @@ const Chat = () => {
                   isMobile={false}
                 />
               ) : (
-                <div className="h-full flex items-center justify-center bg-sidebar">
+                <div className="h-full flex items-center justify-center bg-black">
                   <div className="text-center text-gray-400">
                     <MessageSquare size={64} className="mx-auto mb-4 opacity-30" />
-                    <h3 className="text-xl font-medium mb-2 text-sidebar-foreground">WhatsApp Web</h3>
+                    <h3 className="text-xl font-medium mb-2 text-white">WhatsApp Web</h3>
                     <p className="text-sm">Send and receive messages without keeping your phone online.</p>
                     <p className="text-sm mt-2">Use WhatsApp on up to 4 linked devices and 1 phone at the same time.</p>
                   </div>

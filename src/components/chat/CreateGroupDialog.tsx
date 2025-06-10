@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -77,9 +76,9 @@ const CreateGroupDialog = ({ open, onClose, onCreateGroup }: CreateGroupDialogPr
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-sidebar border-sidebar-border">
+      <DialogContent className="sm:max-w-md bg-black border-gray-800">
         <DialogHeader>
-          <DialogTitle className="text-sidebar-foreground flex items-center gap-2">
+          <DialogTitle className="text-white flex items-center gap-2">
             <Users size={20} />
             Create Group
           </DialogTitle>
@@ -87,38 +86,38 @@ const CreateGroupDialog = ({ open, onClose, onCreateGroup }: CreateGroupDialogPr
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="groupName" className="text-sidebar-foreground">Group Name</Label>
+            <Label htmlFor="groupName" className="text-white">Group Name</Label>
             <Input
               id="groupName"
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
               placeholder="Enter group name"
-              className="bg-sidebar-accent border-sidebar-border text-sidebar-foreground"
+              className="bg-gray-800 border-gray-700 text-white"
               required
             />
           </div>
 
           <div>
-            <Label className="text-sidebar-foreground">Select Friends</Label>
-            <div className="max-h-48 overflow-y-auto space-y-2 mt-2">
+            <Label className="text-white">Select Friends</Label>
+            <div className="max-h-48 overflow-y-auto space-y-2 mt-2 bg-black">
               {friends.length === 0 ? (
                 <p className="text-gray-400 text-sm py-4 text-center">
                   No friends found. Add some friends first!
                 </p>
               ) : (
                 friends.map((friend) => (
-                  <div key={friend.id} className="flex items-center space-x-2 p-2 hover:bg-sidebar-accent rounded">
+                  <div key={friend.id} className="flex items-center space-x-2 p-2 hover:bg-gray-800 rounded">
                     <Checkbox
                       id={`friend-${friend.id}`}
                       checked={selectedFriends.includes(friend.id)}
                       onCheckedChange={() => handleFriendToggle(friend.id)}
                     />
                     <div className="flex items-center gap-2 flex-1">
-                      <div className="w-8 h-8 bg-sidebar-primary rounded-full flex items-center justify-center text-white text-sm">
+                      <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center text-white text-sm">
                         {friend.username.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <p className="text-sidebar-foreground text-sm">{friend.username}</p>
+                        <p className="text-white text-sm">{friend.username}</p>
                         <p className="text-xs text-gray-400">
                           {friend.isOnline ? 'Online' : 'Offline'}
                         </p>
@@ -133,18 +132,18 @@ const CreateGroupDialog = ({ open, onClose, onCreateGroup }: CreateGroupDialogPr
           <div className="flex gap-2 pt-4">
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               onClick={onClose}
-              className="flex-1"
+              className="flex-1 text-white hover:bg-gray-800"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              disabled={!groupName.trim() || selectedFriends.length === 0 || loading}
-              className="flex-1 bg-sidebar-primary hover:bg-sidebar-primary/80"
+              className="flex-1 bg-gray-800 hover:bg-gray-700 text-white"
+              disabled={loading || selectedFriends.length === 0 || !groupName.trim()}
             >
-              {loading ? 'Creating...' : 'Create Group'}
+              Create Group
             </Button>
           </div>
         </form>

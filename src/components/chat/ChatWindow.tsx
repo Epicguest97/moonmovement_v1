@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -134,9 +133,9 @@ const ChatWindow = ({ room, currentUserId, onMessageSent, onBack, isMobile = fal
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-black">
       {/* Chat Header */}
-      <div className={`p-4 border-b border-sidebar-border ${isMobile ? 'bg-sidebar-primary' : ''}`}>
+      <div className={`p-4 border-b border-gray-800 ${isMobile ? 'bg-black' : 'bg-black'}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {isMobile && onBack && (
@@ -144,31 +143,29 @@ const ChatWindow = ({ room, currentUserId, onMessageSent, onBack, isMobile = fal
                 variant="ghost" 
                 size="sm" 
                 onClick={onBack}
-                className={isMobile ? 'text-white hover:bg-white/10' : ''}
+                className="text-white hover:bg-white/10"
               >
                 <ArrowLeft size={20} />
               </Button>
             )}
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
-                  isMobile ? 'bg-white/20 text-white' : 'bg-sidebar-primary text-white'
-                }`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold bg-gray-800 text-white`}>
                   {getRoomName().charAt(0).toUpperCase()}
                 </div>
                 {!room.isGroup && (() => {
                   const otherUser = room.users.find(u => u.user.id !== currentUserId);
                   return otherUser?.user.isOnline && (
-                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-sidebar"></div>
+                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-black"></div>
                   );
                 })()}
               </div>
               <div>
-                <h3 className={`font-semibold ${isMobile ? 'text-white text-lg' : 'text-sidebar-foreground'}`}>
+                <h3 className="font-semibold text-white text-lg">
                   {getRoomName()}
                 </h3>
                 {!room.isGroup && (
-                  <p className={`text-sm ${isMobile ? 'text-white/80' : 'text-gray-400'}`}>
+                  <p className="text-sm text-white/80">
                     {getOtherUserStatus()}
                   </p>
                 )}
@@ -178,15 +175,15 @@ const ChatWindow = ({ room, currentUserId, onMessageSent, onBack, isMobile = fal
           <Button 
             variant="ghost" 
             size="sm"
-            className={isMobile ? 'text-white hover:bg-white/10' : ''}
+            className="text-white hover:bg-white/10"
           >
             <MoreVertical size={16} />
           </Button>
         </div>
       </div>
-
+      
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50">
+      <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-black">
         {loading ? (
           <div className="text-center text-gray-400 py-8">Loading messages...</div>
         ) : (
@@ -200,16 +197,16 @@ const ChatWindow = ({ room, currentUserId, onMessageSent, onBack, isMobile = fal
                   <div
                     className={`px-4 py-2 rounded-2xl ${
                       message.sender.id === currentUserId
-                        ? 'bg-sidebar-primary text-white rounded-br-md'
-                        : 'bg-white text-gray-800 rounded-bl-md shadow-sm'
+                        ? 'bg-gray-800 text-white rounded-br-md'
+                        : 'bg-gray-900 text-white rounded-bl-md'
                     }`}
                   >
                     {message.sender.id !== currentUserId && room.isGroup && (
-                      <p className="text-xs text-gray-500 mb-1 font-medium">{message.sender.username}</p>
+                      <p className="text-xs text-gray-400 mb-1 font-medium">{message.sender.username}</p>
                     )}
                     <p className="text-sm leading-relaxed">{message.content}</p>
                     <p className={`text-xs mt-1 ${
-                      message.sender.id === currentUserId ? 'text-white/70' : 'text-gray-500'
+                      message.sender.id === currentUserId ? 'text-white/70' : 'text-gray-400'
                     }`}>
                       {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
                     </p>
@@ -223,20 +220,20 @@ const ChatWindow = ({ room, currentUserId, onMessageSent, onBack, isMobile = fal
       </div>
 
       {/* Message Input */}
-      <div className="p-3 border-t border-sidebar-border bg-white">
+      <div className="p-3 border-t border-gray-800 bg-black">
         <form onSubmit={sendMessage} className="flex gap-2 items-end">
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Type a message..."
-            className="flex-1 bg-gray-100 border-0 rounded-full px-4 py-3 text-sidebar-foreground resize-none"
+            className="flex-1 bg-gray-800 border-0 rounded-full px-4 py-3 text-white resize-none"
             disabled={sending}
             style={{ minHeight: '44px' }}
           />
           <Button
             type="submit"
             disabled={!newMessage.trim() || sending}
-            className="bg-sidebar-primary hover:bg-sidebar-primary/80 rounded-full w-12 h-12 p-0"
+            className="bg-gray-800 hover:bg-gray-700 rounded-full w-12 h-12 p-0"
           >
             <Send size={18} />
           </Button>

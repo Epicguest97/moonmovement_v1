@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Header from './Header';
 import LeftSidebar from './LeftSidebar';
@@ -7,9 +6,10 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MainLayoutProps {
   children: React.ReactNode;
+  className?: string;
 }
 
-const MainLayout = ({ children }: MainLayoutProps) => {
+const MainLayout = ({ children, className = '' }: MainLayoutProps) => {
   const isMobile = useIsMobile();
   const location = useLocation();
   
@@ -17,11 +17,11 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const showSidebar = !isMobile && location.pathname === '/';
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className={`flex flex-col min-h-screen bg-black ${className}`}>
       <Header />
       <div className="flex flex-1">
         {showSidebar && <LeftSidebar />}
-        <main className={`flex-1 min-w-0 ${showSidebar ? 'ml-72' : ''}`}>
+        <main className={`flex-1 min-w-0 bg-black ${showSidebar ? 'ml-72' : ''}`}>
           <div className={`container mx-auto px-4 py-6 ${showSidebar ? 'max-w-4xl mr-80' : ''}`}>
             {children}
           </div>
