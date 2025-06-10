@@ -36,7 +36,6 @@ model User {
   moderationActions   ModerationAction[]
   
   // Event relations
-  organizedEvents EventRegistration[]
   eventRegistrations EventRegistration[]
   organizedEvents Event[]
 }
