@@ -9,10 +9,9 @@ import {
   TrendingUp, 
   Heart, 
   MapPin, 
-  FileText, 
-  Users, 
-  Building, 
-  Calculator 
+  FileText,
+  Calculator,
+  ChevronDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -24,54 +23,52 @@ const LeftSidebar = () => {
       name: 'Home', 
       path: '/', 
       icon: Home,
-      category: 'main'
     },
     { 
       name: 'Salaries', 
       path: '/salary', 
       icon: DollarSign,
-      category: 'main'
     },
     { 
       name: 'Careers', 
       path: '/careers', 
       icon: Briefcase,
-      category: 'dropdown'
+      hasDropdown: true
     },
     { 
       name: 'Sectors', 
       path: '/sectors', 
       icon: Building2,
-      category: 'dropdown'
+      hasDropdown: true
     },
     { 
       name: "What's Happening", 
       path: '/news', 
       icon: TrendingUp,
-      category: 'dropdown'
+      hasDropdown: true
     },
     { 
       name: 'Interests', 
       path: '/communities', 
       icon: Heart,
-      category: 'dropdown'
+      hasDropdown: true
     },
     { 
       name: 'Cities', 
       path: '/districts', 
       icon: MapPin,
-      category: 'dropdown'
+      hasDropdown: true
     },
     { 
       name: 'For everything else', 
       path: '/misc', 
       icon: FileText,
-      category: 'dropdown'
+      hasDropdown: true
     }
   ];
 
   const exploreItems = [
-    { name: 'Explore Posts', path: '/' },
+    { name: 'Explore Posts', path: '/explore-posts' },
     { name: 'Explore Communities', path: '/communities' },
     { name: 'Explore Companies', path: '/startup-news' },
   ];
@@ -82,7 +79,7 @@ const LeftSidebar = () => {
   };
 
   return (
-    <div className="w-80 bg-sidebar border-r border-sidebar-border h-screen sticky top-0 overflow-y-auto">
+    <div className="fixed left-4 top-20 w-64 bg-sidebar border border-sidebar-border rounded-lg shadow-lg h-[calc(100vh-6rem)] overflow-y-auto z-10">
       <div className="p-4">
         {/* Main Navigation */}
         <nav className="space-y-1">
@@ -91,26 +88,26 @@ const LeftSidebar = () => {
               key={item.path}
               to={item.path}
               className={cn(
-                "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                "flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors",
                 isActive(item.path)
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
                   : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               )}
             >
-              <item.icon className="mr-3 h-5 w-5" />
-              {item.name}
+              <div className="flex items-center">
+                <item.icon className="mr-3 h-4 w-4" />
+                {item.name}
+              </div>
+              {item.hasDropdown && <ChevronDown className="h-4 w-4" />}
             </Link>
           ))}
         </nav>
 
         {/* Separator */}
-        <div className="my-6 border-t border-sidebar-border"></div>
+        <div className="my-4 border-t border-sidebar-border"></div>
 
         {/* Explore Section */}
         <div>
-          <h3 className="px-3 mb-2 text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">
-            Explore
-          </h3>
           <nav className="space-y-1">
             {exploreItems.map((item) => (
               <Link
@@ -127,8 +124,8 @@ const LeftSidebar = () => {
           </nav>
         </div>
 
-        {/* Additional Links */}
-        <div className="mt-6">
+        {/* In Hand Salary Calculator */}
+        <div className="mt-4">
           <nav className="space-y-1">
             <Link
               to="/events"

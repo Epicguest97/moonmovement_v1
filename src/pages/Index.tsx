@@ -122,14 +122,21 @@ const Index = () => {
 
   return (
     <MainLayout>
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Hero Section */}
-        <div className="bg-gradient-to-r from-blue-500 to-green-400 rounded-lg p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm opacity-90 mb-1">02:17 PM</div>
-              <h1 className="text-2xl font-bold mb-2">Ask Anything...</h1>
-            </div>
+      <div className="space-y-6">
+        {/* Hero Section with natural landscape background */}
+        <div className="relative rounded-lg overflow-hidden h-32">
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: 'url(/lovable-uploads/6ee929f6-d821-4271-bd62-f3e8869d5dc0.png)',
+              backgroundPosition: 'center 30%'
+            }}
+          >
+            <div className="absolute inset-0 bg-black/40"></div>
+          </div>
+          <div className="relative z-10 p-6 text-white">
+            <div className="text-sm opacity-90 mb-1">02:23 PM</div>
+            <h1 className="text-2xl font-bold">Ask Anything...</h1>
           </div>
         </div>
 

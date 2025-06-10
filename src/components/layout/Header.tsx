@@ -37,7 +37,7 @@ const Header = () => {
         <div className="flex h-14 items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <span className="font-bold text-xl text-primary">grapevine</span>
+            <span className="font-bold text-xl text-primary">moonmovement</span>
           </Link>
 
           {/* Search Bar */}
