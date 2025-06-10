@@ -1,7 +1,7 @@
 
 import React from 'react';
 import Header from './Header';
-import Sidebar from './Sidebar';
+import LeftSidebar from './LeftSidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MainLayoutProps {
@@ -14,13 +14,13 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto flex flex-1 px-2 sm:px-4 py-2 sm:py-4 gap-2 sm:gap-4">
-        <main className="flex-1 min-w-0">{children}</main>
-        {!isMobile && (
-          <div className="hidden lg:block w-80">
-            <Sidebar />
+      <div className="flex flex-1">
+        {!isMobile && <LeftSidebar />}
+        <main className="flex-1 min-w-0">
+          <div className="container mx-auto px-4 py-6">
+            {children}
           </div>
-        )}
+        </main>
       </div>
     </div>
   );
