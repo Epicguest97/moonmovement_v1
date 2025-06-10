@@ -14,6 +14,7 @@ const chatRoutes = require('./chat');
 const userActivityRoutes = require('./userActivity');
 const userSettingsRoutes = require('./userSettings');
 const moderationRoutes = require('./moderation');
+const eventsRoutes = require('./events');
 
 // Use routes
 router.use('/posts', postRoutes);
@@ -27,5 +28,6 @@ router.use('/chat', chatRoutes);
 router.use('/user-activity', userActivityRoutes);
 router.use('/user-settings', userSettingsRoutes);
 router.use('/moderation', moderationRoutes);
+router.use('/events', eventsRoutes);
 
 module.exports = router;

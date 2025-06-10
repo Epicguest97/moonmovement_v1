@@ -17,6 +17,7 @@ const authRoutes = require('./routes/auth');
 const userSettingsRoutes = require('./routes/userSettings');
 const startupsRouter = require('./routes/startups');
 const chatRoutes = require('./routes/chat');
+const eventsRoutes = require('./routes/events');
 
 app.get("/", (req, res) => {
   res.send("Reddit backend running");
@@ -30,6 +31,7 @@ app.use('/api/news', require('./routes/news'));
 app.use('/api/startups', require('./routes/startups'));
 app.use('/api/community', require('./routes/community'));
 app.use('/api/chat', chatRoutes);
+app.use('/api/events', eventsRoutes);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

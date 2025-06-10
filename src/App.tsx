@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -21,6 +22,7 @@ import StartupDetail from '@/pages/StartupDetail';
 import UnicornsIndia from '@/pages/UnicornsIndia';
 import IndianDistricts from '@/pages/IndianDistricts';
 import ManageCommunities from '@/pages/ManageCommunities';
+import Events from '@/pages/Events';
 import NotFound from '@/pages/NotFound';
 
 import './App.css';
@@ -41,6 +43,7 @@ function App() {
           <Route path="/search" element={<Search />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/news" element={<News />} />
+          <Route path="/events" element={<Events />} />
           <Route path="/communities" element={<ManageCommunities />} />
           <Route path="/news/:id" element={<NewsDetail />} />
           <Route path="/startup-news" element={<StartupNews />} />
