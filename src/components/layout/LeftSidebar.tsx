@@ -1,13 +1,12 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, 
-  DollarSign, 
-  Briefcase, 
-  Building2, 
+  Trophy, 
+  Calendar, 
+  MessageSquare, 
   TrendingUp, 
-  Heart, 
+  Users, 
   MapPin, 
   FileText,
   Calculator,
@@ -25,20 +24,20 @@ const LeftSidebar = () => {
       icon: Home,
     },
     { 
-      name: 'Salaries', 
-      path: '/salary', 
-      icon: DollarSign,
+      name: 'Hall of Fame', 
+      path: '/unicorns-india', 
+      icon: Trophy,
     },
     { 
-      name: 'Careers', 
-      path: '/careers', 
-      icon: Briefcase,
+      name: 'Events', 
+      path: '/events', 
+      icon: Calendar,
       hasDropdown: true
     },
     { 
-      name: 'Sectors', 
-      path: '/sectors', 
-      icon: Building2,
+      name: 'Chat', 
+      path: '/chat', 
+      icon: MessageSquare,
       hasDropdown: true
     },
     { 
@@ -48,9 +47,9 @@ const LeftSidebar = () => {
       hasDropdown: true
     },
     { 
-      name: 'Interests', 
+      name: 'Communities', 
       path: '/communities', 
-      icon: Heart,
+      icon: Users,
       hasDropdown: true
     },
     { 

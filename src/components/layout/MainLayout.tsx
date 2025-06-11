@@ -15,6 +15,14 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   // Only show sidebar on home page and not on mobile
   const showSidebar = !isMobile && location.pathname === '/';
 
+  // Determine main content width based on path
+  const mainContentWidth = 
+    location.pathname === '/' 
+      ? 'w-[50%]' 
+      : location.pathname === '/chat'
+        ? 'w-full' // Full width for chat page
+        : 'w-full md:w-[80%] lg:w-[70%] xl:w-[60%]';
+
   // Prevent body overscrolling and hide scrollbar
   useEffect(() => {
     // Save original overflow style
@@ -63,7 +71,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       <div className="flex flex-1 pt-16"> 
         {showSidebar && <LeftSidebar />}
         <div className="w-full flex justify-center">
-          <main className={`w-[50%] min-w-0 relative overflow-auto`}>
+          <main className={`${mainContentWidth} min-w-0 relative overflow-auto`}>
             <div className="py-6">
               <div className="overflow-hidden overscroll-none">
                 {children}
