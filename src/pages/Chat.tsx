@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, MessageSquare, Plus, ArrowLeft, Users } from 'lucide-react';
+import { Search, MessageSquare, Plus, Users } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import ChatRoomList from '@/components/chat/ChatRoomList';
 import ChatWindow from '@/components/chat/ChatWindow';
@@ -180,14 +181,14 @@ const Chat = () => {
 
   return (
     <MainLayout>
-      <div className="h-screen flex flex-col bg-black">
+      <div className={`${isMobile ? 'h-[calc(100vh-5rem)]' : 'h-[calc(100vh-4rem)]'} flex flex-col bg-black`}>
         {/* Mobile Layout */}
         {isMobile ? (
           <div className="flex-1 flex flex-col">
             {!selectedRoom ? (
               /* Chat List View */
-              <Card className="flex-1 bg-black border-gray-800 rounded-none border-x-0 border-b-0">
-                <div className="p-4 border-b border-gray-800 bg-black">
+              <Card className="flex-1 bg-black border-gray-800 rounded-lg">
+                <div className="p-4 border-b border-gray-800 bg-black rounded-t-lg">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold text-white">Chats</h2>
                     <div className="flex gap-2">
@@ -234,7 +235,7 @@ const Chat = () => {
               </Card>
             ) : (
               /* Chat Window View */
-              <Card className="flex-1 bg-black border-gray-800 rounded-none border-x-0 border-b-0">
+              <Card className="flex-1 bg-black border-gray-800 rounded-lg">
                 <ChatWindow
                   room={selectedRoom}
                   currentUserId={user?.id ? Number(user.id) : undefined}
@@ -247,7 +248,7 @@ const Chat = () => {
           </div>
         ) : (
           /* WhatsApp Web-like Desktop Layout */
-          <div className="h-full flex">
+          <div className="h-full flex rounded-lg overflow-hidden">
             {/* Chat Room List - WhatsApp Web Style */}
             <div className="w-96 bg-black border-r border-gray-800 flex flex-col">
               {/* Header */}

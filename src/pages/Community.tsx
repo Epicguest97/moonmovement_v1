@@ -206,7 +206,7 @@ const Community = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto py-8">
           <div className="text-center">
             <p className="text-sidebar-foreground">Loading community...</p>
           </div>
@@ -218,7 +218,7 @@ const Community = () => {
   if (error || !community) {
     return (
       <MainLayout>
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto py-8">
           <div className="text-center">
             <p className="text-red-400">{error || 'Community not found'}</p>
           </div>
@@ -229,7 +229,7 @@ const Community = () => {
 
   return (
     <MainLayout>
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="max-w-4xl mx-auto py-8">
         {/* Community Header */}
         <Card className="mb-6 bg-sidebar border-sidebar-border">
           {/* Banner */}
