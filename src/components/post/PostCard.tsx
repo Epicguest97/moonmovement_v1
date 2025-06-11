@@ -31,9 +31,11 @@ export interface Post {
 interface PostCardProps {
   post: Post;
   onPostUpdate?: () => void;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
-const PostCard = ({ post, onPostUpdate }: PostCardProps) => {
+const PostCard = ({ post, onPostUpdate, isFirst = false, isLast = false }: PostCardProps) => {
   // Handle both author object and string formats
   const authorName = typeof post.author === 'string' ? post.author : post.author.username;
   
@@ -93,7 +95,11 @@ const PostCard = ({ post, onPostUpdate }: PostCardProps) => {
   };
   
   return (
-    <Card className="post-card overflow-hidden mb-4 bg-sidebar border-sidebar-border">
+    <Card className={`post-card overflow-hidden border-b border-sidebar-border bg-sidebar
+      ${!isFirst && !isLast ? "rounded-none" : ""}
+      ${isFirst && !isLast ? "rounded-t-lg rounded-b-none" : ""}
+      ${!isFirst && isLast ? "rounded-b-lg rounded-t-none" : ""}
+    `}>
       {moderationInfo?.isModerator && moderationInfo.permissions?.managePosts && (
         <PostModerationActions 
           postId={post.id}

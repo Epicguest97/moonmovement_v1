@@ -58,3 +58,34 @@ form,
 * {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Add these rules at the end of your file to make borders thinner */
+
+/* Thinner borders for all elements */
+.border {
+  border-width: 0.5px !important;
+}
+
+/* Specific direction borders */
+.border-b {
+  border-bottom-width: 0.5px !important;
+}
+
+.border-t {
+  border-top-width: 0.5px !important;
+}
+
+/* Target post cards and their containers specifically */
+.post-card {
+  border-width: 0.5px !important;
+  border-bottom-width: 0.5px !important;
+}
+
+div.overflow-hidden.border.border-sidebar-border.rounded-b-lg {
+  border-width: 0.5px !important;
+}
+
+/* Sort controls border */
+.bg-sidebar.border.border-sidebar-border.rounded-t-lg.border-b-0 {
+  border-width: 0.5px !important;
+}

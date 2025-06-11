@@ -148,39 +148,6 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Sort Controls */}
-        <div className="bg-sidebar/30 border border-sidebar-border rounded-lg">
-          <div className="flex p-3 gap-2">
-            <Button 
-              variant={sortBy === 'hot' ? 'default' : 'ghost'} 
-              size="sm" 
-              className={sortBy === 'hot' ? 'bg-primary text-primary-foreground' : ''}
-              onClick={() => handleSortChange('hot')}
-            >
-              <Flame size={16} className="mr-2" />
-              Popular
-            </Button>
-            <Button 
-              variant={sortBy === 'new' ? 'default' : 'ghost'} 
-              size="sm" 
-              className={sortBy === 'new' ? 'bg-primary text-primary-foreground' : ''}
-              onClick={() => handleSortChange('new')}
-            >
-              <Clock size={16} className="mr-2" />
-              New
-            </Button>
-            <Button 
-              variant={sortBy === 'top' ? 'default' : 'ghost'} 
-              size="sm" 
-              className={sortBy === 'top' ? 'bg-primary text-primary-foreground' : ''}
-              onClick={() => handleSortChange('top')}
-            >
-              <TrendingUp size={16} className="mr-2" />
-              Top
-            </Button>
-          </div>
-        </div>
-
         {/* Search Results Info */}
         {searchQuery && (
           <div className="bg-sidebar/30 border border-sidebar-border rounded-lg p-4">
@@ -193,29 +160,70 @@ const Index = () => {
           </div>
         )}
         
-        {/* Posts List */}
-        {sortedPosts.length > 0 ? (
-          <div className="space-y-4">
-            {sortedPosts.map(post => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </div>
-        ) : (
-          <div className="bg-sidebar/30 p-8 border border-sidebar-border rounded-lg text-center">
-            <p className="text-muted-foreground">
-              {searchQuery ? 'No posts match your search.' : 'No posts available yet.'}
-            </p>
-            {searchQuery && (
+        {/* Sort Controls + Posts List - Combined */}
+        <div className="space-y-0"> {/* Remove space between elements */}
+          {/* Sort Controls with rounded top corners */}
+          <div className="bg-sidebar border border-sidebar-border rounded-t-lg border-b-0">
+            <div className="flex p-3 gap-2">
               <Button 
-                variant="ghost" 
-                className="mt-4" 
-                onClick={() => navigate('/')}
+                variant={sortBy === 'hot' ? 'default' : 'ghost'} 
+                size="sm" 
+                className={sortBy === 'hot' ? 'bg-primary text-primary-foreground' : ''}
+                onClick={() => handleSortChange('hot')}
               >
-                Clear search
+                <Flame size={16} className="mr-2" />
+                Popular
               </Button>
-            )}
+              <Button 
+                variant={sortBy === 'new' ? 'default' : 'ghost'} 
+                size="sm" 
+                className={sortBy === 'new' ? 'bg-primary text-primary-foreground' : ''}
+                onClick={() => handleSortChange('new')}
+              >
+                <Clock size={16} className="mr-2" />
+                New
+              </Button>
+              <Button 
+                variant={sortBy === 'top' ? 'default' : 'ghost'} 
+                size="sm" 
+                className={sortBy === 'top' ? 'bg-primary text-primary-foreground' : ''}
+                onClick={() => handleSortChange('top')}
+              >
+                <TrendingUp size={16} className="mr-2" />
+                Top
+              </Button>
+            </div>
           </div>
-        )}
+
+          {/* Posts List with only bottom rounded corners on last post */}
+          {sortedPosts.length > 0 ? (
+            <div className="overflow-hidden border border-sidebar-border rounded-b-lg">
+              {sortedPosts.map((post, index) => (
+                <PostCard 
+                  key={post.id} 
+                  post={post} 
+                  isFirst={false} /* No post should have top rounded corners */
+                  isLast={index === sortedPosts.length - 1}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-sidebar/30 p-8 border border-sidebar-border rounded-lg text-center">
+              <p className="text-muted-foreground">
+                {searchQuery ? 'No posts match your search.' : 'No posts available yet.'}
+              </p>
+              {searchQuery && (
+                <Button 
+                  variant="ghost" 
+                  className="mt-4" 
+                  onClick={() => navigate('/')}
+                >
+                  Clear search
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </MainLayout>
   );
