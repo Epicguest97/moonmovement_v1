@@ -12,12 +12,12 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const isMobile = useIsMobile();
   const location = useLocation();
   
-  // Only show sidebar on home page and not on mobile
-  const showSidebar = !isMobile && location.pathname === '/';
+  // Show sidebar on all pages except chat and not on mobile
+  const showSidebar = !isMobile && location.pathname !== '/chat';
 
   // Determine main content width based on path
   const mainContentWidth = 
-    location.pathname === '/' 
+    location.pathname === '/' || location.pathname === '/news'
       ? 'w-[50%]' 
       : location.pathname === '/chat'
         ? 'w-full' // Full width for chat page
