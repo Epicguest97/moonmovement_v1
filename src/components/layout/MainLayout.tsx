@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Header from './Header';
 import LeftSidebar from './LeftSidebar';
+import FloatingChatWidget from '@/components/chat/FloatingChatWidget';
 import { useLocation } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -17,28 +18,24 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const location = useLocation();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   
-  // Show sidebar on all pages except chat and not on mobile (unless mobile menu is open)
-  const showDesktopSidebar = !isMobile && location.pathname !== '/chat';
+  // Show sidebar on all pages except chat (which no longer exists as a page)
+  const showDesktopSidebar = !isMobile;
   const showMobileSidebar = isMobile && mobileSidebarOpen;
 
-  // Determine main content width and margins based on path and screen size
+  // Determine main content width and margins based on screen size
   const getMainContentClasses = () => {
     if (isMobile) {
       return 'w-full px-4 max-w-full overflow-x-hidden';
     }
     
     // Desktop spacing - middle component should be 50% of screen width
-    if (location.pathname === '/chat') {
-      return 'w-full max-w-[50vw] mx-auto px-4';
-    }
-    
     // For pages with sidebar, account for the fixed 256px sidebar + 80px left margin + 20px gap
     // Then use 50% of remaining space for content
     if (showDesktopSidebar) {
       return 'w-[50vw] ml-[356px] pr-8 max-w-[50vw]';
     }
     
-    // For pages without sidebar (like chat) - center and limit to 50% width
+    // For pages without sidebar - center and limit to 50% width
     return 'w-full max-w-[50vw] mx-auto px-4';
   };
 
@@ -82,6 +79,9 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           </div>
         </main>
       </div>
+
+      {/* Floating Chat Widget */}
+      <FloatingChatWidget />
     </div>
   );
 };

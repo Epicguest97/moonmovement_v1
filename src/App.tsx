@@ -14,7 +14,6 @@ import Submit from '@/pages/Submit';
 import PostDetail from '@/pages/PostDetail';
 import Search from '@/pages/Search';
 import Settings from '@/pages/Settings';
-import Chat from '@/pages/Chat';
 import News from '@/pages/News';
 import NewsDetail from '@/pages/NewsDetail';
 import StartupNews from '@/pages/StartupNews';
@@ -41,7 +40,6 @@ function App() {
           <Route path="/submit" element={<Submit />} />
           <Route path="/post/:id" element={<PostDetail />} />
           <Route path="/search" element={<Search />} />
-          <Route path="/chat" element={<Chat />} />
           <Route path="/news" element={<News />} />
           <Route path="/events" element={<Events />} />
           <Route path="/communities" element={<ManageCommunities />} />
