@@ -24,21 +24,22 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   // Determine main content width and margins based on path and screen size
   const getMainContentClasses = () => {
     if (isMobile) {
-      return 'w-full px-4';
+      return 'w-full px-4 max-w-full overflow-x-hidden';
     }
     
-    // Desktop spacing - maintain exact distances
+    // Desktop spacing - middle component should be 50% of screen width
     if (location.pathname === '/chat') {
-      return 'w-full';
+      return 'w-full max-w-[50vw] mx-auto px-4';
     }
     
     // For pages with sidebar, account for the fixed 256px sidebar + 80px left margin + 20px gap
+    // Then use 50% of remaining space for content
     if (showDesktopSidebar) {
-      return 'w-[calc(100%-356px)] ml-[356px] pr-8';
+      return 'w-[50vw] ml-[356px] pr-8 max-w-[50vw]';
     }
     
-    // For pages without sidebar (like chat)
-    return 'w-full max-w-4xl mx-auto px-4';
+    // For pages without sidebar (like chat) - center and limit to 50% width
+    return 'w-full max-w-[50vw] mx-auto px-4';
   };
 
   const toggleMobileSidebar = () => {
@@ -52,19 +53,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         backgroundColor: '#111114',
         boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
       }}>
-        <Header />
+        <Header onToggleMobileSidebar={toggleMobileSidebar} />
       </div>
-      
-      {/* Mobile menu button */}
-      {isMobile && (
-        <Button
-          onClick={toggleMobileSidebar}
-          className="fixed top-20 left-4 z-40 bg-sidebar hover:bg-sidebar-accent border border-sidebar-border"
-          size="icon"
-        >
-          {mobileSidebarOpen ? <X size={18} /> : <Menu size={18} />}
-        </Button>
-      )}
       
       <div className="flex w-full pt-16 relative">
         {/* Desktop Sidebar */}
@@ -87,7 +77,9 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         
         {/* Main Content */}
         <main className={`${getMainContentClasses()} relative min-h-[calc(100vh-4rem)] pt-4`}>
-          {children}
+          <div className="w-full max-w-full overflow-x-hidden">
+            {children}
+          </div>
         </main>
       </div>
     </div>

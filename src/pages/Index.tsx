@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -93,7 +94,7 @@ const Index = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className="max-w-4xl mx-auto">
+        <div className="w-full max-w-full">
           <div className="bg-sidebar/50 p-8 border border-sidebar-border rounded-lg text-center">
             <h2 className="text-xl font-semibold mb-2 text-foreground">Loading posts...</h2>
             <p className="text-muted-foreground">Please wait while we fetch the latest content.</p>
@@ -106,10 +107,10 @@ const Index = () => {
   if (error) {
     return (
       <MainLayout>
-        <div className="max-w-4xl mx-auto">
+        <div className="w-full max-w-full">
           <div className="bg-sidebar/50 p-8 border border-sidebar-border rounded-lg text-center">
             <h2 className="text-xl font-semibold mb-2 text-red-400">Error</h2>
-            <p className="text-muted-foreground mb-4">{error}</p>
+            <p className="text-muted-foreground mb-4 break-words">{error}</p>
             <Button onClick={() => window.location.reload()}>
               Try Again
             </Button>
@@ -121,7 +122,7 @@ const Index = () => {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 w-full max-w-full overflow-x-hidden">
         {/* Hero Section with natural landscape background - SHORTER VERSION */}
         <div className="relative rounded-lg overflow-hidden">
           <div 
@@ -141,7 +142,7 @@ const Index = () => {
             <Link to="/submit" className="block">
               <Input 
                 placeholder="Create a post..." 
-                className="bg-sidebar/60 hover:bg-sidebar/80 border-sidebar-border/50 cursor-pointer text-white placeholder:text-gray-300 rounded-full px-4 py-2 text-sm backdrop-blur-sm"
+                className="bg-sidebar/60 hover:bg-sidebar/80 border-sidebar-border/50 cursor-pointer text-white placeholder:text-gray-300 rounded-full px-4 py-2 text-sm backdrop-blur-sm w-full"
                 readOnly
               />
             </Link>
@@ -151,8 +152,8 @@ const Index = () => {
         {/* Search Results Info */}
         {searchQuery && (
           <div className="bg-sidebar/30 border border-sidebar-border rounded-lg p-4">
-            <p className="text-foreground">
-              Showing results for: <span className="font-semibold">"{searchQuery}"</span>
+            <p className="text-foreground break-words">
+              Showing results for: <span className="font-semibold break-all">"{searchQuery}"</span>
               {sortedPosts.length > 0 && (
                 <span className="text-muted-foreground ml-2">({sortedPosts.length} results)</span>
               )}
@@ -161,10 +162,10 @@ const Index = () => {
         )}
         
         {/* Sort Controls + Posts List - Combined */}
-        <div className="space-y-0"> {/* Remove space between elements */}
+        <div className="space-y-0 w-full max-w-full"> 
           {/* Sort Controls with rounded top corners */}
-          <div className="bg-sidebar border border-sidebar-border rounded-t-lg border-b-0">
-            <div className="flex p-3 gap-2">
+          <div className="bg-sidebar border border-sidebar-border rounded-t-lg border-b-0 overflow-x-hidden">
+            <div className="flex p-3 gap-2 flex-wrap">
               <Button 
                 variant={sortBy === 'hot' ? 'default' : 'ghost'} 
                 size="sm" 
@@ -197,7 +198,7 @@ const Index = () => {
 
           {/* Posts List with only bottom rounded corners on last post */}
           {sortedPosts.length > 0 ? (
-            <div className="overflow-hidden border border-sidebar-border rounded-b-lg">
+            <div className="overflow-hidden border border-sidebar-border rounded-b-lg w-full">
               {sortedPosts.map((post, index) => (
                 <PostCard 
                   key={post.id} 
@@ -208,8 +209,8 @@ const Index = () => {
               ))}
             </div>
           ) : (
-            <div className="bg-sidebar/30 p-8 border border-sidebar-border rounded-lg text-center">
-              <p className="text-muted-foreground">
+            <div className="bg-sidebar/30 p-8 border border-sidebar-border rounded-lg text-center w-full">
+              <p className="text-muted-foreground break-words">
                 {searchQuery ? 'No posts match your search.' : 'No posts available yet.'}
               </p>
               {searchQuery && (

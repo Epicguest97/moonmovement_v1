@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Bell, User, Settings as SettingsIcon } from 'lucide-react';
+import { Search, Bell, User, Settings as SettingsIcon, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -12,11 +12,17 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
-const Header = () => {
+interface HeaderProps {
+  onToggleMobileSidebar?: () => void;
+}
+
+const Header = ({ onToggleMobileSidebar }: HeaderProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const { user, isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +37,76 @@ const Header = () => {
     navigate('/');
   };
 
+  if (isMobile) {
+    return (
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-4">
+          <div className="flex h-14 items-center justify-between">
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleMobileSidebar}
+              className="flex-shrink-0"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+
+            {/* Centered Logo */}
+            <Link to="/" className="flex items-center space-x-2 absolute left-1/2 transform -translate-x-1/2">
+              <span className="font-bold text-lg text-primary">moonmovement</span>
+            </Link>
+
+            {/* Right Side Actions */}
+            <div className="flex items-center space-x-1 flex-shrink-0">
+              {/* Search Icon for Mobile */}
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => navigate('/search')}
+              >
+                <Search className="h-5 w-5" />
+              </Button>
+
+              {/* User Menu */}
+              {isLoggedIn ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem asChild>
+                      <Link to={`/u/${user?.username}`}>
+                        <User className="mr-2 h-4 w-4" />
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/settings">
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout}>
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button asChild size="sm">
+                  <Link to="/auth">Login</Link>
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
+  // Desktop Header
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
