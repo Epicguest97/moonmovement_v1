@@ -78,7 +78,7 @@ const LeftSidebar = () => {
   };
 
   return (
-    <div className="fixed left-4 top-20 w-64 bg-sidebar border border-sidebar-border rounded-lg shadow-lg h-[calc(100vh-6rem)] overflow-y-auto z-10">
+    <div className="fixed left-20 top-20 w-64 bg-sidebar border border-sidebar-border rounded-lg shadow-lg h-[calc(100vh-6rem)] overflow-y-auto z-10">
       <div className="p-4">
         {/* Main Navigation */}
         <nav className="space-y-1">

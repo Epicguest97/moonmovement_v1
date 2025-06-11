@@ -1,0 +1,60 @@
+/* Dark theme styles */
+body {
+  background-color: #0C0C0F !important;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+/* Main background */
+.bg-background {
+  background-color: #0C0C0F !important;
+}
+
+/* Sidebar and navbar */
+.bg-sidebar, .bg-sidebar-border {
+  background-color: #18181b !important;
+}
+header.bg-background, header.backdrop-blur {
+  background-color: #111114 !important;
+}
+
+/* Component colors */
+.card, .bg-card, 
+div[class*="post-"], 
+.bg-sidebar,
+.chat-window, 
+.chat-message-container,
+[class*="chat-"],
+.bg-muted,
+.bg-popover,
+[class*="card-"],
+[class*="post-card"],
+[class*="comment-"],
+[class*="chat-room"],
+[class*="message-"],
+form,
+[role="dialog"],
+[class*="popover"],
+[class*="dropdown"] {
+  background-color: #18181b !important;
+}
+
+/* Sticky components */
+.sticky-component {
+  position: sticky;
+  top: 4rem;
+  z-index: 10;
+  background-color: #18181b;
+}
+
+/* Hide scrollbars */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+/* Prevent touch bounce */
+* {
+  -webkit-tap-highlight-color: transparent;
+}

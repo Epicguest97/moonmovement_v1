@@ -5,25 +5,25 @@
 @layer base {
   :root {
     --background: 0 0% 10%;
-    --foreground: 0 0% 98%;
+    --foreground: 0 0% 70%; /* Reduce whiteness even further */
 
     --card: 0 0% 15%;
-    --card-foreground: 0 0% 98%;
+    --card-foreground: 0 0% 75%; /* Make card text less bright */
 
     --popover: 0 0% 15%;
-    --popover-foreground: 0 0% 98%;
+    --popover-foreground: 0 0% 75%; /* Make popover text less bright */
 
-    --primary: 142 76% 36%; /* Changed from orange to green */
+    --primary: 142 76% 36%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 79% 46%; /* Reddit blue */
+    --secondary: 210 79% 46%;
     --secondary-foreground: 0 0% 98%;
 
     --muted: 0 0% 20%;
     --muted-foreground: 0 0% 60%;
 
     --accent: 0 0% 20%;
-    --accent-foreground: 0 0% 98%;
+    --accent-foreground: 0 0% 80%; /* Reduce accent text brightness */
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -35,13 +35,17 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 15%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 142 76% 36%; /* Changed from orange to green */
-    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-foreground: 0 0% 75%; /* Reduce sidebar text brightness */
+    --sidebar-primary: 142 76% 36%;
+    --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 0 0% 20%;
-    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-accent-foreground: 0 0% 80%; /* Reduce brightness */
     --sidebar-border: 0 0% 25%;
-    --sidebar-ring: 142 76% 36%; /* Changed from orange to green */
+    --sidebar-ring: 142 76% 36%;
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 600; /* Reduce the boldness */
   }
 
   .dark {
@@ -54,7 +58,7 @@
     --popover: 0 0% 15%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 142 76% 36%; /* Changed from orange to green */
+    --primary: 142 76% 36%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 79% 46%;
@@ -75,12 +79,12 @@
     
     --sidebar-background: 0 0% 15%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 142 76% 36%; /* Changed from orange to green */
+    --sidebar-primary: 142 76% 36%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 20%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 0 0% 25%;
-    --sidebar-ring: 142 76% 36%; /* Changed from orange to green */
+    --sidebar-ring: 142 76% 36%;
   }
 }
 
@@ -91,8 +95,34 @@
 
   body {
     @apply bg-background text-foreground;
+    font-weight: var(--font-weight-normal);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Ensure no text is too bold or too white */
+  p, span, div, a, button, input, textarea, select, li, td, th {
+    @apply text-foreground;
+    font-weight: var(--font-weight-normal);
+  }
+
+  /* Make headings medium weight instead of bold */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: var(--font-weight-medium);
+    @apply text-foreground;
+  }
+  
+  /* Override common classes that might be making text too bright */
+  .text-white, .text-sidebar-foreground {
+    @apply text-foreground !important;
+  }
+  
+  /* Ensure links aren't too bright */
+  a:not([class*="text-"]) {
+    @apply text-foreground hover:text-sidebar-primary;
   }
 }
+
+/* Additional styles remain unchanged */
 
 .post-card {
   @apply transition-all duration-200 hover:border-sidebar-primary hover:shadow-md;
