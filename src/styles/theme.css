@@ -77,8 +77,12 @@ form,
 
 /* Target post cards and their containers specifically */
 .post-card {
-  border-width: 0.5px !important;
-  border-bottom-width: 0.5px !important;
+  border: none !important;
+}
+
+/* And add this to completely remove Card component borders */
+.card.post-card {
+  border: none !important;
 }
 
 div.overflow-hidden.border.border-sidebar-border.rounded-b-lg {

@@ -95,10 +95,11 @@ const PostCard = ({ post, onPostUpdate, isFirst = false, isLast = false }: PostC
   };
   
   return (
-    <Card className={`post-card overflow-hidden border-b border-sidebar-border bg-sidebar
+    <Card className={`post-card overflow-hidden bg-sidebar border-0
       ${!isFirst && !isLast ? "rounded-none" : ""}
       ${isFirst && !isLast ? "rounded-t-lg rounded-b-none" : ""}
       ${!isFirst && isLast ? "rounded-b-lg rounded-t-none" : ""}
+      ${isFirst && isLast ? "" : ""}
     `}>
       {moderationInfo?.isModerator && moderationInfo.permissions?.managePosts && (
         <PostModerationActions 
@@ -154,6 +155,11 @@ const PostCard = ({ post, onPostUpdate, isFirst = false, isLast = false }: PostC
           </div>
         </div>
       </div>
+      
+      {/* Add the subtle divider line only between posts (not after the last one) */}
+      {!isLast && (
+        <div className="mx-8 h-[0.5px] bg-gray-700/50"></div>
+      )}
     </Card>
   );
 };
