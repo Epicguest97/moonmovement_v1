@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import NewsCard, { NewsItem } from './NewsCard';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, Clock, Fire } from 'lucide-react';
+import { TrendingUp, Clock } from 'lucide-react';
 
 const NewsList = () => {
   const [news, setNews] = useState<NewsItem[]>([]);
