@@ -135,7 +135,7 @@ const Index = () => {
           </div>
           <div className="relative z-10 p-4 pb-5 text-white">
             <div className="text-xs opacity-90">02:23 PM</div>
-            <h1 className="text-xl font-medium mb-2">Ask Anything...</h1>
+            <h1 className="text-xl font-medium mb-2">Build It!</h1>
             
             {/* Embed the input box directly in the hero section */}
             <Link to="/submit" className="block">

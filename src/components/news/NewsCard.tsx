@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,20 +8,24 @@ export interface NewsItem {
   id: number;
   title: string;
   summary: string;
-  content?: string;
+  content: string;
+  publishedAt: string;
   source: string;
+  category: string;
   url: string;
   imageUrl?: string;
-  category: string;
-  publishedAt: string;
-  createdAt: string;
+  funding?: string;
+  company?: string;
+  tags?: string[];
 }
 
 interface NewsCardProps {
   news: NewsItem;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
-const NewsCard = ({ news }: NewsCardProps) => {
+const NewsCard = ({ news, isFirst = false, isLast = false }: NewsCardProps) => {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -32,7 +35,12 @@ const NewsCard = ({ news }: NewsCardProps) => {
   };
 
   return (
-    <Card className="mb-3 sm:mb-4 overflow-hidden bg-sidebar border-sidebar-border hover:border-sidebar-primary transition-all duration-200 mx-2 sm:mx-0">
+    <Card className={`news-card overflow-hidden bg-sidebar border-0
+      ${!isFirst && !isLast ? "rounded-none" : ""}
+      ${isFirst && !isLast ? "rounded-t-lg rounded-b-none" : ""}
+      ${!isFirst && isLast ? "rounded-b-lg rounded-t-none" : ""}
+      ${isFirst && isLast ? "" : ""}
+    `}>
       <div className="flex flex-col">
         {news.imageUrl && (
           <div className="w-full md:hidden">
@@ -103,6 +111,11 @@ const NewsCard = ({ news }: NewsCardProps) => {
           </CardContent>
         </div>
       </div>
+      
+      {/* Add the subtle divider line only between news items (not after the last one) */}
+      {!isLast && (
+        <div className="mx-8 h-[0.5px] bg-gray-700/50"></div>
+      )}
     </Card>
   );
 };

@@ -85,6 +85,15 @@ form,
   border: none !important;
 }
 
+/* Add this with your other card styles */
+.news-card {
+  border: none !important;
+}
+
+.card.news-card {
+  border: none !important;
+}
+
 div.overflow-hidden.border.border-sidebar-border.rounded-b-lg {
   border-width: 0.5px !important;
 }
