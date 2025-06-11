@@ -25,6 +25,9 @@ const MainLayout = ({ children }: MainLayoutProps) => {
 
   // Prevent body overscrolling and hide scrollbar
   useEffect(() => {
+    // Set page background color
+    document.body.style.backgroundColor = '#0C0C0F';
+    
     // Save original overflow style
     const originalStyle = window.getComputedStyle(document.body).overflow;
     
@@ -48,6 +51,20 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         main::-webkit-scrollbar {
           display: none;
         }
+        
+        /* Custom background colors */
+        body {
+          background-color: #0C0C0F !important;
+        }
+        .bg-background {
+          background-color: #0C0C0F !important;
+        }
+        .bg-sidebar, .bg-sidebar-border {
+          background-color: #131316 !important;
+        }
+        header.bg-background, header.backdrop-blur {
+          background-color: #111114 !important;
+        }
       `;
       document.head.appendChild(style);
     }
@@ -64,8 +81,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <div className="fixed top-0 left-0 right-0 z-50 bg-background">
+    <div className="flex flex-col min-h-screen" style={{ backgroundColor: '#0C0C0F' }}>
+      <div className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: '#111114' }}>
         <Header />
       </div>
       <div className="flex flex-1 pt-16"> 
