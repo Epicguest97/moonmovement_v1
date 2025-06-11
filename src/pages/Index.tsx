@@ -1,12 +1,11 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
-import CreatePostCard from '@/components/post/CreatePostCard';
 import PostCard, { Post } from '@/components/post/PostCard';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Flame, TrendingUp, Clock } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 const Index = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -123,8 +122,8 @@ const Index = () => {
   return (
     <MainLayout>
       <div className="space-y-6">
-        {/* Hero Section with natural landscape background */}
-        <div className="relative rounded-lg overflow-hidden h-32">
+        {/* Hero Section with natural landscape background - SHORTER VERSION */}
+        <div className="relative rounded-lg overflow-hidden">
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{
@@ -134,14 +133,21 @@ const Index = () => {
           >
             <div className="absolute inset-0 bg-black/40"></div>
           </div>
-          <div className="relative z-10 p-6 text-white">
-            <div className="text-sm opacity-90 mb-1">02:23 PM</div>
-            <h1 className="text-2xl font-bold">Ask Anything...</h1>
+          <div className="relative z-10 p-4 pb-5 text-white">
+            <div className="text-xs opacity-90">02:23 PM</div>
+            <h1 className="text-xl font-medium mb-2">Ask Anything...</h1>
+            
+            {/* Embed the input box directly in the hero section */}
+            <Link to="/submit" className="block">
+              <Input 
+                placeholder="Create a post..." 
+                className="bg-sidebar/60 hover:bg-sidebar/80 border-sidebar-border/50 cursor-pointer text-white placeholder:text-gray-300 rounded-full px-4 py-2 text-sm backdrop-blur-sm"
+                readOnly
+              />
+            </Link>
           </div>
         </div>
 
-        <CreatePostCard />
-        
         {/* Sort Controls */}
         <div className="bg-sidebar/30 border border-sidebar-border rounded-lg">
           <div className="flex p-3 gap-2">
