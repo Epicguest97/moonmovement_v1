@@ -12,15 +12,13 @@ interface PostContentProps {
 
 const PostContent = ({ post, isCompact = false, isDetailView = false }: PostContentProps) => {
   const [isExpanded, setIsExpanded] = useState(isDetailView);
-  const shouldTruncate = post.content.length > 300 && !isExpanded && !isDetailView;
+  const shouldTruncate = post.content?.length > 300 && !isExpanded && !isDetailView;
   
-  const renderContent = () => {
-    let content;
-    
+  const renderImage = () => {
     if (post.imageUrl) {
       return (
         <div className={cn(
-          "mt-2",
+          "mt-2 mb-4",
           isCompact && !isDetailView ? "max-h-32 overflow-hidden" : ""
         )}>
           <img 
@@ -31,10 +29,38 @@ const PostContent = ({ post, isCompact = false, isDetailView = false }: PostCont
         </div>
       );
     }
-    
-    if (post.isLink && post.linkUrl) {
+    return null;
+  };
+  
+  const renderTextContent = () => {
+    if (post.content) {
+      const content = shouldTruncate
+        ? `${post.content.substring(0, 300)}...`
+        : post.content;
+        
       return (
-        <div className="mt-2">
+        <div className="mt-2 text-sm">
+          <p className="whitespace-pre-line">{content}</p>
+          
+          {shouldTruncate && (
+            <Button 
+              variant="link" 
+              className="text-sidebar-primary p-0 h-auto font-medium mt-1"
+              onClick={() => setIsExpanded(true)}
+            >
+              Read more
+            </Button>
+          )}
+        </div>
+      );
+    }
+    return null;
+  };
+  
+  const renderLinkContent = () => {
+    if (post.linkUrl) {
+      return (
+        <div className="mt-2 mb-2">
           <a 
             href={post.linkUrl} 
             target="_blank" 
@@ -46,39 +72,18 @@ const PostContent = ({ post, isCompact = false, isDetailView = false }: PostCont
         </div>
       );
     }
-    
-    if (post.isText) {
-      content = shouldTruncate
-        ? `${post.content.substring(0, 300)}...`
-        : post.content;
-        
-      return (
-        <div className="mt-2 text-sm">
-          <p className="whitespace-pre-line">{content}</p>
-          
-          {shouldTruncate && (
-            <Button 
-              variant="link" 
-              className="text-reddit-secondary p-0 h-auto font-medium mt-1"
-              onClick={() => setIsExpanded(true)}
-            >
-              Read more
-            </Button>
-          )}
-        </div>
-      );
-    }
-    
     return null;
   };
-  
+
   return (
     <div className={cn(
-      isCompact && !isDetailView ? "max-h-40 overflow-hidden" : "",
+      isCompact && !isDetailView ? "max-h-96 overflow-hidden" : "",
       "relative"
     )}>
-      {renderContent()}
-
+      {renderImage()}
+      {renderTextContent()}
+      {renderLinkContent()}
+      
       {!isDetailView && (
         <Link to={`/post/${post.id}`} className="absolute inset-0 z-10">
           <span className="sr-only">View post</span>

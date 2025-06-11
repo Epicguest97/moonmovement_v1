@@ -18,10 +18,10 @@ const PostDetail = () => {
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<CommentType[]>([]);
   const [voteStatus, setVoteStatus] = useState<'up' | 'down' | null>(null);
-  const [voteScore, setVoteScore] = useState<number>(0);
+  const [voteScore, setVoteScore] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Function to build nested comment structure
   const buildCommentTree = (flatComments: any[]): CommentType[] => {
     const commentMap = new Map();
@@ -249,58 +249,74 @@ const PostDetail = () => {
   return (
     <MainLayout>
       <div className="max-w-3xl mx-auto p-4">
-        <Card className="overflow-hidden mb-4 bg-sidebar border-sidebar-border">
-          <div className="flex">
-            <VoteControls 
-              score={voteScore} 
-              voteStatus={voteStatus} 
-              onVote={handleVote} 
-            />
-            
-            <div className="flex-1 p-4">
-              <div className="flex items-center text-xs text-gray-400 mb-2">
-                <Link to={`/r/${post.subreddit}`} className="font-medium text-gray-200 hover:underline mr-1">
-                  r/{post.subreddit}
-                </Link>
-                <span className="mx-1">•</span>
-                Posted by{" "}
-                <Link to={`/user/${authorName}`} className="hover:underline mx-1 text-gray-400">
-                  u/{authorName}
-                </Link>
-                <span className="mx-1">•</span>
-                <span>{post.timestamp}</span>
-              </div>
-              
-              <h1 className="text-xl font-semibold mb-3 text-white">{post.title}</h1>
-              
-              <PostContent post={post} isDetailView={true} />
-              
-              <PostFooter 
-                commentCount={post.commentCount} 
-                postId={post.id} 
+        {/* Single unified card for post and comments */}
+        <div className="overflow-hidden border border-sidebar-border rounded-lg">
+          
+          {/* Post content section */}
+          <Card className="bg-sidebar rounded-none border-0">
+            <div className="flex">
+              <VoteControls 
+                score={voteScore} 
+                voteStatus={voteStatus} 
+                onVote={handleVote} 
               />
+              
+              <div className="flex-1 p-4">
+                <div className="flex items-center text-xs text-gray-400 mb-2">
+                  <Link to={`/r/${post.subreddit}`} className="font-medium text-gray-200 hover:underline mr-1">
+                    r/{post.subreddit}
+                  </Link>
+                  <span className="mx-1">•</span>
+                  Posted by{" "}
+                  <Link to={`/user/${authorName}`} className="hover:underline mx-1 text-gray-400">
+                    u/{authorName}
+                  </Link>
+                  <span className="mx-1">•</span>
+                  <span>{post.timestamp}</span>
+                </div>
+                
+                <h1 className="text-xl font-semibold mb-3 text-white">{post.title}</h1>
+                
+                <PostContent post={post} isDetailView={true} />
+                
+                <PostFooter 
+                  commentCount={post.commentCount} 
+                  postId={post.id} 
+                />
+              </div>
             </div>
+          </Card>
+          
+          {/* Subtle divider line */}
+          <div className="mx-8 h-[0.5px] bg-gray-700/50"></div>
+          
+          {/* Comment box section */}
+          <div className="bg-sidebar p-4 border-0 rounded-none">
+            <CommentBox onSubmit={handleCommentSubmit} />
           </div>
-        </Card>
-        
-        <div className="bg-sidebar rounded-md border border-sidebar-border p-4 mb-4">
-          <CommentBox onSubmit={handleCommentSubmit} />
+          
+          {/* Subtle divider line */}
+          <div className="mx-8 h-[0.5px] bg-gray-700/50"></div>
+          
+          {/* Comments section */}
+          <div className="bg-sidebar p-4 border-0 rounded-none">
+            {comments.length > 0 ? (
+              <>
+                <h3 className="font-medium mb-4 text-white">{comments.length} Comments</h3>
+                <CommentList 
+                  comments={comments} 
+                  postId={post.id}
+                  onReplySubmit={handleReplySubmit}
+                />
+              </>
+            ) : (
+              <div className="text-center py-4 text-gray-400">
+                <p>No comments yet. Be the first to comment!</p>
+              </div>
+            )}
+          </div>
+          
         </div>
-        
-        {comments.length > 0 ? (
-          <div className="bg-sidebar rounded-md border border-sidebar-border p-4">
-            <h3 className="font-medium mb-4 text-white">{comments.length} Comments</h3>
-            <CommentList 
-              comments={comments} 
-              postId={post.id}
-              onReplySubmit={handleReplySubmit}
-            />
-          </div>
-        ) : (
-          <div className="bg-sidebar rounded-md border border-sidebar-border p-4 text-center">
-            <p className="text-gray-400">No comments yet. Be the first to comment!</p>
-          </div>
-        )}
       </div>
     </MainLayout>
   );

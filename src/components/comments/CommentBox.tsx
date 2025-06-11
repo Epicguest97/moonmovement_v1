@@ -1,55 +1,73 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { SmileIcon, ArrowUpCircle, User } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface CommentBoxProps {
-  onSubmit?: (content: string) => void;
+  onSubmit: (text: string) => void;
+  placeholder?: string;
 }
 
-const CommentBox = ({ onSubmit }: CommentBoxProps) => {
-  const [content, setContent] = useState('');
-  const [isFocused, setIsFocused] = useState(false);
-
-  const handleSubmit = () => {
-    if (content.trim() && onSubmit) {
-      onSubmit(content);
-      setContent('');
+const CommentBox = ({ onSubmit, placeholder = "Add a comment..." }: CommentBoxProps) => {
+  const [commentText, setCommentText] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Get username for avatar
+  const username = localStorage.getItem('username') || 'Guest';
+  
+  const handleSubmit = async () => {
+    if (!commentText.trim()) return;
+    
+    try {
+      setIsSubmitting(true);
+      await onSubmit(commentText);
+      setCommentText('');
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
+  
   return (
-    <div className="bg-card rounded-md border border-border p-3 mt-4">
-      <p className="text-sm font-medium mb-2 text-foreground">Comment as <span className="text-primary">username</span></p>
+    <div className="flex gap-2">
+      <Avatar className="w-8 h-8">
+        <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${username}`} />
+        <AvatarFallback className="bg-sidebar-accent">
+          <User size={16} className="text-gray-400" />
+        </AvatarFallback>
+      </Avatar>
       
-      <textarea 
-        className="w-full p-3 border border-border rounded resize-y min-h-[100px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary bg-background text-foreground placeholder:text-muted-foreground"
-        placeholder="What are your thoughts?"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        onFocus={() => setIsFocused(true)}
-      />
-      
-      {isFocused && (
-        <div className="flex justify-end mt-2">
+      <div className="relative flex-1 rounded-lg border border-sidebar-border bg-sidebar">
+        <Textarea
+          value={commentText}
+          onChange={(e) => setCommentText(e.target.value)}
+          placeholder={placeholder}
+          className="min-h-[100px] resize-none border-0 bg-transparent py-3 px-4 focus-visible:ring-0 focus-visible:ring-offset-0 text-sm placeholder:text-gray-500"
+        />
+        
+        <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center">
           <Button 
             variant="ghost" 
-            onClick={() => {
-              setIsFocused(false);
-              setContent('');
-            }}
-            className="mr-2 text-foreground hover:bg-accent"
+            size="icon"
+            type="button"
+            className="h-7 w-7 rounded-full text-muted-foreground hover:text-foreground"
           >
-            Cancel
+            <SmileIcon size={18} />
           </Button>
-          <Button 
-            className="bg-primary hover:bg-primary/90 text-primary-foreground" 
-            disabled={!content.trim()}
+          
+          <Button
             onClick={handleSubmit}
+            disabled={!commentText.trim() || isSubmitting}
+            variant="ghost"
+            size="icon"
+            className={`h-9 w-9 rounded-full ${commentText.trim() ? 'text-primary hover:text-primary' : 'text-muted-foreground'}`}
           >
-            Comment
+            <ArrowUpCircle size={22} className={commentText.trim() ? 'fill-primary' : ''} />
           </Button>
         </div>
-      )}
+      </div>
     </div>
   );
 };
