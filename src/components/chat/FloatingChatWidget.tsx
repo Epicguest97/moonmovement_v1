@@ -86,7 +86,7 @@ const FloatingChatWidget = () => {
   }
 
   return (
-    <div className="fixed bottom-0 right-4 z-50 flex flex-col items-end space-y-2">
+    <div className="fixed bottom-0 right-4 z-50 flex items-end space-x-2">
       {/* Open Chat Windows */}
       <div className="flex space-x-2">
         {openChats.map((chat) => (
@@ -100,7 +100,7 @@ const FloatingChatWidget = () => {
         ))}
       </div>
 
-      {/* Chat List Widget */}
+      {/* Chat List Widget - positioned to the left of chat windows */}
       {isOpen && (
         <Card className="w-80 h-96 bg-sidebar border-sidebar-border shadow-lg">
           <FloatingChatList
@@ -113,15 +113,16 @@ const FloatingChatWidget = () => {
         </Card>
       )}
 
-      {/* Chat Toggle Button */}
+      {/* Chat Toggle Button - LinkedIn style rectangular black box */}
       {!isOpen && (
-        <Button
+        <div
           onClick={() => setIsOpen(true)}
-          className="w-12 h-12 rounded-full bg-primary hover:bg-primary/90 shadow-lg"
-          size="icon"
+          className="w-16 h-12 bg-black hover:bg-gray-800 cursor-pointer transition-colors shadow-lg flex items-center justify-center text-white font-medium text-sm"
+          style={{ borderRadius: '8px 8px 0 0' }}
         >
-          <MessageSquare size={20} />
-        </Button>
+          <MessageSquare size={18} className="mr-1" />
+          Chat
+        </div>
       )}
     </div>
   );
