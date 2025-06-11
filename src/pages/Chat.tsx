@@ -179,7 +179,7 @@ const Chat = () => {
   }
 
   return (
-    <MainLayout className="bg-black">
+    <MainLayout>
       <div className="h-screen flex flex-col bg-black">
         {/* Mobile Layout */}
         {isMobile ? (
