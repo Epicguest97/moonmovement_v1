@@ -167,6 +167,125 @@ router.delete('/:subreddit/moderators/:userId', authenticateToken, checkModerato
   }
 });
 
+// Ban user from subreddit
+router.post('/:subreddit/ban', authenticateToken, checkModerator, async (req, res) => {
+  try {
+    const { subreddit } = req.params;
+    const { username, reason, duration } = req.body;
+    
+    // Check permissions
+    const modPermissions = JSON.parse(req.moderator.permissions);
+    if (!modPermissions.manageUsers) {
+      return res.status(403).json({ error: 'You do not have permission to ban users' });
+    }
+    
+    // Find user to ban
+    const userToBan = await prisma.user.findUnique({
+      where: { username }
+    });
+    
+    if (!userToBan) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Create ban record
+    const ban = await prisma.subredditBan.create({
+      data: {
+        subreddit,
+        userId: userToBan.id,
+        reason,
+        duration,
+        bannedBy: req.user.userId
+      }
+    });
+    
+    // Log action
+    await prisma.moderationAction.create({
+      data: {
+        moderatorId: req.user.userId,
+        subreddit,
+        action: 'ban_user',
+        reason,
+        details: JSON.stringify({ bannedUser: username, duration })
+      }
+    });
+    
+    res.json({ message: 'User banned successfully', ban });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to ban user' });
+  }
+});
+
+// Unban user from subreddit
+router.delete('/:subreddit/ban/:userId', authenticateToken, checkModerator, async (req, res) => {
+  try {
+    const { subreddit, userId } = req.params;
+    
+    // Check permissions
+    const modPermissions = JSON.parse(req.moderator.permissions);
+    if (!modPermissions.manageUsers) {
+      return res.status(403).json({ error: 'You do not have permission to unban users' });
+    }
+    
+    // Remove ban
+    await prisma.subredditBan.deleteMany({
+      where: {
+        subreddit,
+        userId: parseInt(userId),
+        isActive: true
+      }
+    });
+    
+    // Log action
+    await prisma.moderationAction.create({
+      data: {
+        moderatorId: req.user.userId,
+        subreddit,
+        action: 'unban_user',
+        details: JSON.stringify({ unbannedUserId: userId })
+      }
+    });
+    
+    res.json({ message: 'User unbanned successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to unban user' });
+  }
+});
+
+// Get banned users
+router.get('/:subreddit/banned', authenticateToken, checkModerator, async (req, res) => {
+  try {
+    const { subreddit } = req.params;
+    
+    const bannedUsers = await prisma.subredditBan.findMany({
+      where: {
+        subreddit,
+        isActive: true
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true
+          }
+        },
+        bannedByUser: {
+          select: {
+            username: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+    
+    res.json(bannedUsers);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch banned users' });
+  }
+});
+
 // Remove post
 router.delete('/:subreddit/posts/:postId', authenticateToken, checkModerator, async (req, res) => {
   try {

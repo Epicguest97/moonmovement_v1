@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -34,6 +35,8 @@ model User {
   // Moderation relations
   moderatedSubreddits SubredditModerator[]
   moderationActions   ModerationAction[]
+  bannedUsers         SubredditBan[] @relation("BannedBy")
+  bans                SubredditBan[] @relation("UserBans")
   
   // Event relations
   eventRegistrations EventRegistration[]
@@ -214,6 +217,21 @@ model SubredditModerator {
   permissions String   // JSON string of permissions
   assignedAt  DateTime @default(now())
   assignedBy  Int      // User ID who assigned this mod
+  isActive    Boolean  @default(true)
+  
+  @@unique([subreddit, userId])
+}
+
+model SubredditBan {
+  id          Int      @id @default(autoincrement())
+  subreddit   String
+  user        User     @relation("UserBans", fields: [userId], references: [id])
+  userId      Int
+  reason      String?
+  duration    String?  // "permanent", "1d", "7d", "30d", etc.
+  bannedByUser User    @relation("BannedBy", fields: [bannedBy], references: [id])
+  bannedBy    Int
+  createdAt   DateTime @default(now())
   isActive    Boolean  @default(true)
   
   @@unique([subreddit, userId])

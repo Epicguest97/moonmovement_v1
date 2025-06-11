@@ -1,3 +1,4 @@
+
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
@@ -35,6 +36,34 @@ router.get('/', async (req, res) => {
   } catch (error) {
     console.error('Error fetching communities:', error);
     res.status(500).json({ error: 'Failed to fetch communities' });
+  }
+});
+
+// GET community by name
+router.get('/name/:name', async (req, res) => {
+  try {
+    const { name } = req.params;
+    const community = await prisma.community.findUnique({
+      where: { name },
+      include: {
+        members: {
+          include: {
+            user: {
+              select: { id: true, username: true }
+            }
+          }
+        }
+      }
+    });
+    
+    if (!community) {
+      return res.status(404).json({ error: 'Community not found' });
+    }
+    
+    res.json(community);
+  } catch (error) {
+    console.error('Error fetching community:', error);
+    res.status(500).json({ error: 'Failed to fetch community' });
   }
 });
 
@@ -98,6 +127,54 @@ router.post('/', authenticateToken, async (req, res) => {
       res.status(400).json({ error: 'Community name already exists' });
     } else {
       res.status(500).json({ error: 'Failed to create community' });
+    }
+  }
+});
+
+// PUT update community (requires moderator permissions)
+router.put('/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, bannerImage, icon } = req.body;
+    const userId = req.user.userId;
+    
+    // Check if user is moderator
+    const moderator = await prisma.subredditModerator.findFirst({
+      where: {
+        subreddit: name || (await prisma.community.findUnique({ where: { id: parseInt(id) } }))?.name,
+        userId,
+        isActive: true
+      }
+    });
+    
+    if (!moderator) {
+      return res.status(403).json({ error: 'You are not a moderator of this community' });
+    }
+    
+    const permissions = JSON.parse(moderator.permissions);
+    if (!permissions.manageSettings) {
+      return res.status(403).json({ error: 'You do not have permission to update community settings' });
+    }
+    
+    const community = await prisma.community.update({
+      where: { id: parseInt(id) },
+      data: {
+        ...(name && { name }),
+        ...(description && { description }),
+        ...(bannerImage !== undefined && { bannerImage }),
+        ...(icon !== undefined && { icon })
+      }
+    });
+    
+    res.json(community);
+  } catch (error) {
+    console.error('Error updating community:', error);
+    if (error.code === 'P2025') {
+      res.status(404).json({ error: 'Community not found' });
+    } else if (error.code === 'P2002') {
+      res.status(400).json({ error: 'Community name already exists' });
+    } else {
+      res.status(500).json({ error: 'Failed to update community' });
     }
   }
 });
@@ -213,37 +290,6 @@ router.get('/:id/membership', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Error checking membership:', error);
     res.status(500).json({ error: 'Failed to check membership' });
-  }
-});
-
-// PUT update community by id
-router.put('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, description, bannerImage, icon, memberCount, onlineCount } = req.body;
-    
-    const community = await prisma.community.update({
-      where: { id: parseInt(id) },
-      data: {
-        ...(name && { name }),
-        ...(description && { description }),
-        ...(bannerImage !== undefined && { bannerImage }),
-        ...(icon !== undefined && { icon }),
-        ...(memberCount !== undefined && { memberCount }),
-        ...(onlineCount !== undefined && { onlineCount })
-      }
-    });
-    
-    res.json(community);
-  } catch (error) {
-    console.error('Error updating community:', error);
-    if (error.code === 'P2025') {
-      res.status(404).json({ error: 'Community not found' });
-    } else if (error.code === 'P2002') {
-      res.status(400).json({ error: 'Community name already exists' });
-    } else {
-      res.status(500).json({ error: 'Failed to update community' });
-    }
   }
 });
 

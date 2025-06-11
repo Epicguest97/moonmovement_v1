@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,8 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Check, Users, Settings, History } from 'lucide-react';
+import { Trash2, Check, Users, Settings, History, Shield, Image } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import CommunitySettings from './CommunitySettings';
+import UserManagement from './UserManagement';
 
 interface ModeratorPermissions {
   managePosts: boolean;
@@ -40,12 +41,22 @@ interface ModerationAction {
   };
 }
 
+interface Community {
+  id: number;
+  name: string;
+  description: string;
+  bannerImage?: string;
+  icon?: string;
+}
+
 interface ModerationPanelProps {
   subreddit: string;
   userPermissions: ModeratorPermissions;
+  community?: Community;
+  onCommunityUpdate?: (community: Community) => void;
 }
 
-const ModerationPanel = ({ subreddit, userPermissions }: ModerationPanelProps) => {
+const ModerationPanel = ({ subreddit, userPermissions, community, onCommunityUpdate }: ModerationPanelProps) => {
   const [moderators, setModerators] = useState<Moderator[]>([]);
   const [moderationLog, setModerationLog] = useState<ModerationAction[]>([]);
   const [newModUsername, setNewModUsername] = useState('');
@@ -188,6 +199,18 @@ const ModerationPanel = ({ subreddit, userPermissions }: ModerationPanelProps) =
               <Users size={16} className="mr-2" />
               Moderators
             </TabsTrigger>
+            {userPermissions.manageUsers && (
+              <TabsTrigger value="users" className="data-[state=active]:bg-sidebar text-sidebar-foreground">
+                <Shield size={16} className="mr-2" />
+                User Management
+              </TabsTrigger>
+            )}
+            {userPermissions.manageSettings && community && (
+              <TabsTrigger value="settings" className="data-[state=active]:bg-sidebar text-sidebar-foreground">
+                <Image size={16} className="mr-2" />
+                Community Settings
+              </TabsTrigger>
+            )}
             <TabsTrigger value="log" className="data-[state=active]:bg-sidebar text-sidebar-foreground">
               <History size={16} className="mr-2" />
               Moderation Log
@@ -291,6 +314,24 @@ const ModerationPanel = ({ subreddit, userPermissions }: ModerationPanelProps) =
               })}
             </div>
           </TabsContent>
+
+          {userPermissions.manageUsers && (
+            <TabsContent value="users">
+              <UserManagement 
+                subreddit={subreddit} 
+                canManageUsers={userPermissions.manageUsers} 
+              />
+            </TabsContent>
+          )}
+
+          {userPermissions.manageSettings && community && onCommunityUpdate && (
+            <TabsContent value="settings">
+              <CommunitySettings 
+                community={community} 
+                onCommunityUpdate={onCommunityUpdate} 
+              />
+            </TabsContent>
+          )}
 
           <TabsContent value="log" className="space-y-4">
             <div className="space-y-2">

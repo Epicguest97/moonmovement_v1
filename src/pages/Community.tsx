@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -184,6 +185,14 @@ const Community = () => {
     }
   };
 
+  const handleCommunityUpdate = (updatedCommunity: Community) => {
+    setCommunity(updatedCommunity);
+    // Update cache
+    if (communityName) {
+      communityCache.set(communityName, updatedCommunity);
+    }
+  };
+
   const formatMemberCount = (count: number) => {
     if (count >= 1000000) {
       return `${(count / 1000000).toFixed(1)}M`;
@@ -336,6 +345,8 @@ const Community = () => {
               <ModerationPanel 
                 subreddit={communityName!} 
                 userPermissions={moderationInfo.permissions} 
+                community={community}
+                onCommunityUpdate={handleCommunityUpdate}
               />
             </TabsContent>
           )}
