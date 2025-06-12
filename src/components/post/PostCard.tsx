@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -138,8 +137,9 @@ const PostCard = ({ post, onPostUpdate, isFirst = false, isLast = false }: PostC
         />
       </div>
       
+      {/* Keep only this divider line between posts */}
       {!isLast && (
-        <div className="mx-8 h-[0.5px] bg-gray-700/50"></div>
+        <div className="h-[0.5px] bg-gray-700/50"></div>
       )}
     </Card>
   );

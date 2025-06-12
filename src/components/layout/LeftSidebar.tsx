@@ -1,11 +1,9 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, 
   Trophy, 
   Calendar, 
-  MessageSquare, 
   TrendingUp, 
   Users, 
   MapPin, 
@@ -37,12 +35,6 @@ const LeftSidebar = () => {
       hasDropdown: true
     },
     { 
-      name: 'Chat', 
-      path: '/chat', 
-      icon: MessageSquare,
-      hasDropdown: true
-    },
-    { 
       name: "What's Happening", 
       path: '/news', 
       icon: TrendingUp,
@@ -68,12 +60,6 @@ const LeftSidebar = () => {
     }
   ];
 
-  const exploreItems = [
-    { name: 'Explore Posts', path: '/explore-posts' },
-    { name: 'Explore Communities', path: '/communities' },
-    { name: 'Explore Companies', path: '/startup-news' },
-  ];
-
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
@@ -81,7 +67,7 @@ const LeftSidebar = () => {
 
   const sidebarClasses = isMobile 
     ? "w-full h-full bg-sidebar p-4" 
-    : "fixed left-20 top-20 w-64 bg-sidebar border border-sidebar-border rounded-lg shadow-lg h-[calc(100vh-6rem)] overflow-y-auto z-10 p-4";
+    : "fixed left-20 top-20 w-64 bg-sidebar border border-sidebar-border rounded-lg shadow-lg h-auto max-h-[500px] overflow-y-auto z-10 p-4";
 
   return (
     <div className={sidebarClasses}>
@@ -106,42 +92,6 @@ const LeftSidebar = () => {
           </Link>
         ))}
       </nav>
-
-      {/* Separator */}
-      <div className="my-4 border-t border-sidebar-border"></div>
-
-      {/* Explore Section */}
-      <div>
-        <nav className="space-y-1">
-          {exploreItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={cn(
-                "block px-3 py-2 rounded-md text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors",
-                isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground"
-              )}
-            >
-              {item.name}
-            </Link>
-          ))}
-        </nav>
-      </div>
-
-      {/* In Hand Salary Calculator */}
-      <div className="mt-4">
-        <nav className="space-y-1">
-          <Link
-            to="/events"
-            className={cn(
-              "block px-3 py-2 rounded-md text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors",
-              isActive('/events') && "bg-sidebar-accent text-sidebar-accent-foreground"
-            )}
-          >
-            In Hand Salary Calculator
-          </Link>
-        </nav>
-      </div>
     </div>
   );
 };

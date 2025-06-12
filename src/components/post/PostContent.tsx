@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Post } from './PostCard';
 import { Link } from 'react-router-dom';
@@ -34,7 +33,8 @@ const PostContent = ({ post, isCompact = false, isDetailView = false }: PostCont
   };
   
   const renderTextContent = () => {
-    if (post.content) {
+    // Hide text content on main page if post has an image
+    if (post.content && (!post.imageUrl || isDetailView)) {
       const content = shouldTruncate
         ? `${post.content.substring(0, 300)}...`
         : post.content;
@@ -59,7 +59,8 @@ const PostContent = ({ post, isCompact = false, isDetailView = false }: PostCont
   };
   
   const renderLinkContent = () => {
-    if (post.linkUrl) {
+    // Hide link content on main page if post has an image
+    if (post.linkUrl && (!post.imageUrl || isDetailView)) {
       return (
         <div className="mt-2 mb-2 overflow-hidden">
           <a 

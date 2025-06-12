@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -27,7 +26,7 @@ interface PostFooterProps {
 
 const PostFooter = ({ commentCount, postId, likeScore, isLiked, onLike }: PostFooterProps) => {
   return (
-    <div className="flex items-center justify-between text-xs text-gray-400 mt-3 pt-2 border-t border-gray-700/50">
+    <div className="flex items-center justify-between text-xs text-gray-400 mt-3 pt-2">
       <div className="flex items-center space-x-4">
         <LikeButton 
           score={likeScore}
