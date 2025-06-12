@@ -1,4 +1,3 @@
-
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -18,6 +17,7 @@ const userSettingsRoutes = require('./routes/userSettings');
 const startupsRouter = require('./routes/startups');
 const chatRoutes = require('./routes/chat');
 const eventsRoutes = require('./routes/events');
+const districtsRoutes = require('./routes/districts');
 
 app.get("/", (req, res) => {
   res.send("Reddit backend running");
@@ -32,6 +32,7 @@ app.use('/api/startups', require('./routes/startups'));
 app.use('/api/community', require('./routes/community'));
 app.use('/api/chat', chatRoutes);
 app.use('/api/events', eventsRoutes);
+app.use('/api/districts', districtsRoutes);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
