@@ -248,7 +248,7 @@ const PostDetail = () => {
   
   return (
     <MainLayout>
-      <div className="max-w-3xl mx-auto p-4">
+      <div className="max-w-3xl mx-auto p-4 w-full overflow-x-hidden">
         {/* Single unified card for post and comments */}
         <div className="overflow-hidden border border-sidebar-border rounded-lg">
           
