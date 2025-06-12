@@ -9,7 +9,7 @@ router.get('/', async (req, res) => {
     console.log('Fetching posts...');
     const posts = await prisma.post.findMany({
       where: {
-        isRemoved: false // Only show non-removed posts
+        isRemoved: false
       },
       include: { 
         author: {
@@ -22,15 +22,22 @@ router.get('/', async (req, res) => {
         }, 
         comments: {
           where: {
-            isRemoved: false // Only count non-removed comments
+            isRemoved: false
           }
         }, 
-        votes: true 
+        likes: true 
       },
       orderBy: { createdAt: 'desc' }
     });
+    
+    const postsWithLikeCount = posts.map(post => ({
+      ...post,
+      likeCount: post.likes.length,
+      voteScore: post.likes.length // For backward compatibility
+    }));
+    
     console.log('Posts fetched successfully:', posts.length);
-    res.json(posts);
+    res.json(postsWithLikeCount);
   } catch (err) {
     console.error('Error fetching posts:', err);
     res.status(500).json({ error: 'Failed to fetch posts', details: err.message });
@@ -54,15 +61,14 @@ router.get('/:id', async (req, res) => {
         }, 
         comments: {
           where: {
-            isRemoved: false // Only show non-removed comments
+            isRemoved: false
           }
         }, 
-        votes: true 
+        likes: true 
       }
     });
     if (!post) return res.status(404).json({ error: 'Post not found' });
     
-    // If post is removed, only show to mods or author
     if (post.isRemoved) {
       const token = req.headers.authorization?.split(' ')[1];
       if (token) {
@@ -71,7 +77,6 @@ router.get('/:id', async (req, res) => {
           const { JWT_SECRET } = require('../config');
           const decoded = jwt.verify(token, JWT_SECRET);
           
-          // Check if user is author or moderator
           const isModerator = await prisma.subredditModerator.findFirst({
             where: {
               subreddit: post.subreddit,
@@ -91,7 +96,13 @@ router.get('/:id', async (req, res) => {
       }
     }
     
-    res.json(post);
+    const postWithLikeCount = {
+      ...post,
+      likeCount: post.likes.length,
+      voteScore: post.likes.length // For backward compatibility
+    };
+    
+    res.json(postWithLikeCount);
   } catch (err) {
     console.error('Error fetching post:', err);
     res.status(500).json({ error: 'Failed to fetch post', details: err.message });
@@ -103,8 +114,6 @@ router.post('/', authenticateToken, async (req, res) => {
   try {
     const { title, content, subreddit, imageUrl, linkUrl, tags } = req.body;
     
-    // IMPORTANT: Use the authenticated user's ID from the JWT token
-    // instead of trusting any user ID sent in the request body
     const userId = req.user.userId;
     
     const post = await prisma.post.create({
@@ -115,7 +124,7 @@ router.post('/', authenticateToken, async (req, res) => {
         imageUrl,
         linkUrl,
         tags,
-        authorId: userId  // Use the authenticated user's ID
+        authorId: userId
       },
       include: {
         author: {
@@ -124,11 +133,11 @@ router.post('/', authenticateToken, async (req, res) => {
             username: true,
             email: true
           }
-        }
+        },
+        likes: true
       }
     });
     
-    // If this is the first post in the subreddit, make the author a moderator
     const existingMods = await prisma.subredditModerator.findFirst({
       where: {
         subreddit: post.subreddit,
@@ -151,7 +160,11 @@ router.post('/', authenticateToken, async (req, res) => {
       });
     }
     
-    res.status(201).json(post);
+    res.status(201).json({
+      ...post,
+      likeCount: 0,
+      voteScore: 0
+    });
   } catch (err) {
     console.error('Error creating post:', err);
     res.status(500).json({ error: 'Failed to create post', details: err.message });
@@ -180,45 +193,54 @@ router.put('/:id', async (req, res) => {
           }
         }, 
         comments: true, 
-        votes: true 
+        likes: true 
       }
     });
-    res.json(updated);
+    
+    res.json({
+      ...updated,
+      likeCount: updated.likes.length,
+      voteScore: updated.likes.length
+    });
   } catch (err) {
     console.error('PUT /:id Error:', err);
     res.status(404).json({ error: 'Post not found', details: err.message });
   }
 });
 
-// Vote (upvote or downvote) a post
-router.post('/:id/vote', async (req, res) => {
+// Like/Unlike a post
+router.post('/:id/like', async (req, res) => {
   const { id } = req.params;
-  const { username, type } = req.body; // type: 1 for upvote, -1 for downvote
-  if (!username || ![1, -1].includes(type)) {
-    return res.status(400).json({ error: 'Invalid vote data' });
+  const { username } = req.body;
+  
+  if (!username) {
+    return res.status(400).json({ error: 'Username required' });
   }
+  
   try {
     const user = await prisma.user.findUnique({ where: { username } });
     if (!user) return res.status(400).json({ error: 'User not found' });
+    
     const postId = Number(id);
-    // Check if vote exists
-    const existingVote = await prisma.vote.findFirst({
+    
+    // Check if like exists
+    const existingLike = await prisma.like.findFirst({
       where: { userId: user.id, postId }
     });
-    let vote;
-    if (existingVote) {
-      // Update vote
-      vote = await prisma.vote.update({
-        where: { id: existingVote.id },
-        data: { type }
+    
+    if (existingLike) {
+      // Unlike - remove the like
+      await prisma.like.delete({
+        where: { id: existingLike.id }
       });
     } else {
-      // Create vote
-      vote = await prisma.vote.create({
-        data: { type, userId: user.id, postId }
+      // Like - create a new like
+      await prisma.like.create({
+        data: { userId: user.id, postId }
       });
     }
-    // Return updated post with votes
+    
+    // Return updated post with likes
     const updatedPost = await prisma.post.findUnique({
       where: { id: postId },
       include: { 
@@ -231,10 +253,74 @@ router.post('/:id/vote', async (req, res) => {
           }
         }, 
         comments: true, 
-        votes: true 
+        likes: true 
       }
     });
-    res.json(updatedPost);
+    
+    res.json({
+      ...updatedPost,
+      likeCount: updatedPost.likes.length,
+      voteScore: updatedPost.likes.length
+    });
+  } catch (err) {
+    console.error('Like Error:', err);
+    res.status(500).json({ error: 'Failed to like post', details: err.message });
+  }
+});
+
+// Keep the old vote endpoint for backward compatibility but map to likes
+router.post('/:id/vote', async (req, res) => {
+  const { id } = req.params;
+  const { username, type } = req.body;
+  
+  if (!username || ![1, -1].includes(type)) {
+    return res.status(400).json({ error: 'Invalid vote data' });
+  }
+  
+  try {
+    const user = await prisma.user.findUnique({ where: { username } });
+    if (!user) return res.status(400).json({ error: 'User not found' });
+    
+    const postId = Number(id);
+    
+    // For upvotes, treat as likes. For downvotes, remove likes if they exist
+    if (type === 1) {
+      const existingLike = await prisma.like.findFirst({
+        where: { userId: user.id, postId }
+      });
+      
+      if (!existingLike) {
+        await prisma.like.create({
+          data: { userId: user.id, postId }
+        });
+      }
+    } else if (type === -1) {
+      await prisma.like.deleteMany({
+        where: { userId: user.id, postId }
+      });
+    }
+    
+    const updatedPost = await prisma.post.findUnique({
+      where: { id: postId },
+      include: { 
+        author: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            createdAt: true
+          }
+        }, 
+        comments: true, 
+        likes: true 
+      }
+    });
+    
+    res.json({
+      ...updatedPost,
+      votes: updatedPost.likes.map(like => ({ type: 1, userId: like.userId })), // For backward compatibility
+      likeCount: updatedPost.likes.length
+    });
   } catch (err) {
     console.error('Vote Error:', err);
     res.status(500).json({ error: 'Failed to vote on post', details: err.message });

@@ -106,9 +106,16 @@ div.overflow-hidden.border.border-sidebar-border.rounded-b-lg {
 
 /* Mobile-specific styles for full-screen posts */
 @media (max-width: 767px) {
-  /* Mobile body background should be pure black for posts */
-  .mobile-post-view body {
+  /* Mobile post detail page - pure black background */
+  .mobile-post-detail {
     background-color: #000000 !important;
+    min-height: 100vh !important;
+  }
+  
+  /* Mobile post detail header */
+  .mobile-post-detail header {
+    background-color: #000000 !important;
+    border-bottom: 1px solid #333 !important;
   }
   
   /* Mobile full-width container */
@@ -139,9 +146,19 @@ div.overflow-hidden.border.border-sidebar-border.rounded-b-lg {
     padding-right: 16px !important;
   }
   
-  /* Mobile post detail fixes */
-  .mobile-post-detail {
-    background-color: #000000 !important;
-    min-height: 100vh !important;
+  /* Remove all card backgrounds on mobile post detail */
+  .mobile-post-detail .card,
+  .mobile-post-detail .bg-card,
+  .mobile-post-detail .bg-sidebar {
+    background-color: transparent !important;
+    border: none !important;
+  }
+  
+  /* Mobile comment styling */
+  .mobile-post-detail .comment-item {
+    background-color: transparent !important;
+    border-left: 1px solid #333 !important;
+    margin-left: 8px !important;
+    padding-left: 12px !important;
   }
 }

@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
-import { MessageSquare, Share } from 'lucide-react';
-import VoteControls from './VoteControls';
 import PostContent from './PostContent';
+import PostFooter from './PostFooter';
 import PostModerationActions from '../moderation/PostModerationActions';
 
 export interface Post {
@@ -16,7 +16,7 @@ export interface Post {
     email: string;
     password: string;
     createdAt: string;
-  } | string; // Support both formats for backward compatibility
+  } | string;
   subreddit: string;
   timestamp: string;
   voteScore: number;
@@ -36,12 +36,10 @@ interface PostCardProps {
 }
 
 const PostCard = ({ post, onPostUpdate, isFirst = false, isLast = false }: PostCardProps) => {
-  // Handle both author object and string formats
   const authorName = typeof post.author === 'string' ? post.author : post.author.username;
   
-  // Voting state
-  const [voteStatus, setVoteStatus] = useState<'up' | 'down' | null>(null);
-  const [voteScore, setVoteScore] = useState(post.voteScore);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeScore, setLikeScore] = useState(post.voteScore);
   const [moderationInfo, setModerationInfo] = useState<{ isModerator: boolean; permissions: any } | null>(null);
   
   useEffect(() => {
@@ -68,29 +66,28 @@ const PostCard = ({ post, onPostUpdate, isFirst = false, isLast = false }: PostC
     checkModeratorStatus();
   }, [post.subreddit]);
   
-  const handleVote = async (direction: 'up' | 'down') => {
+  const handleLike = async () => {
     const username = localStorage.getItem('username');
     if (!username) {
-      alert('You must be signed in to vote.');
+      alert('You must be signed in to like posts.');
       return;
     }
-    const type = direction === 'up' ? 1 : -1;
+
     try {
-      const res = await fetch(`https://moonmovement.onrender.com/api/posts/${post.id}/vote`, {
+      const res = await fetch(`https://moonmovement.onrender.com/api/posts/${post.id}/like`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, type })
+        body: JSON.stringify({ username })
       });
-      if (!res.ok) throw new Error('Failed to vote');
+      
+      if (!res.ok) throw new Error('Failed to like post');
+      
       const updatedPost = await res.json();
-      // Calculate new vote score from updatedPost.votes
-      const newScore = Array.isArray(updatedPost.votes)
-        ? updatedPost.votes.reduce((sum: number, v: any) => sum + (v.type === 1 ? 1 : v.type === -1 ? -1 : 0), 0)
-        : 0;
-      setVoteScore(newScore);
-      setVoteStatus(direction);
+      setLikeScore(updatedPost.likeCount || 0);
+      setIsLiked(!isLiked);
     } catch (err) {
-      alert('Failed to vote');
+      console.error('Failed to like post:', err);
+      alert('Failed to like post');
     }
   };
   
@@ -110,53 +107,37 @@ const PostCard = ({ post, onPostUpdate, isFirst = false, isLast = false }: PostC
         />
       )}
       
-      <div className="flex">
-        <VoteControls 
-          score={voteScore} 
-          voteStatus={voteStatus} 
-          onVote={handleVote} 
-        />
-        
-        <div className="flex-1 p-4">
-          <div className="flex items-center text-xs text-gray-400 mb-2">
-            <Link to={`/r/${post.subreddit}`} className="font-medium text-gray-200 hover:underline mr-1">
-              r/{post.subreddit}
-            </Link>
-            <span className="mx-1">•</span>
-            Posted by{" "}
-            <Link to={`/u/${authorName}`} className="hover:underline mx-1 text-gray-400">
-              u/{authorName}
-            </Link>
-            <span className="mx-1">•</span>
-            <span>{post.timestamp}</span>
-          </div>
-          
-          <Link to={`/post/${post.id}`}>
-            <h3 className="text-lg font-semibold mb-2 text-white hover:text-primary cursor-pointer">
-              {post.title}
-            </h3>
+      <div className="p-4">
+        <div className="flex items-center text-xs text-gray-400 mb-2">
+          <Link to={`/r/${post.subreddit}`} className="font-medium text-gray-200 hover:underline mr-1">
+            r/{post.subreddit}
           </Link>
-          
-          <PostContent post={post} />
-          
-          <div className="flex items-center mt-3 text-xs text-gray-400">
-            <Link 
-              to={`/post/${post.id}`}
-              className="flex items-center hover:bg-sidebar-accent hover:text-white rounded p-1 -ml-1"
-            >
-              <MessageSquare size={16} className="mr-1" />
-              {post.commentCount} Comments
-            </Link>
-            
-            <button className="flex items-center hover:bg-sidebar-accent hover:text-white rounded p-1 ml-2">
-              <Share size={16} className="mr-1" />
-              Share
-            </button>
-          </div>
+          <span className="mx-1">•</span>
+          Posted by{" "}
+          <Link to={`/u/${authorName}`} className="hover:underline mx-1 text-gray-400">
+            u/{authorName}
+          </Link>
+          <span className="mx-1">•</span>
+          <span>{post.timestamp}</span>
         </div>
+        
+        <Link to={`/post/${post.id}`}>
+          <h3 className="text-lg font-semibold mb-2 text-white hover:text-primary cursor-pointer">
+            {post.title}
+          </h3>
+        </Link>
+        
+        <PostContent post={post} />
+        
+        <PostFooter 
+          commentCount={post.commentCount}
+          postId={post.id}
+          likeScore={likeScore}
+          isLiked={isLiked}
+          onLike={handleLike}
+        />
       </div>
       
-      {/* Add the subtle divider line only between posts (not after the last one) */}
       {!isLast && (
         <div className="mx-8 h-[0.5px] bg-gray-700/50"></div>
       )}

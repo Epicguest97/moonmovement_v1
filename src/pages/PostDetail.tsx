@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
-import { Card } from '@/components/ui/card';
-import VoteControls from '@/components/post/VoteControls';
 import PostContent from '@/components/post/PostContent';
 import PostFooter from '@/components/post/PostFooter';
 import CommentBox from '@/components/comments/CommentBox';
@@ -12,13 +10,15 @@ import { CommentType } from '@/components/comments/CommentList';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const PostDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const isMobile = useIsMobile();
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<CommentType[]>([]);
-  const [voteStatus, setVoteStatus] = useState<'up' | 'down' | null>(null);
-  const [voteScore, setVoteScore] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeScore, setLikeScore] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -78,7 +78,7 @@ const PostDetail = () => {
             subreddit: data.subreddit || 'general'
           };
           setPost(transformedPost);
-          setVoteScore(transformedPost.voteScore);
+          setLikeScore(transformedPost.voteScore);
           setLoading(false);
         })
         .catch((error) => {
@@ -101,18 +101,28 @@ const PostDetail = () => {
     }
   }, [id]);
   
-  const handleVote = (direction: 'up' | 'down') => {
-    if (voteStatus === direction) {
-      // Remove vote
-      setVoteStatus(null);
-      setVoteScore(direction === 'up' ? voteScore - 1 : voteScore + 1);
-    } else {
-      // Change vote or add new vote
-      const scoreDelta = voteStatus === null 
-        ? (direction === 'up' ? 1 : -1) 
-        : (direction === 'up' ? 2 : -2);
-      setVoteStatus(direction);
-      setVoteScore(voteScore + scoreDelta);
+  const handleLike = async () => {
+    const username = localStorage.getItem('username');
+    if (!username) {
+      alert('You must be signed in to like posts.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`https://moonmovement.onrender.com/api/posts/${post.id}/like`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username })
+      });
+      
+      if (!res.ok) throw new Error('Failed to like post');
+      
+      const updatedPost = await res.json();
+      setLikeScore(updatedPost.likeCount || 0);
+      setIsLiked(!isLiked);
+    } catch (err) {
+      console.error('Failed to like post:', err);
+      alert('Failed to like post');
     }
   };
   
@@ -128,7 +138,6 @@ const PostDetail = () => {
     const commentData = {
       content: commentText,
       postId: post.id,
-      // Don't send authorId or username - the server should determine this from the token
     };
     
     try {
@@ -147,7 +156,6 @@ const PostDetail = () => {
       }
       
       const newComment = await res.json();
-      // Map backend response to CommentType
       const mappedComment = {
         id: newComment.id.toString(),
         author: typeof newComment.author === 'string' ? newComment.author : newComment.author.username,
@@ -177,7 +185,6 @@ const PostDetail = () => {
       content,
       postId: post.id,
       parentId: parseInt(parentId)
-      // Don't send authorId or username - the server should determine this from the token
     };
     
     console.log('Submitting reply data:', replyData);
@@ -198,7 +205,6 @@ const PostDetail = () => {
         throw new Error(errorData.error || 'Failed to submit reply');
       }
       
-      // Refresh comments to get the updated nested structure
       const commentsRes = await fetch(`https://moonmovement.onrender.com/api/comments/post/${post.id}`);
       const commentsData = await commentsRes.json();
       const nestedComments = buildCommentTree(commentsData);
@@ -213,8 +219,8 @@ const PostDetail = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className="max-w-3xl mx-auto p-4">
-          <div className="bg-sidebar p-6 rounded-md border border-sidebar-border text-center">
+        <div className={isMobile ? "min-h-screen bg-black text-white flex items-center justify-center" : "max-w-3xl mx-auto p-4"}>
+          <div className={isMobile ? "text-center" : "bg-sidebar p-6 rounded-md border border-sidebar-border text-center"}>
             <h2 className="text-lg font-bold mb-2 text-white">Loading...</h2>
             <p className="text-gray-300">Fetching post details...</p>
           </div>
@@ -226,8 +232,8 @@ const PostDetail = () => {
   if (error || !post) {
     return (
       <MainLayout>
-        <div className="max-w-3xl mx-auto p-4">
-          <div className="bg-sidebar p-6 rounded-md border border-sidebar-border text-center">
+        <div className={isMobile ? "min-h-screen bg-black text-white flex items-center justify-center p-4" : "max-w-3xl mx-auto p-4"}>
+          <div className={isMobile ? "text-center" : "bg-sidebar p-6 rounded-md border border-sidebar-border text-center"}>
             <h2 className="text-lg font-bold mb-2 text-white">Post Not Found</h2>
             <p className="text-gray-300">
               {error || "The post you're looking for doesn't exist or has been removed."}
@@ -246,62 +252,100 @@ const PostDetail = () => {
   
   const authorName = typeof post.author === 'string' ? post.author : post.author.username;
   
+  if (isMobile) {
+    return (
+      <MainLayout>
+        <div className="min-h-screen bg-black text-white">
+          <div className="px-4 py-2">
+            <div className="flex items-center text-xs text-gray-400 mb-3">
+              <span className="text-gray-200 font-medium">r/{post.subreddit}</span>
+              <span className="mx-2">•</span>
+              <span>u/{authorName}</span>
+              <span className="mx-2">•</span>
+              <span>{post.timestamp}</span>
+            </div>
+            
+            <h1 className="text-lg font-semibold mb-4 text-white leading-tight">
+              {post.title}
+            </h1>
+            
+            <div className="mb-4">
+              <PostContent post={post} isDetailView={true} />
+            </div>
+            
+            <PostFooter 
+              commentCount={post.commentCount}
+              postId={post.id}
+              likeScore={likeScore}
+              isLiked={isLiked}
+              onLike={handleLike}
+            />
+            
+            <div className="mt-6 mb-4">
+              <CommentBox onSubmit={handleCommentSubmit} />
+            </div>
+            
+            {comments.length > 0 && (
+              <div className="mt-6">
+                <h3 className="font-medium mb-4 text-white text-sm">
+                  {comments.length} Comments
+                </h3>
+                <CommentList 
+                  comments={comments} 
+                  postId={post.id}
+                  onReplySubmit={handleReplySubmit}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+  
   return (
     <MainLayout>
       <div className="w-full max-w-full overflow-x-hidden">
-        {/* Single unified card for post and comments */}
         <div className="overflow-hidden border border-sidebar-border rounded-lg md:max-w-3xl md:mx-auto">
           
-          {/* Post content section */}
-          <Card className="bg-sidebar rounded-none border-0">
-            <div className="flex">
-              <VoteControls 
-                score={voteScore} 
-                voteStatus={voteStatus} 
-                onVote={handleVote} 
-              />
-              
-              <div className="flex-1 p-4 min-w-0 overflow-x-hidden">
-                <div className="flex items-center text-xs text-gray-400 mb-2 flex-wrap">
-                  <Link to={`/r/${post.subreddit}`} className="font-medium text-gray-200 hover:underline mr-1 break-all">
-                    r/{post.subreddit}
-                  </Link>
-                  <span className="mx-1">•</span>
-                  <span className="break-words">Posted by{" "}</span>
-                  <Link to={`/user/${authorName}`} className="hover:underline mx-1 text-gray-400 break-all">
-                    u/{authorName}
-                  </Link>
-                  <span className="mx-1">•</span>
-                  <span className="break-words">{post.timestamp}</span>
-                </div>
-                
-                <h1 className="text-xl font-semibold mb-3 text-white break-words">{post.title}</h1>
-                
-                <div className="overflow-x-hidden">
-                  <PostContent post={post} isDetailView={true} />
-                </div>
-                
-                <PostFooter 
-                  commentCount={post.commentCount} 
-                  postId={post.id} 
-                />
-              </div>
+          <div className="bg-sidebar p-4">
+            <div className="flex items-center text-xs text-gray-400 mb-2 flex-wrap">
+              <Link to={`/r/${post.subreddit}`} className="font-medium text-gray-200 hover:underline mr-1 break-all">
+                r/{post.subreddit}
+              </Link>
+              <span className="mx-1">•</span>
+              <span className="break-words">Posted by{" "}</span>
+              <Link to={`/user/${authorName}`} className="hover:underline mx-1 text-gray-400 break-all">
+                u/{authorName}
+              </Link>
+              <span className="mx-1">•</span>
+              <span className="break-words">{post.timestamp}</span>
             </div>
-          </Card>
+            
+            <h1 className="text-xl font-semibold mb-3 text-white break-words">{post.title}</h1>
+            
+            <div className="overflow-x-hidden mb-4">
+              <PostContent post={post} isDetailView={true} />
+            </div>
+            
+            <PostFooter 
+              commentCount={post.commentCount}
+              postId={post.id}
+              likeScore={likeScore}
+              isLiked={isLiked}
+              onLike={handleLike}
+            />
+          </div>
           
-          {/* Subtle divider line */}
           <div className="mx-8 h-[0.5px] bg-gray-700/50"></div>
           
-          {/* Comment box section */}
-          <div className="bg-sidebar p-4 border-0 rounded-none">
+          <div className="bg-sidebar p-4">
             <CommentBox onSubmit={handleCommentSubmit} />
           </div>
           
-          {/* Subtle divider line */}
           <div className="mx-8 h-[0.5px] bg-gray-700/50"></div>
           
-          {/* Comments section */}
-          <div className="bg-sidebar p-4 border-0 rounded-none">
+          <div className="bg-sidebar p-4">
             {comments.length > 0 ? (
               <>
                 <h3 className="font-medium mb-4 text-white">{comments.length} Comments</h3>
