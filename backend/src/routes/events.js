@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 const prisma = require('../utils/prisma');
@@ -15,6 +14,7 @@ router.get('/', async (req, res) => {
       whereClause.category = category;
     }
     
+    // Only include upcoming events if specified in query
     if (upcoming === 'true') {
       whereClause.eventDate = {
         gte: new Date()
