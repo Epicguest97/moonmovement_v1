@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Post } from './PostCard';
 import { Link } from 'react-router-dom';
@@ -18,13 +19,13 @@ const PostContent = ({ post, isCompact = false, isDetailView = false }: PostCont
     if (post.imageUrl) {
       return (
         <div className={cn(
-          "mt-2 mb-4",
-          isCompact && !isDetailView ? "max-h-32 overflow-hidden" : ""
+          "mt-2 mb-4 overflow-hidden",
+          isCompact && !isDetailView ? "max-h-32" : ""
         )}>
           <img 
             src={post.imageUrl} 
             alt={post.title} 
-            className="max-w-full rounded-md" 
+            className="max-w-full w-full h-auto rounded-md object-cover" 
           />
         </div>
       );
@@ -39,8 +40,8 @@ const PostContent = ({ post, isCompact = false, isDetailView = false }: PostCont
         : post.content;
         
       return (
-        <div className="mt-2 text-sm">
-          <p className="whitespace-pre-line">{content}</p>
+        <div className="mt-2 text-sm overflow-hidden">
+          <p className="whitespace-pre-line break-words overflow-wrap-anywhere">{content}</p>
           
           {shouldTruncate && (
             <Button 
@@ -60,12 +61,12 @@ const PostContent = ({ post, isCompact = false, isDetailView = false }: PostCont
   const renderLinkContent = () => {
     if (post.linkUrl) {
       return (
-        <div className="mt-2 mb-2">
+        <div className="mt-2 mb-2 overflow-hidden">
           <a 
             href={post.linkUrl} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-sm text-blue-500 hover:underline break-all"
+            className="text-sm text-blue-500 hover:underline break-all overflow-wrap-anywhere"
           >
             {post.linkUrl}
           </a>
@@ -78,7 +79,7 @@ const PostContent = ({ post, isCompact = false, isDetailView = false }: PostCont
   return (
     <div className={cn(
       isCompact && !isDetailView ? "max-h-96 overflow-hidden" : "",
-      "relative"
+      "relative overflow-hidden"
     )}>
       {renderImage()}
       {renderTextContent()}

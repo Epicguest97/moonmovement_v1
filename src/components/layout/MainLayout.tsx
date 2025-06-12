@@ -18,6 +18,9 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const location = useLocation();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   
+  // Check if we're on a post detail page for mobile styling
+  const isPostDetailPage = location.pathname.startsWith('/post/');
+  
   // Show sidebar on all pages except chat (which no longer exists as a page)
   const showDesktopSidebar = !isMobile;
   const showMobileSidebar = isMobile && mobileSidebarOpen;
@@ -25,6 +28,10 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   // Determine main content width and margins based on screen size
   const getMainContentClasses = () => {
     if (isMobile) {
+      // For mobile post detail pages, use full width with black background
+      if (isPostDetailPage) {
+        return 'mobile-full-width mobile-post-container';
+      }
       return 'w-full px-4 max-w-full overflow-x-hidden';
     }
     
@@ -44,10 +51,10 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className={`flex flex-col min-h-screen bg-background ${isMobile && isPostDetailPage ? 'mobile-post-detail' : ''}`}>
       {/* Fixed header */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-background" style={{ 
-        backgroundColor: '#111114',
+        backgroundColor: isMobile && isPostDetailPage ? '#000000' : '#111114',
         boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
       }}>
         <Header onToggleMobileSidebar={toggleMobileSidebar} />
@@ -74,7 +81,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         
         {/* Main Content */}
         <main className={`${getMainContentClasses()} relative min-h-[calc(100vh-4rem)] pt-4`}>
-          <div className="w-full max-w-full overflow-x-hidden">
+          <div className={`w-full max-w-full overflow-x-hidden ${isMobile && isPostDetailPage ? 'mobile-text-fix' : ''}`}>
             {children}
           </div>
         </main>

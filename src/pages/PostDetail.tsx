@@ -248,9 +248,9 @@ const PostDetail = () => {
   
   return (
     <MainLayout>
-      <div className="max-w-3xl mx-auto p-4 w-full overflow-x-hidden">
+      <div className="w-full max-w-full overflow-x-hidden">
         {/* Single unified card for post and comments */}
-        <div className="overflow-hidden border border-sidebar-border rounded-lg">
+        <div className="overflow-hidden border border-sidebar-border rounded-lg md:max-w-3xl md:mx-auto">
           
           {/* Post content section */}
           <Card className="bg-sidebar rounded-none border-0">
@@ -261,23 +261,25 @@ const PostDetail = () => {
                 onVote={handleVote} 
               />
               
-              <div className="flex-1 p-4">
-                <div className="flex items-center text-xs text-gray-400 mb-2">
-                  <Link to={`/r/${post.subreddit}`} className="font-medium text-gray-200 hover:underline mr-1">
+              <div className="flex-1 p-4 min-w-0 overflow-x-hidden">
+                <div className="flex items-center text-xs text-gray-400 mb-2 flex-wrap">
+                  <Link to={`/r/${post.subreddit}`} className="font-medium text-gray-200 hover:underline mr-1 break-all">
                     r/{post.subreddit}
                   </Link>
                   <span className="mx-1">•</span>
-                  Posted by{" "}
-                  <Link to={`/user/${authorName}`} className="hover:underline mx-1 text-gray-400">
+                  <span className="break-words">Posted by{" "}</span>
+                  <Link to={`/user/${authorName}`} className="hover:underline mx-1 text-gray-400 break-all">
                     u/{authorName}
                   </Link>
                   <span className="mx-1">•</span>
-                  <span>{post.timestamp}</span>
+                  <span className="break-words">{post.timestamp}</span>
                 </div>
                 
-                <h1 className="text-xl font-semibold mb-3 text-white">{post.title}</h1>
+                <h1 className="text-xl font-semibold mb-3 text-white break-words">{post.title}</h1>
                 
-                <PostContent post={post} isDetailView={true} />
+                <div className="overflow-x-hidden">
+                  <PostContent post={post} isDetailView={true} />
+                </div>
                 
                 <PostFooter 
                   commentCount={post.commentCount} 
