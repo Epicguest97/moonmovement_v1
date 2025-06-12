@@ -35,7 +35,7 @@ const Index = () => {
         const transformedPosts: Post[] = data.map((post: any) => ({
           ...post,
           id: post.id.toString(),
-          voteScore: post.votes?.length || 0,
+          voteScore: post.likeCount || 0, // Use likeCount from backend
           commentCount: post.comments?.length || 0,
           timestamp: new Date(post.createdAt).toLocaleString(),
           subreddit: post.subreddit || 'general'

@@ -338,5 +338,4 @@ router.post('/:id/vote', async (req, res) => {
     }
 });
 
-
 module.exports = router;

@@ -72,7 +72,7 @@ const PostDetail = () => {
           const transformedPost = {
             ...data,
             id: data.id.toString(),
-            voteScore: data.votes?.length || 0,
+            voteScore: data.likeCount || 0, // Use likeCount from backend
             commentCount: data.comments?.length || 0,
             timestamp: new Date(data.createdAt).toLocaleString(),
             subreddit: data.subreddit || 'general'
@@ -118,7 +118,7 @@ const PostDetail = () => {
       if (!res.ok) throw new Error('Failed to like post');
       
       const updatedPost = await res.json();
-      setLikeScore(updatedPost.likeCount || 0);
+      setLikeScore(updatedPost.likeCount || 0); // Use likeCount from backend
       setIsLiked(!isLiked);
     } catch (err) {
       console.error('Failed to like post:', err);
