@@ -1,146 +1,177 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+
+import React from 'react';
 import { Card } from '@/components/ui/card';
-import PostContent from './PostContent';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import VoteControls from './VoteControls';
 import PostFooter from './PostFooter';
-import PostModerationActions from '../moderation/PostModerationActions';
+import PollComponent from './PollComponent';
 
 export interface Post {
   id: string;
   title: string;
   content: string;
   author: {
-    id: number;
     username: string;
-    email: string;
-    password: string;
-    createdAt: string;
-  } | string;
+    id?: number;
+    email?: string;
+    password?: string;
+  };
   subreddit: string;
-  timestamp: string;
   voteScore: number;
   commentCount: number;
+  timestamp: string;
   imageUrl?: string;
   videoUrl?: string;
   linkUrl?: string;
-  isText?: boolean;
-  isLink?: boolean;
+  poll?: {
+    id: number;
+    question: string;
+    options: Array<{
+      id: number;
+      text: string;
+      votes: any[];
+    }>;
+    expiresAt?: string;
+  };
 }
 
 interface PostCardProps {
   post: Post;
-  onPostUpdate?: () => void;
   isFirst?: boolean;
   isLast?: boolean;
 }
 
-const PostCard = ({ post, onPostUpdate, isFirst = false, isLast = false }: PostCardProps) => {
+const PostCard = ({ post, isFirst = false, isLast = false }: PostCardProps) => {
   const authorName = typeof post.author === 'string' ? post.author : post.author.username;
-  
-  const [isLiked, setIsLiked] = useState(false);
-  const [likeScore, setLikeScore] = useState(post.voteScore);
-  const [moderationInfo, setModerationInfo] = useState<{ isModerator: boolean; permissions: any } | null>(null);
-  
-  useEffect(() => {
-    const checkModeratorStatus = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) return;
 
-      try {
-        const response = await fetch(`https://moonmovement.onrender.com/api/moderation/${post.subreddit}/check`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setModerationInfo(data);
-        }
-      } catch (err) {
-        console.error('Failed to check moderator status:', err);
-      }
-    };
-
-    checkModeratorStatus();
-  }, [post.subreddit]);
-  
-  const handleLike = async () => {
-    const username = localStorage.getItem('username');
-    if (!username) {
-      alert('You must be signed in to like posts.');
-      return;
+  const getVideoEmbedUrl = (url: string) => {
+    // Convert YouTube URLs to embed format
+    if (url.includes('youtube.com/watch')) {
+      const videoId = url.split('v=')[1]?.split('&')[0];
+      return `https://www.youtube.com/embed/${videoId}`;
     }
-
-    try {
-      const res = await fetch(`https://moonmovement.onrender.com/api/posts/${post.id}/like`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username })
-      });
-      
-      if (!res.ok) throw new Error('Failed to like post');
-      
-      const updatedPost = await res.json();
-      setLikeScore(updatedPost.likeCount || 0);
-      setIsLiked(!isLiked);
-    } catch (err) {
-      console.error('Failed to like post:', err);
-      alert('Failed to like post');
+    if (url.includes('youtu.be/')) {
+      const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+      return `https://www.youtube.com/embed/${videoId}`;
     }
+    // Convert Vimeo URLs to embed format
+    if (url.includes('vimeo.com/')) {
+      const videoId = url.split('vimeo.com/')[1]?.split('?')[0];
+      return `https://player.vimeo.com/video/${videoId}`;
+    }
+    return url;
   };
-  
+
+  const borderRadiusClass = () => {
+    if (isFirst && isLast) return 'rounded-lg';
+    if (isFirst) return 'rounded-t-lg rounded-b-none';
+    if (isLast) return 'rounded-b-lg rounded-t-none';
+    return 'rounded-none';
+  };
+
   return (
-    <Card className={`post-card overflow-hidden bg-sidebar border-0
-      ${!isFirst && !isLast ? "rounded-none" : ""}
-      ${isFirst && !isLast ? "rounded-t-lg rounded-b-none" : ""}
-      ${!isFirst && isLast ? "rounded-b-lg rounded-t-none" : ""}
-      ${isFirst && isLast ? "" : ""}
-    `}>
-      {moderationInfo?.isModerator && moderationInfo.permissions?.managePosts && (
-        <PostModerationActions 
-          postId={post.id}
-          subreddit={post.subreddit}
-          canManagePosts={moderationInfo.permissions.managePosts}
-          onPostRemoved={onPostUpdate}
+    <Card className={`bg-sidebar border-sidebar-border border-t-0 ${borderRadiusClass()} relative`}>
+      <div className="flex p-4 gap-3">
+        {/* Vote Controls */}
+        <VoteControls 
+          postId={post.id} 
+          initialScore={post.voteScore}
+          className="flex-shrink-0"
         />
-      )}
-      
-      <div className="p-4">
-        <div className="flex items-center text-xs text-gray-400 mb-2">
-          <Link to={`/r/${post.subreddit}`} className="font-medium text-gray-200 hover:underline mr-1">
-            r/{post.subreddit}
-          </Link>
-          <span className="mx-1">•</span>
-          Posted by{" "}
-          <Link to={`/u/${authorName}`} className="hover:underline mx-1 text-gray-400">
-            u/{authorName}
-          </Link>
-          <span className="mx-1">•</span>
-          <span>{post.timestamp}</span>
-        </div>
-        
-        <Link to={`/post/${post.id}`}>
-          <h3 className="text-lg font-semibold mb-2 text-white hover:text-primary cursor-pointer">
+
+        {/* Main Content */}
+        <div className="flex-1 min-w-0">
+          {/* Header */}
+          <div className="flex items-center gap-2 mb-2 text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">r/{post.subreddit}</span>
+            <span>•</span>
+            <span>Posted by</span>
+            <div className="flex items-center gap-1">
+              <Avatar className="h-4 w-4">
+                <AvatarFallback className="text-xs">
+                  {authorName.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <span>u/{authorName}</span>
+            </div>
+            <span>•</span>
+            <span>{post.timestamp}</span>
+          </div>
+
+          {/* Title */}
+          <h3 className="font-medium text-foreground mb-2 break-words">
             {post.title}
           </h3>
-        </Link>
-        
-        <PostContent post={post} />
-        
-        <PostFooter 
-          commentCount={post.commentCount}
-          postId={post.id}
-          likeScore={likeScore}
-          isLiked={isLiked}
-          onLike={handleLike}
-        />
+
+          {/* Content */}
+          {post.content && (
+            <div className="text-foreground mb-3 break-words whitespace-pre-wrap">
+              {post.content}
+            </div>
+          )}
+
+          {/* Image */}
+          {post.imageUrl && (
+            <div className="mb-3">
+              <img 
+                src={post.imageUrl} 
+                alt="Post content"
+                className="max-w-full h-auto rounded-lg border border-sidebar-border"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
+              />
+            </div>
+          )}
+
+          {/* Video */}
+          {post.videoUrl && (
+            <div className="mb-3">
+              <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                <iframe
+                  src={getVideoEmbedUrl(post.videoUrl)}
+                  className="absolute top-0 left-0 w-full h-full rounded-lg"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title="Video content"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Link Preview */}
+          {post.linkUrl && (
+            <div className="mb-3">
+              <a 
+                href={post.linkUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block p-3 bg-sidebar-accent/30 border border-sidebar-border rounded-lg hover:bg-sidebar-accent/50 transition-colors"
+              >
+                <div className="text-primary hover:underline break-all">
+                  {post.linkUrl}
+                </div>
+              </a>
+            </div>
+          )}
+
+          {/* Poll */}
+          {post.poll && (
+            <div className="mb-3">
+              <PollComponent poll={post.poll} postId={post.id} />
+            </div>
+          )}
+
+          {/* Footer */}
+          <PostFooter 
+            postId={post.id}
+            commentCount={post.commentCount}
+            subreddit={post.subreddit}
+          />
+        </div>
       </div>
-      
-      {/* Keep only this divider line between posts */}
-      {!isLast && (
-        <div className="h-[0.5px] bg-gray-700/50"></div>
-      )}
     </Card>
   );
 };

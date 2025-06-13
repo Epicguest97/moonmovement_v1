@@ -35,7 +35,16 @@ router.get('/', async (req, res) => {
             isRemoved: false
           }
         },
-        votes: true
+        votes: true,
+        poll: {
+          include: {
+            options: {
+              include: {
+                votes: true
+              }
+            }
+          }
+        }
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -73,7 +82,16 @@ router.get('/:id', async (req, res) => {
             isRemoved: false
           }
         },
-        votes: true
+        votes: true,
+        poll: {
+          include: {
+            options: {
+              include: {
+                votes: true
+              }
+            }
+          }
+        }
       }
     });
     if (!post) return res.status(404).json({ error: 'Post not found' });
@@ -120,7 +138,7 @@ router.get('/:id', async (req, res) => {
 // Create a new post
 router.post('/', authenticateToken, async (req, res) => {
   try {
-    const { title, content, subreddit, imageUrl, linkUrl, tags } = req.body;
+    const { title, content, subreddit, imageUrl, videoUrl, linkUrl, tags, poll } = req.body;
 
     const userId = req.user.userId;
 
@@ -130,6 +148,7 @@ router.post('/', authenticateToken, async (req, res) => {
         content,
         subreddit: subreddit || 'general',
         imageUrl,
+        videoUrl,
         linkUrl,
         tags,
         authorId: userId
@@ -145,6 +164,22 @@ router.post('/', authenticateToken, async (req, res) => {
         votes: true
       }
     });
+
+    // Create poll if provided
+    if (poll && poll.question && poll.options && poll.options.length > 0) {
+      await prisma.poll.create({
+        data: {
+          postId: post.id,
+          question: poll.question,
+          expiresAt: poll.expiresAt ? new Date(poll.expiresAt) : null,
+          options: {
+            create: poll.options.map(option => ({
+              text: option
+            }))
+          }
+        }
+      });
+    }
 
     const existingMods = await prisma.subredditModerator.findFirst({
       where: {
@@ -238,29 +273,26 @@ router.post('/:id/like', async (req, res) => {
     });
 
     if (existingVote) {
-      // If it's already an upvote (a like), remove it (unlike).
       if (existingVote.type === 1) {
         await prisma.vote.delete({
           where: { id: existingVote.id }
         });
-      } else { // If it's a downvote, change it to an upvote (a like).
+      } else {
         await prisma.vote.update({
           where: { id: existingVote.id },
           data: { type: 1 }
         });
       }
     } else {
-      // If no vote exists, create a new upvote (a like).
       await prisma.vote.create({
         data: {
           userId: user.id,
           postId: postId,
-          type: 1 // 1 for upvote (like)
+          type: 1
         }
       });
     }
 
-    // Return updated post with correct vote counts
     const updatedPost = await prisma.post.findUnique({
       where: { id: postId },
       include: {
@@ -281,10 +313,62 @@ router.post('/:id/like', async (req, res) => {
   }
 });
 
+// Vote on a poll
+router.post('/:id/poll/vote', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const { optionId } = req.body;
+  const userId = req.user.userId;
+
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id: Number(id) },
+      include: { poll: true }
+    });
+
+    if (!post || !post.poll) {
+      return res.status(404).json({ error: 'Poll not found' });
+    }
+
+    // Remove existing vote if any
+    await prisma.pollVote.deleteMany({
+      where: {
+        userId: userId,
+        pollId: post.poll.id
+      }
+    });
+
+    // Add new vote
+    await prisma.pollVote.create({
+      data: {
+        userId: userId,
+        pollId: post.poll.id,
+        pollOptionId: optionId
+      }
+    });
+
+    // Return updated poll with vote counts
+    const updatedPoll = await prisma.poll.findUnique({
+      where: { id: post.poll.id },
+      include: {
+        options: {
+          include: {
+            votes: true
+          }
+        }
+      }
+    });
+
+    res.json(updatedPoll);
+  } catch (err) {
+    console.error('Error voting on poll:', err);
+    res.status(500).json({ error: 'Failed to vote on poll', details: err.message });
+  }
+});
+
 // Vote on a post (upvote/downvote)
 router.post('/:id/vote', async (req, res) => {
     const { id } = req.params;
-    const { username, type } = req.body; // type should be 1 or -1
+    const { username, type } = req.body;
 
     if (!username || ![1, -1].includes(type)) {
         return res.status(400).json({ error: 'Invalid vote data' });
@@ -302,17 +386,14 @@ router.post('/:id/vote', async (req, res) => {
 
         if (existingVote) {
             if (existingVote.type === type) {
-                // User is undoing their vote
                 await prisma.vote.delete({ where: { id: existingVote.id } });
             } else {
-                // User is changing their vote
                 await prisma.vote.update({
                     where: { id: existingVote.id },
                     data: { type }
                 });
             }
         } else {
-            // New vote
             await prisma.vote.create({
                 data: { userId: user.id, postId, type }
             });
