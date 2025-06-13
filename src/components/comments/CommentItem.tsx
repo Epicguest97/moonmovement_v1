@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import VoteControls from '../post/VoteControls';
 import { CommentType } from './CommentList';
-import { MessageSquare, Share, MoreHorizontal } from 'lucide-react';
+import { MessageSquare, Share, MoreHorizontal, ArrowUp, ArrowDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -67,6 +68,14 @@ const Comment = ({ comment, depth = 0, postId, onReplySubmit }: CommentProps) =>
     }
   };
 
+  // Format score for display
+  const formatScore = (score: number): string => {
+    if (score >= 1000) {
+      return `${(score / 1000).toFixed(1)}k`;
+    }
+    return score.toString();
+  };
+
   return (
     <div 
       className="comment mt-2 pt-2"
@@ -88,13 +97,36 @@ const Comment = ({ comment, depth = 0, postId, onReplySubmit }: CommentProps) =>
         <div className="text-sm mb-2 text-foreground">{comment.content}</div>
         
         <div className="flex items-center text-xs text-muted-foreground">
-          <div className="mr-2">
-            <VoteControls 
-              score={voteScore} 
-              voteStatus={voteStatus} 
-              onVote={handleVote} 
-              vertical={false}
-            />
+          <div className="flex items-center mr-2">
+            <button 
+              className={cn(
+                "vote-button flex items-center justify-center w-6 h-6 rounded-sm",
+                voteStatus === 'up' ? "text-sidebar-primary" : "text-gray-400 hover:text-gray-200"
+              )}
+              onClick={() => handleVote('up')}
+              aria-label="Upvote"
+            >
+              <ArrowUp size={14} />
+            </button>
+            
+            <span className={cn(
+              "font-medium text-xs px-1",
+              voteStatus === 'up' ? "text-sidebar-primary" : 
+              voteStatus === 'down' ? "text-blue-600" : "text-gray-200"
+            )}>
+              {formatScore(voteScore)}
+            </span>
+            
+            <button 
+              className={cn(
+                "vote-button flex items-center justify-center w-6 h-6 rounded-sm",
+                voteStatus === 'down' ? "text-blue-600" : "text-gray-400 hover:text-gray-200"
+              )}
+              onClick={() => handleVote('down')}
+              aria-label="Downvote"
+            >
+              <ArrowDown size={14} />
+            </button>
           </div>
           
           <Button 

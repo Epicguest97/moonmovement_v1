@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -5,6 +6,7 @@ import PostContent from '@/components/post/PostContent';
 import PostFooter from '@/components/post/PostFooter';
 import CommentBox from '@/components/comments/CommentBox';
 import CommentList from '@/components/comments/CommentList';
+import LikeButton from '@/components/post/LikeButton';
 import { Post } from '@/components/post/PostCard';
 import { CommentType } from '@/components/comments/CommentList';
 import { Link } from 'react-router-dom';
@@ -273,13 +275,21 @@ const PostDetail = () => {
               <PostContent post={post} isDetailView={true} />
             </div>
             
-            <PostFooter 
-              commentCount={post.commentCount}
-              postId={post.id}
-              likeScore={likeScore}
-              isLiked={isLiked}
-              onLike={handleLike}
-            />
+            <div className="flex items-center justify-between text-xs text-gray-400 mt-3 pt-2">
+              <div className="flex items-center space-x-4">
+                <LikeButton 
+                  score={likeScore}
+                  isLiked={isLiked}
+                  onLike={handleLike}
+                />
+                
+                <PostFooter 
+                  commentCount={post.commentCount}
+                  postId={post.id}
+                  subreddit={post.subreddit}
+                />
+              </div>
+            </div>
             
             <div className="mt-6 mb-4">
               <CommentBox onSubmit={handleCommentSubmit} />
@@ -328,13 +338,21 @@ const PostDetail = () => {
               <PostContent post={post} isDetailView={true} />
             </div>
             
-            <PostFooter 
-              commentCount={post.commentCount}
-              postId={post.id}
-              likeScore={likeScore}
-              isLiked={isLiked}
-              onLike={handleLike}
-            />
+            <div className="flex items-center justify-between text-xs text-gray-400 mt-3 pt-2">
+              <div className="flex items-center space-x-4">
+                <LikeButton 
+                  score={likeScore}
+                  isLiked={isLiked}
+                  onLike={handleLike}
+                />
+                
+                <PostFooter 
+                  commentCount={post.commentCount}
+                  postId={post.id}
+                  subreddit={post.subreddit}
+                />
+              </div>
+            </div>
           </div>
           
           <div className="mx-8 h-[0.5px] bg-gray-700/50"></div>
