@@ -28,6 +28,7 @@ interface Post {
     id: number;
     username: string;
     email: string;
+    password: string;
     createdAt: string;
   };
   subreddit: string;
@@ -38,7 +39,7 @@ interface Post {
   imageUrl?: string;
   videoUrl?: string;
   linkUrl?: string;
-  timestamp: string; // Add this property to match PostCard expectations
+  timestamp: string;
 }
 
 const communityCache = new Map();
@@ -184,9 +185,13 @@ const Community = () => {
         
         if (response.ok) {
           const postsData = await response.json();
-          // Transform posts to match the expected format with timestamp
+          // Transform posts to match the expected format with timestamp and author password
           const transformedPosts = postsData.map((post: any) => ({
             ...post,
+            author: {
+              ...post.author,
+              password: '' // Add empty password field to match interface
+            },
             timestamp: new Date(post.createdAt).toLocaleDateString()
           }));
           setPosts(transformedPosts);
