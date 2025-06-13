@@ -33,7 +33,6 @@ model User {
   moderatedSubreddits  SubredditModerator[]
   activities           UserActivity[]
   votes                Vote[]
-  pollVotes            PollVote[]
 }
 
 model Post {
@@ -43,7 +42,6 @@ model Post {
   authorId          Int
   subreddit         String
   imageUrl          String?
-  videoUrl          String?
   linkUrl           String?
   createdAt         DateTime           @default(now())
   tags              String?
@@ -56,39 +54,6 @@ model Post {
   moderationActions ModerationAction[]
   author            User               @relation(fields: [authorId], references: [id])
   votes             Vote[]
-  poll              Poll?
-}
-
-model Poll {
-  id        Int        @id @default(autoincrement())
-  postId    Int        @unique
-  question  String
-  options   PollOption[]
-  createdAt DateTime   @default(now())
-  expiresAt DateTime?
-  post      Post       @relation(fields: [postId], references: [id])
-  votes     PollVote[]
-}
-
-model PollOption {
-  id      Int        @id @default(autoincrement())
-  pollId  Int
-  text    String
-  votes   PollVote[]
-  poll    Poll       @relation(fields: [pollId], references: [id])
-}
-
-model PollVote {
-  id           Int        @id @default(autoincrement())
-  userId       Int
-  pollId       Int
-  pollOptionId Int
-  createdAt    DateTime   @default(now())
-  user         User       @relation(fields: [userId], references: [id])
-  poll         Poll       @relation(fields: [pollId], references: [id])
-  pollOption   PollOption @relation(fields: [pollOptionId], references: [id])
-
-  @@unique([userId, pollId])
 }
 
 model Comment {
