@@ -47,7 +47,7 @@ export const PostCard = ({ post, isFirst = true, isLast = false }: PostCardProps
   const location = useLocation();
   
   const isMainFeed = location.pathname === '/';
-  const hideTextContent = isMainFeed && post.imageUrl;
+  const hideTextContent = isMainFeed && !!post.imageUrl;
   const hasOnlyText = !post.imageUrl && !post.linkUrl;
 
   return (
@@ -68,7 +68,7 @@ export const PostCard = ({ post, isFirst = true, isLast = false }: PostCardProps
         
         <div className="flex items-center justify-between text-xs text-gray-400 py-2">
           <PostFooter 
-            commentCount={post.commentCount || post._count?.comments || 0} 
+            commentCount={post.commentCount || 0} 
             postId={post.id}
             subreddit={post.subreddit}
           />
