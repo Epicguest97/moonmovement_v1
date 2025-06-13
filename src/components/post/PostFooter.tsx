@@ -1,7 +1,7 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import LikeButton from './LikeButton';
 import { 
   MessageSquare,
   Share,
@@ -17,23 +17,15 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 interface PostFooterProps {
-  commentCount: number;
   postId: string;
-  likeScore: number;
-  isLiked: boolean;
-  onLike: () => void;
+  commentCount: number;
+  subreddit: string;
 }
 
-const PostFooter = ({ commentCount, postId, likeScore, isLiked, onLike }: PostFooterProps) => {
+const PostFooter = ({ commentCount, postId, subreddit }: PostFooterProps) => {
   return (
     <div className="flex items-center justify-between text-xs text-gray-400 mt-3 pt-2">
       <div className="flex items-center space-x-4">
-        <LikeButton 
-          score={likeScore}
-          isLiked={isLiked}
-          onLike={onLike}
-        />
-        
         <Link 
           to={`/post/${postId}`}
           className="flex items-center space-x-1 hover:text-white transition-colors"
