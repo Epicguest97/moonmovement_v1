@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -123,18 +122,17 @@ const Index = () => {
   return (
     <MainLayout>
       <div className="space-y-6 w-full max-w-full overflow-x-hidden">
-        {/* Hero Section with natural landscape background - SHORTER VERSION */}
-        <div className="relative rounded-lg overflow-hidden">
+        {/* Hero Section with natural landscape background - TALLER VERSION */}
+        <div className="relative rounded-lg overflow-hidden h-[400px]">
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: 'url(/lovable-uploads/6ee929f6-d821-4271-bd62-f3e8869d5dc0.png)',
+              backgroundImage: 'url(/banner.jpeg)',
               backgroundPosition: 'center 30%'
             }}
           >
-            <div className="absolute inset-0 bg-black/40"></div>
           </div>
-          <div className="relative z-10 p-4 pb-5 text-white">
+          <div className="relative z-10 p-6 pb-5 text-white flex flex-col justify-end h-full">
             <div className="text-xs opacity-90">02:23 PM</div>
             <h1 className="text-xl font-medium mb-2">Build It!</h1>
             
