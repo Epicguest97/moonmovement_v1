@@ -8,9 +8,10 @@ interface PostContentProps {
   post: Post;
   isCompact?: boolean;
   isDetailView?: boolean;
+  hideTextContent?: boolean; // Add this new prop
 }
 
-const PostContent = ({ post, isCompact = false, isDetailView = false }: PostContentProps) => {
+const PostContent = ({ post, isCompact = false, isDetailView = false, hideTextContent = false }: PostContentProps) => {
   const [isExpanded, setIsExpanded] = useState(isDetailView);
   const shouldTruncate = post.content?.length > 300 && !isExpanded && !isDetailView;
   
@@ -33,8 +34,10 @@ const PostContent = ({ post, isCompact = false, isDetailView = false }: PostCont
   };
   
   const renderTextContent = () => {
-    // Hide text content on main page if post has an image
-    if (post.content && (!post.imageUrl || isDetailView)) {
+    // Don't render text if hideTextContent is true
+    if (hideTextContent) return null;
+    
+    if (post.content && (isDetailView || !post.imageUrl)) {
       const content = shouldTruncate
         ? `${post.content.substring(0, 300)}...`
         : post.content;
@@ -59,8 +62,10 @@ const PostContent = ({ post, isCompact = false, isDetailView = false }: PostCont
   };
   
   const renderLinkContent = () => {
-    // Hide link content on main page if post has an image
-    if (post.linkUrl && (!post.imageUrl || isDetailView)) {
+    // Don't render link if hideTextContent is true
+    if (hideTextContent) return null;
+    
+    if (post.linkUrl && (isDetailView || !post.imageUrl)) {
       return (
         <div className="mt-2 mb-2 overflow-hidden">
           <a 

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
-import PostCard, { Post } from '@/components/post/PostCard';
+import { PostCard, Post } from '@/components/post/PostCard';
 import CreatePostModal from '@/components/post/CreatePostModal';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -200,12 +200,17 @@ const Index = () => {
           {sortedPosts.length > 0 ? (
             <div className="overflow-hidden border border-sidebar-border rounded-b-lg w-full">
               {sortedPosts.map((post, index) => (
-                <PostCard 
-                  key={post.id} 
-                  post={post} 
-                  isFirst={false} /* No post should have top rounded corners */
-                  isLast={index === sortedPosts.length - 1}
-                />
+                <>
+                  <PostCard 
+                    key={post.id} 
+                    post={post} 
+                    isFirst={false}
+                    isLast={index === sortedPosts.length - 1}
+                  />
+                  {index !== sortedPosts.length - 1 && (
+                    <div className="mx-4 h-[1px] bg-gray-700/80"></div>
+                  )}
+                </>
               ))}
             </div>
           ) : (
