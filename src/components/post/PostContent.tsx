@@ -8,20 +8,24 @@ interface PostContentProps {
   post: Post;
   isCompact?: boolean;
   isDetailView?: boolean;
-  hideTextContent?: boolean; // Add this new prop
+  hideTextContent?: boolean;
+  hasOnlyText?: boolean;
 }
 
-const PostContent = ({ post, isCompact = false, isDetailView = false, hideTextContent = false }: PostContentProps) => {
+const PostContent = ({ 
+  post, 
+  isCompact = false, 
+  isDetailView = false, 
+  hideTextContent = false,
+  hasOnlyText = false
+}: PostContentProps) => {
   const [isExpanded, setIsExpanded] = useState(isDetailView);
   const shouldTruncate = post.content?.length > 300 && !isExpanded && !isDetailView;
   
   const renderImage = () => {
     if (post.imageUrl) {
       return (
-        <div className={cn(
-          "mt-2 mb-4 overflow-hidden",
-          isCompact && !isDetailView ? "max-h-32" : ""
-        )}>
+        <div className="mt-1 mb-0 overflow-hidden">
           <img 
             src={post.imageUrl} 
             alt={post.title} 
@@ -34,7 +38,6 @@ const PostContent = ({ post, isCompact = false, isDetailView = false, hideTextCo
   };
   
   const renderTextContent = () => {
-    // Don't render text if hideTextContent is true
     if (hideTextContent) return null;
     
     if (post.content && (isDetailView || !post.imageUrl)) {
@@ -43,7 +46,10 @@ const PostContent = ({ post, isCompact = false, isDetailView = false, hideTextCo
         : post.content;
         
       return (
-        <div className="mt-2 text-sm overflow-hidden">
+        <div className={cn(
+          "mt-1 text-sm overflow-hidden",
+          hasOnlyText && !isDetailView ? "mb-0 pb-0" : "mb-1 pb-1"
+        )}>
           <p className="whitespace-pre-line break-words overflow-wrap-anywhere">{content}</p>
           
           {shouldTruncate && (
@@ -83,10 +89,7 @@ const PostContent = ({ post, isCompact = false, isDetailView = false, hideTextCo
   };
 
   return (
-    <div className={cn(
-      isCompact && !isDetailView ? "max-h-96 overflow-hidden" : "",
-      "relative overflow-hidden"
-    )}>
+    <div className="relative overflow-hidden py-0">
       {renderImage()}
       {renderTextContent()}
       {renderLinkContent()}

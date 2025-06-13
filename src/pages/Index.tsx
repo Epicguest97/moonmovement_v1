@@ -200,9 +200,8 @@ const Index = () => {
           {sortedPosts.length > 0 ? (
             <div className="overflow-hidden border border-sidebar-border rounded-b-lg w-full">
               {sortedPosts.map((post, index) => (
-                <>
+                <div key={post.id} className="post-container">
                   <PostCard 
-                    key={post.id} 
                     post={post} 
                     isFirst={false}
                     isLast={index === sortedPosts.length - 1}
@@ -210,7 +209,7 @@ const Index = () => {
                   {index !== sortedPosts.length - 1 && (
                     <div className="mx-4 h-[1px] bg-gray-700/80"></div>
                   )}
-                </>
+                </div>
               ))}
             </div>
           ) : (

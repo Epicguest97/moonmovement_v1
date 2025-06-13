@@ -46,11 +46,9 @@ export const PostCard = ({ post, isFirst = true, isLast = false }: PostCardProps
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Check if we're on the main feed page
   const isMainFeed = location.pathname === '/';
-  
-  // Only show image (no text/links) on main feed if post has an image
   const hideTextContent = isMainFeed && post.imageUrl;
+  const hasOnlyText = !post.imageUrl && !post.linkUrl;
 
   return (
     <Card className={cn(
@@ -59,7 +57,7 @@ export const PostCard = ({ post, isFirst = true, isLast = false }: PostCardProps
       isLast ? "rounded-b-lg" : "border-b-0 rounded-b-none",
       "divide-y divide-sidebar-border overflow-hidden"
     )}>
-      <div className="p-3">
+      <div className="p-0 pt-2 px-3 relative">
         <PostHeader post={post} />
         
         <PostContent 
@@ -68,7 +66,7 @@ export const PostCard = ({ post, isFirst = true, isLast = false }: PostCardProps
           hideTextContent={hideTextContent} 
         />
         
-        <div className="flex items-center justify-between text-xs text-gray-400 mt-3 pt-2">
+        <div className="flex items-center justify-between text-xs text-gray-400 py-2">
           <PostFooter 
             commentCount={post.commentCount || post._count?.comments || 0} 
             postId={post.id}
