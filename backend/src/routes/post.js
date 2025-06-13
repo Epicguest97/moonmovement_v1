@@ -35,16 +35,7 @@ router.get('/', async (req, res) => {
             isRemoved: false
           }
         },
-        votes: true,
-        poll: {
-          include: {
-            options: {
-              include: {
-                votes: true
-              }
-            }
-          }
-        }
+        votes: true
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -82,16 +73,7 @@ router.get('/:id', async (req, res) => {
             isRemoved: false
           }
         },
-        votes: true,
-        poll: {
-          include: {
-            options: {
-              include: {
-                votes: true
-              }
-            }
-          }
-        }
+        votes: true
       }
     });
     if (!post) return res.status(404).json({ error: 'Post not found' });
@@ -165,20 +147,24 @@ router.post('/', authenticateToken, async (req, res) => {
       }
     });
 
-    // Create poll if provided
+    // Create poll if provided (this will work after migration)
     if (poll && poll.question && poll.options && poll.options.length > 0) {
-      await prisma.poll.create({
-        data: {
-          postId: post.id,
-          question: poll.question,
-          expiresAt: poll.expiresAt ? new Date(poll.expiresAt) : null,
-          options: {
-            create: poll.options.map(option => ({
-              text: option
-            }))
+      try {
+        await prisma.poll.create({
+          data: {
+            postId: post.id,
+            question: poll.question,
+            expiresAt: poll.expiresAt ? new Date(poll.expiresAt) : null,
+            options: {
+              create: poll.options.map(option => ({
+                text: option
+              }))
+            }
           }
-        }
-      });
+        });
+      } catch (pollError) {
+        console.log('Poll creation failed (migration needed):', pollError.message);
+      }
     }
 
     const existingMods = await prisma.subredditModerator.findFirst({
@@ -321,11 +307,24 @@ router.post('/:id/poll/vote', authenticateToken, async (req, res) => {
 
   try {
     const post = await prisma.post.findUnique({
-      where: { id: Number(id) },
-      include: { poll: true }
+      where: { id: Number(id) }
     });
 
-    if (!post || !post.poll) {
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    // Try to find the poll (will work after migration)
+    let poll;
+    try {
+      poll = await prisma.poll.findUnique({
+        where: { postId: post.id }
+      });
+    } catch (pollError) {
+      return res.status(404).json({ error: 'Poll functionality not available (migration needed)' });
+    }
+
+    if (!poll) {
       return res.status(404).json({ error: 'Poll not found' });
     }
 
@@ -333,7 +332,7 @@ router.post('/:id/poll/vote', authenticateToken, async (req, res) => {
     await prisma.pollVote.deleteMany({
       where: {
         userId: userId,
-        pollId: post.poll.id
+        pollId: poll.id
       }
     });
 
@@ -341,14 +340,14 @@ router.post('/:id/poll/vote', authenticateToken, async (req, res) => {
     await prisma.pollVote.create({
       data: {
         userId: userId,
-        pollId: post.poll.id,
+        pollId: poll.id,
         pollOptionId: optionId
       }
     });
 
     // Return updated poll with vote counts
     const updatedPoll = await prisma.poll.findUnique({
-      where: { id: post.poll.id },
+      where: { id: poll.id },
       include: {
         options: {
           include: {
