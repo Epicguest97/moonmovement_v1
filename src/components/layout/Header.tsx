@@ -78,7 +78,7 @@ const Header = ({ onToggleMobileSidebar }: HeaderProps) => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56 bg-sidebar border-sidebar-border">
                     <DropdownMenuLabel className="text-sidebar-foreground">My Account</DropdownMenuLabel>
-                    <DropdownMenuItem onClick={() => navigate(`/user/${user.username}`)}>
+                    <DropdownMenuItem onClick={() => navigate(`/u/${user.username}`)}>
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
                     </DropdownMenuItem>
@@ -157,7 +157,7 @@ const Header = ({ onToggleMobileSidebar }: HeaderProps) => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 bg-sidebar border-sidebar-border">
                   <DropdownMenuLabel className="text-sidebar-foreground">My Account</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => navigate(`/user/${user.username}`)}>
+                  <DropdownMenuItem onClick={() => navigate(`/u/${user.username}`)}>
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </DropdownMenuItem>
