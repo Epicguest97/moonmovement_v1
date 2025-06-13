@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -24,13 +24,28 @@ interface PollComponentProps {
 const PollComponent = ({ poll, postId }: PollComponentProps) => {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
   const totalVotes = poll.options.reduce((sum, option) => sum + option.votes.length, 0);
 
-  const handleVote = async (optionId: number) => {
-    if (!user || hasVoted) return;
+  // Check if user has already voted
+  useEffect(() => {
+    if (user && poll.options.length > 0) {
+      const userVote = poll.options.find(option => 
+        option.votes.some((vote: any) => vote.userId === user.id)
+      );
+      if (userVote) {
+        setSelectedOption(userVote.id);
+        setHasVoted(true);
+      }
+    }
+  }, [user, poll.options]);
 
+  const handleVote = async (optionId: number) => {
+    if (!user || hasVoted || loading) return;
+
+    setLoading(true);
     try {
       const response = await fetch(`https://moonmovement.onrender.com/api/posts/${postId}/poll/vote`, {
         method: 'POST',
@@ -44,15 +59,21 @@ const PollComponent = ({ poll, postId }: PollComponentProps) => {
       if (response.ok) {
         setSelectedOption(optionId);
         setHasVoted(true);
+        // Reload page to show updated vote counts
+        window.location.reload();
       }
     } catch (error) {
       console.error('Error voting on poll:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const getPercentage = (votes: number) => {
     return totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
   };
+
+  const isExpired = poll.expiresAt ? new Date(poll.expiresAt) < new Date() : false;
 
   return (
     <div className="bg-sidebar-accent/30 rounded-lg p-4 space-y-3">
@@ -67,18 +88,26 @@ const PollComponent = ({ poll, postId }: PollComponentProps) => {
             <div key={option.id} className="relative">
               <Button
                 variant="outline"
-                className={`w-full justify-start text-left h-auto p-3 ${
-                  hasVoted 
+                className={`w-full justify-start text-left h-auto p-3 relative overflow-hidden ${
+                  hasVoted || isExpired
                     ? 'cursor-default' 
                     : 'hover:bg-sidebar-accent/50'
                 } ${
                   isSelected ? 'border-primary bg-primary/10' : ''
                 }`}
-                onClick={() => !hasVoted && handleVote(option.id)}
-                disabled={hasVoted}
+                onClick={() => !hasVoted && !isExpired && !loading && handleVote(option.id)}
+                disabled={hasVoted || isExpired || loading}
               >
-                <div className="flex justify-between items-center w-full">
-                  <span>{option.text}</span>
+                {/* Vote percentage background */}
+                {hasVoted && (
+                  <div 
+                    className="absolute left-0 top-0 h-full bg-primary/20 transition-all duration-300 rounded"
+                    style={{ width: `${percentage}%` }}
+                  />
+                )}
+                
+                <div className="flex justify-between items-center w-full relative z-10">
+                  <span className={isSelected ? 'font-medium' : ''}>{option.text}</span>
                   {hasVoted && (
                     <span className="text-sm text-muted-foreground">
                       {percentage}% ({option.votes.length})
@@ -86,13 +115,6 @@ const PollComponent = ({ poll, postId }: PollComponentProps) => {
                   )}
                 </div>
               </Button>
-              
-              {hasVoted && (
-                <div 
-                  className="absolute left-0 top-0 h-full bg-primary/20 rounded transition-all duration-300"
-                  style={{ width: `${percentage}%` }}
-                />
-              )}
             </div>
           );
         })}
@@ -101,7 +123,14 @@ const PollComponent = ({ poll, postId }: PollComponentProps) => {
       <div className="text-sm text-muted-foreground">
         {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
         {poll.expiresAt && (
-          <span> • Expires {new Date(poll.expiresAt).toLocaleDateString()}</span>
+          <span className={isExpired ? 'text-red-400' : ''}>
+            {' • '}{isExpired ? 'Expired' : 'Expires'} {new Date(poll.expiresAt).toLocaleDateString()}
+          </span>
+        )}
+        {!user && !hasVoted && (
+          <div className="text-xs text-muted-foreground mt-1">
+            Login to vote on this poll
+          </div>
         )}
       </div>
     </div>
