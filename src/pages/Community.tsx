@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, Eye, Settings } from 'lucide-react';
 import ModerationPanel from '@/components/moderation/ModerationPanel';
+import PostCard from '@/components/post/PostCard';
 
 interface Community {
   id: number;
@@ -20,13 +20,35 @@ interface Community {
   createdAt: string;
 }
 
+interface Post {
+  id: string;
+  title: string;
+  content: string;
+  author: {
+    id: number;
+    username: string;
+    email: string;
+    createdAt: string;
+  };
+  subreddit: string;
+  createdAt: string;
+  voteScore: number;
+  likeCount: number;
+  commentCount: number;
+  imageUrl?: string;
+  videoUrl?: string;
+  linkUrl?: string;
+}
+
 const communityCache = new Map();
 
 const Community = () => {
   const { communityName } = useParams<{ communityName: string }>();
   const { isLoggedIn } = useAuth();
   const [community, setCommunity] = useState<Community | null>(null);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [postsLoading, setPostsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isMember, setIsMember] = useState(false);
   const [membershipLoading, setMembershipLoading] = useState(false);
@@ -81,7 +103,7 @@ const Community = () => {
         }
         
         // First attempt: try to fetch specific community by name
-        const response = await fetchWithTimeout(`https://moonmovement.onrender.com/api/community/name/${communityName}`);
+        const response = await fetch(`https://moonmovement.onrender.com/api/community/name/${communityName}`);
         
         let communityData;
         
@@ -91,7 +113,7 @@ const Community = () => {
           setCommunity(communityData);
         } else {
           // Fallback: fetch all communities and filter
-          const allCommunitiesResponse = await fetchWithTimeout('https://moonmovement.onrender.com/api/community');
+          const allCommunitiesResponse = await fetch('https://moonmovement.onrender.com/api/community');
           if (!allCommunitiesResponse.ok) {
             throw new Error('Failed to fetch communities');
           }
@@ -149,6 +171,36 @@ const Community = () => {
 
     fetchCommunity();
   }, [communityName, isLoggedIn]);
+
+  // Fetch posts for this community
+  useEffect(() => {
+    const fetchPosts = async () => {
+      if (!communityName) return;
+      
+      try {
+        setPostsLoading(true);
+        const response = await fetch(`https://moonmovement.onrender.com/api/posts/community/${communityName}`);
+        
+        if (response.ok) {
+          const postsData = await response.json();
+          // Transform posts to match the expected format
+          const transformedPosts = postsData.map((post: any) => ({
+            ...post,
+            timestamp: new Date(post.createdAt).toLocaleDateString()
+          }));
+          setPosts(transformedPosts);
+        } else {
+          console.error('Failed to fetch posts for community');
+        }
+      } catch (err) {
+        console.error('Error fetching posts:', err);
+      } finally {
+        setPostsLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, [communityName]);
 
   const handleJoinLeave = async () => {
     if (!isLoggedIn || !community) return;
@@ -293,7 +345,7 @@ const Community = () => {
             <div className="flex gap-4">
               {isLoggedIn ? (
                 <Button 
-                  onClick={handleJoinLeave}
+                  onClick={() => handleJoinLeave()}
                   disabled={membershipLoading}
                   className={isMember 
                     ? "bg-gray-600 hover:bg-gray-700 text-white" 
@@ -326,18 +378,37 @@ const Community = () => {
               )}
             </div>
 
-            {/* Community Content */}
-            <Card className="bg-sidebar border-sidebar-border">
-              <CardHeader>
-                <h2 className="text-xl font-semibold text-sidebar-foreground">Posts</h2>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-400">
-                  <p>No posts yet in this community.</p>
-                  <p className="text-sm mt-2">Be the first to create a post!</p>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Posts */}
+            {postsLoading ? (
+              <Card className="bg-sidebar border-sidebar-border">
+                <CardContent className="text-center py-8">
+                  <p className="text-gray-400">Loading posts...</p>
+                </CardContent>
+              </Card>
+            ) : posts.length > 0 ? (
+              <div className="space-y-0">
+                {posts.map((post, index) => (
+                  <PostCard 
+                    key={post.id} 
+                    post={post} 
+                    isFirst={index === 0}
+                    isLast={index === posts.length - 1}
+                  />
+                ))}
+              </div>
+            ) : (
+              <Card className="bg-sidebar border-sidebar-border">
+                <CardHeader>
+                  <h2 className="text-xl font-semibold text-sidebar-foreground">Posts</h2>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8 text-gray-400">
+                    <p>No posts yet in this community.</p>
+                    <p className="text-sm mt-2">Be the first to create a post!</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {moderationInfo?.isModerator && (

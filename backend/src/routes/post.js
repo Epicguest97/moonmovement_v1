@@ -338,4 +338,48 @@ router.post('/:id/vote', async (req, res) => {
     }
 });
 
+// GET posts by subreddit/community
+router.get('/community/:subreddit', async (req, res) => {
+  try {
+    const { subreddit } = req.params;
+    console.log('Fetching posts for subreddit:', subreddit);
+    
+    const posts = await prisma.post.findMany({
+      where: {
+        subreddit: subreddit,
+        isRemoved: false
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            createdAt: true
+          }
+        },
+        comments: {
+          where: {
+            isRemoved: false
+          }
+        },
+        votes: true
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const postsWithLikeCount = posts.map(post => ({
+      ...post,
+      ...getVoteCounts(post.votes),
+      commentCount: post.comments.length
+    }));
+
+    console.log('Posts fetched for subreddit successfully:', posts.length);
+    res.json(postsWithLikeCount);
+  } catch (err) {
+    console.error('Error fetching posts for subreddit:', err);
+    res.status(500).json({ error: 'Failed to fetch posts for subreddit', details: err.message });
+  }
+});
+
 module.exports = router;
