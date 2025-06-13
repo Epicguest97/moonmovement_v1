@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Bell, User, Settings as SettingsIcon, Menu } from 'lucide-react';
+import { Search, Bell, User, Settings as SettingsIcon, Menu, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -10,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -76,21 +76,16 @@ const Header = ({ onToggleMobileSidebar }: HeaderProps) => {
                       <User className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuItem asChild>
-                      <Link to={`/u/${user?.username}`}>
-                        <User className="mr-2 h-4 w-4" />
-                        Profile
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/settings">
-                        Settings
-                      </Link>
+                  <DropdownMenuContent align="end" className="w-56 bg-sidebar border-sidebar-border">
+                    <DropdownMenuLabel className="text-sidebar-foreground">My Account</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => navigate(`/user/${user.username}`)}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout}>
-                      Logout
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -137,7 +132,11 @@ const Header = ({ onToggleMobileSidebar }: HeaderProps) => {
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => navigate('/settings')}
+            >
               <SettingsIcon className="h-5 w-5" />
             </Button>
 
@@ -156,21 +155,16 @@ const Header = ({ onToggleMobileSidebar }: HeaderProps) => {
                     <User className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem asChild>
-                    <Link to={`/u/${user?.username}`}>
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/settings">
-                      Settings
-                    </Link>
+                <DropdownMenuContent align="end" className="w-56 bg-sidebar border-sidebar-border">
+                  <DropdownMenuLabel className="text-sidebar-foreground">My Account</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => navigate(`/user/${user.username}`)}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
-                    Logout
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
