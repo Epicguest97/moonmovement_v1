@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import PostCard, { Post } from '@/components/post/PostCard';
+import CreatePostModal from '@/components/post/CreatePostModal';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Flame, TrendingUp, Clock } from 'lucide-react';
@@ -12,6 +13,7 @@ const Index = () => {
   const [sortBy, setSortBy] = useState<'hot' | 'new' | 'top'>('hot');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   
@@ -137,13 +139,13 @@ const Index = () => {
             <h1 className="text-xl font-medium mb-2">Build It!</h1>
             
             {/* Embed the input box directly in the hero section */}
-            <Link to="/submit" className="block">
+            <div onClick={() => setIsCreatePostModalOpen(true)} className="block">
               <Input 
                 placeholder="Create a post..." 
                 className="bg-sidebar/60 hover:bg-sidebar/80 border-sidebar-border/50 cursor-pointer text-white placeholder:text-gray-300 rounded-full px-4 py-2 text-sm backdrop-blur-sm w-full"
                 readOnly
               />
-            </Link>
+            </div>
           </div>
         </div>
 
@@ -224,6 +226,12 @@ const Index = () => {
           )}
         </div>
       </div>
+
+      {/* Create Post Modal */}
+      <CreatePostModal 
+        isOpen={isCreatePostModalOpen}
+        onClose={() => setIsCreatePostModalOpen(false)}
+      />
     </MainLayout>
   );
 };
