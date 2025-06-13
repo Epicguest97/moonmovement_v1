@@ -1,10 +1,8 @@
-
-import React, { useState, useEffect } from 'react';
-import { X, Image, Video, Link, List, Smile, Calendar } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Image, Video, Link as LinkIcon, List, Smile, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
+import FileUploader from '@/components/ui/FileUploader';
 
 interface CreatePostModalProps {
   isOpen: boolean;
@@ -16,25 +14,48 @@ interface PollOption {
   text: string;
 }
 
+type MediaType = 'image' | 'video' | 'link' | 'poll' | null;
+
 const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
-  const [mainContent, setMainContent] = useState('');
-  const [additionalDetails, setAdditionalDetails] = useState('');
+  const [step, setStep] = useState(1);
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [activeMediaType, setActiveMediaType] = useState<MediaType>(null);
   const [imageUrl, setImageUrl] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
   const [linkUrl, setLinkUrl] = useState('');
-  const [showImageInput, setShowImageInput] = useState(false);
-  const [showVideoInput, setShowVideoInput] = useState(false);
-  const [showLinkInput, setShowLinkInput] = useState(false);
-  const [showPollInput, setShowPollInput] = useState(false);
   const [pollQuestion, setPollQuestion] = useState('');
   const [pollOptions, setPollOptions] = useState<PollOption[]>([
-    { id: '1', text: '' },
-    { id: '2', text: '' }
+    { id: '1', text: '' }, { id: '2', text: '' }
   ]);
   const [subreddit, setSubreddit] = useState('general');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [communities, setCommunities] = useState<{id: number, name: string, memberCount: number}[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
   
   const { user } = useAuth();
+  const titleInputRef = useRef<HTMLTextAreaElement>(null);
+  const contentInputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Fetch communities
+  useEffect(() => {
+    if (isOpen && step === 2) {
+      fetchCommunities();
+    }
+  }, [isOpen, step]);
+
+  const fetchCommunities = async () => {
+    try {
+      const response = await fetch('https://moonmovement.onrender.com/api/community');
+      if (response.ok) {
+        const data = await response.json();
+        setCommunities(data);
+      }
+    } catch (error) {
+      console.error('Error fetching communities:', error);
+    }
+  };
 
   // Handle ESC key press
   useEffect(() => {
@@ -55,7 +76,6 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
     };
   }, [isOpen, onClose]);
 
-  // Handle clicking outside modal
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -63,23 +83,65 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
   };
 
   const resetForm = () => {
-    setMainContent('');
-    setAdditionalDetails('');
+    setStep(1);
+    setTitle('');
+    setContent('');
+    setActiveMediaType(null);
     setImageUrl('');
     setVideoUrl('');
     setLinkUrl('');
-    setShowImageInput(false);
-    setShowVideoInput(false);
-    setShowLinkInput(false);
-    setShowPollInput(false);
     setPollQuestion('');
     setPollOptions([{ id: '1', text: '' }, { id: '2', text: '' }]);
     setSubreddit('general');
+    setUploadedFiles([]);
+    setSelectedCommunity(null);
   };
 
   const handleClose = () => {
     resetForm();
     onClose();
+  };
+
+  const handleNext = () => {
+    if (title.trim()) {
+      setStep(2);
+    }
+  };
+
+  const handleBack = () => {
+    setStep(1);
+  };
+
+  // Auto-adjust textarea height
+  const adjustTextareaHeight = (textarea: HTMLTextAreaElement | null) => {
+    if (!textarea) return;
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  };
+
+  useEffect(() => {
+    if (titleInputRef.current) {
+      adjustTextareaHeight(titleInputRef.current);
+    }
+  }, [title]);
+
+  useEffect(() => {
+    if (contentInputRef.current) {
+      adjustTextareaHeight(contentInputRef.current);
+    }
+  }, [content]);
+
+  // Focus title input when modal opens
+  useEffect(() => {
+    if (isOpen && titleInputRef.current) {
+      setTimeout(() => {
+        titleInputRef.current?.focus();
+      }, 100);
+    }
+  }, [isOpen]);
+
+  const toggleMediaType = (type: MediaType) => {
+    setActiveMediaType(activeMediaType === type ? null : type);
   };
 
   const addPollOption = () => {
@@ -102,20 +164,20 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
   };
 
   const handleSubmit = async () => {
-    if (!mainContent.trim() || !user) return;
+    if (!title.trim() || !user) return;
 
     setIsSubmitting(true);
     try {
       const postData: any = {
-        title: mainContent.split('\n')[0] || mainContent.substring(0, 100),
-        content: mainContent + (additionalDetails ? '\n\n' + additionalDetails : ''),
+        title: title,
+        content: content,
         subreddit,
-        imageUrl: imageUrl || null,
-        videoUrl: videoUrl || null,
-        linkUrl: linkUrl || null
+        imageUrl: activeMediaType === 'image' ? imageUrl : null,
+        videoUrl: activeMediaType === 'video' ? videoUrl : null,
+        linkUrl: activeMediaType === 'link' ? linkUrl : null
       };
 
-      if (showPollInput && pollQuestion.trim() && pollOptions.some(opt => opt.text.trim())) {
+      if (activeMediaType === 'poll' && pollQuestion.trim() && pollOptions.some(opt => opt.text.trim())) {
         postData.poll = {
           question: pollQuestion,
           options: pollOptions.filter(opt => opt.text.trim()).map(opt => opt.text)
@@ -144,6 +206,21 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
     }
   };
 
+  const selectCommunity = (communityName: string) => {
+    setSubreddit(communityName);
+    setSelectedCommunity(communityName);
+  };
+
+  const handleFilesSelected = (files: File[]) => {
+    setUploadedFiles(files);
+    // You would typically upload these to your server and get URLs back
+    // For now, just set the first image as the imageUrl
+    if (files.length > 0) {
+      // This is a placeholder. In a real app, you'd upload the file and get a URL
+      setImageUrl(URL.createObjectURL(files[0]));
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -153,29 +230,36 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
         backgroundColor: 'rgba(0, 0, 0, 0.7)',
         backdropFilter: 'blur(8px)',
       }}
-      onClick={handleBackdropClick}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div 
-        className="bg-sidebar border border-sidebar-border rounded-xl shadow-2xl transform transition-all duration-300 ease-out animate-scale-in"
-        style={{
-          width: '50vw',
-          minWidth: '400px',
-          maxWidth: '600px',
-          maxHeight: '90vh',
-          overflow: 'auto'
-        }}
+        className="bg-sidebar border border-sidebar-border rounded-xl shadow-2xl w-[700px] max-w-[95vw] max-h-[90vh] overflow-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-sidebar-border">
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold text-foreground">Create a Post</h2>
-            <span className="text-green-500">✅</span>
-          </div>
+        <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
+          {step === 1 ? (
+            <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              Create a Post 
+              <span className="bg-green-500/20 text-green-500 text-xs px-1.5 py-0.5 rounded-full">✓</span>
+            </h2>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setStep(1)}
+                className="h-8 w-8 rounded-full hover:bg-sidebar-accent"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <span className="font-medium">Select a community</span>
+            </div>
+          )}
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleClose}
+            onClick={onClose}
             className="h-8 w-8 rounded-full hover:bg-sidebar-accent"
           >
             <X className="h-4 w-4" />
@@ -183,177 +267,183 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
         </div>
 
         {/* Main Content */}
-        <div className="p-6 space-y-4">
-          {/* Community Selection */}
-          <div>
-            <Input
-              placeholder="Community (e.g., general, tech, funny)"
-              value={subreddit}
-              onChange={(e) => setSubreddit(e.target.value)}
-              className="bg-sidebar-accent/30 border-sidebar-border"
-            />
-          </div>
+        {step === 1 ? (
+          <div className="flex flex-col">
+            {/* Unified input area */}
+            <div className="p-6 space-y-0 flex-1 min-h-[300px]">
+              <div className="flex flex-col mb-5">
+                <textarea
+                  ref={titleInputRef}
+                  placeholder="What would you like to share?"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  rows={1}
+                  className="w-full text-lg resize-none border-0 focus:ring-0 bg-transparent focus:outline-none placeholder-gray-500 mb-4"
+                  maxLength={300}
+                />
+                
+                <textarea
+                  ref={contentInputRef}
+                  placeholder="Add more details... (optional)"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  rows={1}
+                  className="w-full text-base resize-none border-0 focus:ring-0 bg-transparent focus:outline-none placeholder-gray-500/70 pt-2"
+                />
+              </div>
 
-          {/* Main Input */}
-          <div>
-            <Textarea
-              placeholder="What would you like to share?"
-              value={mainContent}
-              onChange={(e) => setMainContent(e.target.value)}
-              className="min-h-[120px] resize-none border-0 bg-transparent text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
-              style={{ fontSize: '16px' }}
-            />
-          </div>
-
-          {/* Additional Details */}
-          <div>
-            <Textarea
-              placeholder="Add more details... (optional)"
-              value={additionalDetails}
-              onChange={(e) => setAdditionalDetails(e.target.value)}
-              className="min-h-[80px] resize-none border-0 bg-sidebar-accent/30 text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 rounded-lg"
-            />
-          </div>
-
-          {/* Image Input */}
-          {showImageInput && (
-            <div>
-              <Input
-                placeholder="Image URL"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                className="bg-sidebar-accent/30 border-sidebar-border"
-              />
-            </div>
-          )}
-
-          {/* Video Input */}
-          {showVideoInput && (
-            <div>
-              <Input
-                placeholder="Video URL (YouTube, Vimeo, etc.)"
-                value={videoUrl}
-                onChange={(e) => setVideoUrl(e.target.value)}
-                className="bg-sidebar-accent/30 border-sidebar-border"
-              />
-            </div>
-          )}
-
-          {/* Link Input */}
-          {showLinkInput && (
-            <div>
-              <Input
-                placeholder="Link URL"
-                value={linkUrl}
-                onChange={(e) => setLinkUrl(e.target.value)}
-                className="bg-sidebar-accent/30 border-sidebar-border"
-              />
-            </div>
-          )}
-
-          {/* Poll Input */}
-          {showPollInput && (
-            <div className="space-y-3 p-4 bg-sidebar-accent/20 rounded-lg">
-              <Input
-                placeholder="Poll question"
-                value={pollQuestion}
-                onChange={(e) => setPollQuestion(e.target.value)}
-                className="bg-sidebar-accent/30 border-sidebar-border"
-              />
-              {pollOptions.map((option, index) => (
-                <div key={option.id} className="flex gap-2">
-                  <Input
-                    placeholder={`Option ${index + 1}`}
-                    value={option.text}
-                    onChange={(e) => updatePollOption(option.id, e.target.value)}
-                    className="bg-sidebar-accent/30 border-sidebar-border flex-1"
+              {/* Media inputs */}
+              {activeMediaType === 'image' && (
+                <div className="mt-4">
+                  <FileUploader 
+                    onFilesSelected={handleFilesSelected}
+                    maxFiles={4}
+                    maxSizeMB={4}
                   />
-                  {pollOptions.length > 2 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removePollOption(option.id)}
-                      className="text-red-400 hover:text-red-300"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                  
+                  {/* Show uploaded image previews */}
+                  {uploadedFiles.length > 0 && (
+                    <div className="mt-4 grid grid-cols-2 gap-2">
+                      {uploadedFiles.map((file, index) => (
+                        <div key={index} className="relative aspect-video bg-sidebar-accent rounded-md overflow-hidden">
+                          <img 
+                            src={URL.createObjectURL(file)} 
+                            alt={`Upload ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                          <button 
+                            className="absolute top-1 right-1 bg-black/70 rounded-full p-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setUploadedFiles(uploadedFiles.filter((_, i) => i !== index));
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Other media types would go here */}
+            </div>
+
+            {/* Divider */}
+            <div className="h-px bg-sidebar-border w-full"></div>
+
+            {/* Footer */}
+            <div className="p-4 flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => toggleMediaType('image')} 
+                  className={`text-gray-400 hover:text-gray-200 ${activeMediaType === 'image' ? 'text-primary' : ''}`}
+                >
+                  <Image className="h-5 w-5" />
+                </button>
+                <button 
+                  onClick={() => toggleMediaType('video')} 
+                  className={`text-gray-400 hover:text-gray-200 ${activeMediaType === 'video' ? 'text-primary' : ''}`}
+                >
+                  <Video className="h-5 w-5" />
+                </button>
+                <button 
+                  onClick={() => toggleMediaType('link')} 
+                  className={`text-gray-400 hover:text-gray-200 ${activeMediaType === 'link' ? 'text-primary' : ''}`}
+                >
+                  <LinkIcon className="h-5 w-5" />
+                </button>
+                <button 
+                  onClick={() => toggleMediaType('poll')} 
+                  className={`text-gray-400 hover:text-gray-200 ${activeMediaType === 'poll' ? 'text-primary' : ''}`}
+                >
+                  <List className="h-5 w-5" />
+                </button>
+              </div>
+              
+              <Button
+                onClick={() => title.trim() ? setStep(2) : null}
+                className={`px-6 py-2 rounded-full transition-all duration-200 ${
+                  title.trim() ? 'bg-primary hover:bg-primary/90' : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                }`}
+                disabled={!title.trim()}
+              >
+                Next &rarr;
+              </Button>
+            </div>
+          </div>
+        ) : (
+          /* Community selection UI */
+          <div className="p-6 space-y-4">
+            <div className="mb-2 text-sm text-gray-400">
+              Choose a community for your post
+            </div>
+            
+            <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-2">
+              {communities.map((community) => (
+                <div 
+                  key={community.id}
+                  onClick={() => selectCommunity(community.name)}
+                  className={`flex items-center justify-between p-3 rounded-lg border ${
+                    selectedCommunity === community.name
+                      ? 'bg-primary/20 border-primary'
+                      : 'bg-sidebar-accent/30 border-sidebar-border hover:border-primary'
+                  } cursor-pointer`}
+                >
+                  <div className="flex items-center">
+                    <div className="w-10 h-10 rounded-full bg-sidebar-primary flex items-center justify-center mr-3">
+                      <span className="text-white font-bold">r/</span>
+                    </div>
+                    <div>
+                      <div className="font-medium">r/{community.name}</div>
+                      <div className="text-xs text-gray-400">{community.memberCount} members</div>
+                    </div>
+                  </div>
+                  
+                  {selectedCommunity === community.name && (
+                    <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+                      <svg width="12" height="9" viewBox="0 0 12 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 4L4.5 7.5L11 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
                   )}
                 </div>
               ))}
-              {pollOptions.length < 5 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={addPollOption}
-                  className="text-primary hover:text-primary/80"
-                >
-                  + Add Option
-                </Button>
+              
+              {communities.length === 0 && (
+                <div className="text-center py-8 text-gray-400">
+                  Loading communities...
+                </div>
               )}
             </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="p-6 pt-0">
-          {/* Action Buttons */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            
+            {/* Post button (only enabled if community is selected) */}
+            <div className="flex justify-end pt-4 border-t border-sidebar-border mt-4">
               <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowImageInput(!showImageInput)}
-                className={`h-10 w-10 rounded-full hover:bg-sidebar-accent ${showImageInput ? 'bg-sidebar-accent text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                disabled={!selectedCommunity}
+                onClick={handleSubmit}
+                className={`px-8 py-2 rounded-full font-medium transition-all duration-200 ${
+                  selectedCommunity
+                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                    : 'bg-muted text-muted-foreground cursor-not-allowed'
+                }`}
               >
-                <Image className="h-5 w-5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowVideoInput(!showVideoInput)}
-                className={`h-10 w-10 rounded-full hover:bg-sidebar-accent ${showVideoInput ? 'bg-sidebar-accent text-primary' : 'text-muted-foreground hover:text-foreground'}`}
-              >
-                <Video className="h-5 w-5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowLinkInput(!showLinkInput)}
-                className={`h-10 w-10 rounded-full hover:bg-sidebar-accent ${showLinkInput ? 'bg-sidebar-accent text-primary' : 'text-muted-foreground hover:text-foreground'}`}
-              >
-                <Link className="h-5 w-5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowPollInput(!showPollInput)}
-                className={`h-10 w-10 rounded-full hover:bg-sidebar-accent ${showPollInput ? 'bg-sidebar-accent text-primary' : 'text-muted-foreground hover:text-foreground'}`}
-              >
-                <List className="h-5 w-5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 rounded-full hover:bg-sidebar-accent text-muted-foreground hover:text-foreground"
-              >
-                <Smile className="h-5 w-5" />
+                {isSubmitting ? (
+                  <div className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Posting...
+                  </div>
+                ) : (
+                  'Post'
+                )}
               </Button>
             </div>
-
-            {/* Submit Button */}
-            <Button
-              disabled={!mainContent.trim() || isSubmitting}
-              onClick={handleSubmit}
-              className={`px-6 py-2 rounded-full font-medium transition-all duration-200 ${
-                mainContent.trim() && !isSubmitting
-                  ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                  : 'bg-muted text-muted-foreground cursor-not-allowed'
-              }`}
-            >
-              {isSubmitting ? 'Posting...' : 'Post →'}
-            </Button>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
