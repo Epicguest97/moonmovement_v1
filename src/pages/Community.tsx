@@ -38,6 +38,7 @@ interface Post {
   imageUrl?: string;
   videoUrl?: string;
   linkUrl?: string;
+  timestamp: string; // Add this property to match PostCard expectations
 }
 
 const communityCache = new Map();
@@ -183,7 +184,7 @@ const Community = () => {
         
         if (response.ok) {
           const postsData = await response.json();
-          // Transform posts to match the expected format
+          // Transform posts to match the expected format with timestamp
           const transformedPosts = postsData.map((post: any) => ({
             ...post,
             timestamp: new Date(post.createdAt).toLocaleDateString()
