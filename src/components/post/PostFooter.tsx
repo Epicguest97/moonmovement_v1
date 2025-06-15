@@ -6,7 +6,8 @@ import {
   MessageSquare,
   Share,
   Bookmark,
-  MoreHorizontal
+  MoreHorizontal,
+  Edit
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -20,9 +21,15 @@ interface PostFooterProps {
   postId: string;
   commentCount: number;
   subreddit: string;
+  authorUsername?: string;
+  onEditClick?: () => void;
 }
 
-const PostFooter = ({ commentCount, postId, subreddit }: PostFooterProps) => {
+const PostFooter = ({ commentCount, postId, subreddit, authorUsername, onEditClick }: PostFooterProps) => {
+  // Check if current user is the author
+  const currentUsername = localStorage.getItem('username');
+  const isAuthor = currentUsername === authorUsername;
+
   return (
     <div className="flex items-center justify-between text-xs text-gray-400 mt-3 pt-2">
       <div className="flex items-center space-x-4">
@@ -42,6 +49,18 @@ const PostFooter = ({ commentCount, postId, subreddit }: PostFooterProps) => {
           <Share size={16} className="mr-1" />
           <span>Share</span>
         </Button>
+
+        {isAuthor && onEditClick && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center text-xs text-gray-400 hover:text-white p-1 h-auto"
+            onClick={onEditClick}
+          >
+            <Edit size={16} className="mr-1" />
+            <span>Edit</span>
+          </Button>
+        )}
       </div>
 
       <div className="flex items-center space-x-2">

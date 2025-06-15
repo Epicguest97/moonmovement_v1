@@ -7,6 +7,7 @@ import PostFooter from '@/components/post/PostFooter';
 import CommentBox from '@/components/comments/CommentBox';
 import CommentList from '@/components/comments/CommentList';
 import LikeButton from '@/components/post/LikeButton';
+import EditPostDialog from '@/components/post/EditPostDialog';
 import { Post } from '@/components/post/PostCard';
 import { CommentType } from '@/components/comments/CommentList';
 import { Link } from 'react-router-dom';
@@ -23,6 +24,7 @@ const PostDetail = () => {
   const [likeScore, setLikeScore] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   // Function to build nested comment structure
   const buildCommentTree = (flatComments: any[]): CommentType[] => {
@@ -58,7 +60,7 @@ const PostDetail = () => {
     return rootComments;
   };
 
-  useEffect(() => {
+  const fetchPost = () => {
     if (id) {
       console.log('Fetching post with ID:', id);
       // Fetch the specific post by ID
@@ -88,7 +90,11 @@ const PostDetail = () => {
           setError(error.message);
           setLoading(false);
         });
-      
+    }
+  };
+
+  const fetchComments = () => {
+    if (id) {
       // Fetch comments for this specific post
       fetch(`https://moonmovement.onrender.com/api/comments/post/${id}`)
         .then(res => res.json())
@@ -101,6 +107,11 @@ const PostDetail = () => {
           console.error('Failed to fetch comments:', error);
         });
     }
+  };
+
+  useEffect(() => {
+    fetchPost();
+    fetchComments();
   }, [id]);
   
   const handleLike = async () => {
@@ -207,14 +218,39 @@ const PostDetail = () => {
         throw new Error(errorData.error || 'Failed to submit reply');
       }
       
-      const commentsRes = await fetch(`https://moonmovement.onrender.com/api/comments/post/${post.id}`);
-      const commentsData = await commentsRes.json();
-      const nestedComments = buildCommentTree(commentsData);
-      setComments(nestedComments);
+      fetchComments(); // Refresh comments after reply
       setPost({ ...post, commentCount: post.commentCount + 1 });
     } catch (err) {
       console.error('Error submitting reply:', err);
       throw err;
+    }
+  };
+
+  const handleEditPost = async (title: string, content: string) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('You must be logged in to edit posts');
+    }
+
+    try {
+      const response = await fetch(`https://moonmovement.onrender.com/api/posts/${post.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ title, content })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update post');
+      }
+
+      setPost({ ...post, title, content });
+    } catch (error) {
+      console.error('Error updating post:', error);
+      throw error;
     }
   };
   
@@ -287,6 +323,8 @@ const PostDetail = () => {
                   commentCount={post.commentCount}
                   postId={post.id}
                   subreddit={post.subreddit}
+                  authorUsername={authorName}
+                  onEditClick={() => setIsEditDialogOpen(true)}
                 />
               </div>
             </div>
@@ -304,11 +342,20 @@ const PostDetail = () => {
                   comments={comments} 
                   postId={post.id}
                   onReplySubmit={handleReplySubmit}
+                  onCommentUpdate={fetchComments}
                 />
               </div>
             )}
           </div>
         </div>
+
+        <EditPostDialog
+          isOpen={isEditDialogOpen}
+          onClose={() => setIsEditDialogOpen(false)}
+          onSave={handleEditPost}
+          initialTitle={post.title}
+          initialContent={post.content}
+        />
       </MainLayout>
     );
   }
@@ -350,6 +397,8 @@ const PostDetail = () => {
                   commentCount={post.commentCount}
                   postId={post.id}
                   subreddit={post.subreddit}
+                  authorUsername={authorName}
+                  onEditClick={() => setIsEditDialogOpen(true)}
                 />
               </div>
             </div>
@@ -371,6 +420,7 @@ const PostDetail = () => {
                   comments={comments} 
                   postId={post.id}
                   onReplySubmit={handleReplySubmit}
+                  onCommentUpdate={fetchComments}
                 />
               </>
             ) : (
@@ -382,6 +432,14 @@ const PostDetail = () => {
           
         </div>
       </div>
+
+      <EditPostDialog
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        onSave={handleEditPost}
+        initialTitle={post.title}
+        initialContent={post.content}
+      />
     </MainLayout>
   );
 };

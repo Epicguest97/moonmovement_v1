@@ -15,9 +15,10 @@ interface CommentListProps {
   comments: CommentType[];
   postId: string;
   onReplySubmit: (parentId: string, content: string) => Promise<void>;
+  onCommentUpdate?: () => void;
 }
 
-const CommentList = ({ comments, postId, onReplySubmit }: CommentListProps) => {
+const CommentList = ({ comments, postId, onReplySubmit, onCommentUpdate }: CommentListProps) => {
   return (
     <div className="mt-4">
       {comments.map(comment => (
@@ -26,6 +27,7 @@ const CommentList = ({ comments, postId, onReplySubmit }: CommentListProps) => {
           comment={comment} 
           postId={postId}
           onReplySubmit={onReplySubmit}
+          onCommentUpdate={onCommentUpdate}
         />
       ))}
     </div>

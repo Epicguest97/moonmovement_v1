@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { CommentType } from './CommentList';
-import { MessageSquare, Share, MoreHorizontal, ArrowUp, ArrowDown } from 'lucide-react';
+import { MessageSquare, Share, MoreHorizontal, ArrowUp, ArrowDown, Edit } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import EditCommentDialog from './EditCommentDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,15 +19,22 @@ interface CommentProps {
   depth?: number;
   postId: string;
   onReplySubmit: (parentId: string, content: string) => Promise<void>;
+  onCommentUpdate?: () => void;
 }
 
-const Comment = ({ comment, depth = 0, postId, onReplySubmit }: CommentProps) => {
+const Comment = ({ comment, depth = 0, postId, onReplySubmit, onCommentUpdate }: CommentProps) => {
   const [isReplying, setIsReplying] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [voteStatus, setVoteStatus] = useState<'up' | 'down' | null>(null);
   const [voteScore, setVoteScore] = useState(comment.voteScore);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [commentContent, setCommentContent] = useState(comment.content);
   const maxDepth = 5;
+
+  // Check if current user is the author
+  const currentUsername = localStorage.getItem('username');
+  const isAuthor = currentUsername === comment.author;
 
   const handleVote = (direction: 'up' | 'down') => {
     if (voteStatus === direction) {
@@ -68,6 +76,37 @@ const Comment = ({ comment, depth = 0, postId, onReplySubmit }: CommentProps) =>
     }
   };
 
+  const handleEditComment = async (newContent: string) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('You must be logged in to edit comments');
+    }
+
+    try {
+      const response = await fetch(`https://moonmovement.onrender.com/api/comments/${comment.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ content: newContent })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update comment');
+      }
+
+      setCommentContent(newContent);
+      if (onCommentUpdate) {
+        onCommentUpdate();
+      }
+    } catch (error) {
+      console.error('Error updating comment:', error);
+      throw error;
+    }
+  };
+
   // Format score for display
   const formatScore = (score: number): string => {
     if (score >= 1000) {
@@ -92,9 +131,15 @@ const Comment = ({ comment, depth = 0, postId, onReplySubmit }: CommentProps) =>
           </Link>
           <span className="mx-1">•</span>
           <span>{comment.timestamp}</span>
+          {isAuthor && (
+            <>
+              <span className="mx-1">•</span>
+              <span className="text-primary text-xs">you</span>
+            </>
+          )}
         </div>
         
-        <div className="text-sm mb-2 text-foreground">{comment.content}</div>
+        <div className="text-sm mb-2 text-foreground">{commentContent}</div>
         
         <div className="flex items-center text-xs text-muted-foreground">
           <div className="flex items-center mr-2">
@@ -147,6 +192,18 @@ const Comment = ({ comment, depth = 0, postId, onReplySubmit }: CommentProps) =>
             <Share size={14} className="mr-1" />
             <span>Share</span>
           </Button>
+
+          {isAuthor && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="flex items-center text-xs text-muted-foreground ml-1 p-1 h-auto hover:text-primary"
+              onClick={() => setIsEditDialogOpen(true)}
+            >
+              <Edit size={14} className="mr-1" />
+              <span>Edit</span>
+            </Button>
+          )}
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -208,11 +265,19 @@ const Comment = ({ comment, depth = 0, postId, onReplySubmit }: CommentProps) =>
                 depth={depth + 1} 
                 postId={postId}
                 onReplySubmit={onReplySubmit}
+                onCommentUpdate={onCommentUpdate}
               />
             ))}
           </div>
         )}
       </div>
+
+      <EditCommentDialog
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        onSave={handleEditComment}
+        initialContent={commentContent}
+      />
     </div>
   );
 };
