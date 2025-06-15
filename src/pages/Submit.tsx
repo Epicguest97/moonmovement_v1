@@ -78,14 +78,17 @@ const Submit = () => {
     
     setIsUploading(true);
     try {
-      // For now, let's use base64 as a fallback
-      // In production, you should use a proper image hosting service
+      console.log('Processing file:', files[0].name, 'Size:', (files[0].size / 1024 / 1024).toFixed(2) + 'MB');
+      
+      // Convert to base64 for display
       const base64Url = await convertToBase64(files[0]);
       setImageUrl(base64Url);
       setUploadedFiles(files);
+      
+      console.log('Image processed successfully');
     } catch (error) {
       console.error('Error processing image:', error);
-      alert('Failed to process image. Please try again.');
+      alert('Failed to process image. Please try a smaller image.');
     } finally {
       setIsUploading(false);
     }
@@ -260,7 +263,7 @@ const Submit = () => {
                   <FileUploader 
                     onFilesSelected={handleFilesSelected}
                     maxFiles={1}
-                    maxSizeMB={10}
+                    maxSizeMB={2}
                   />
                 )}
                 
@@ -284,6 +287,11 @@ const Submit = () => {
                         <X className="h-4 w-4 text-white" />
                       </button>
                     </div>
+                    {uploadedFiles.length > 0 && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Size: {(uploadedFiles[0].size / 1024 / 1024).toFixed(2)} MB
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
