@@ -140,9 +140,33 @@ const Communities = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className="container mx-auto py-8">
+        <div className="space-y-6 w-full max-w-full overflow-x-hidden">
+          {/* Hero Section Skeleton */}
+          <div className="relative rounded-lg overflow-hidden h-[350px]">
+            <div 
+              className="absolute inset-0 bg-cover bg-center"
+              style={{
+                backgroundImage: 'url(/banner.jpeg)',
+                backgroundPosition: 'center 30%'
+              }}
+            >
+            </div>
+            <div className="relative z-10 p-8 text-white h-full flex flex-col justify-between">
+              <div className="absolute top-6 right-6 flex gap-4 animate-pulse">
+                <div className="text-center bg-sidebar/60 backdrop-blur-sm border border-sidebar-border/50 rounded-lg px-3 py-2">
+                  <div className="h-6 bg-white/20 rounded w-12 mb-1"></div>
+                  <div className="h-4 bg-white/20 rounded w-16"></div>
+                </div>
+              </div>
+              
+              <div className="w-full">
+                <div className="h-10 bg-white/20 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+          
           <div className="text-center">
-            <p className="text-sidebar-foreground">Loading communities...</p>
+            <p className="text-gray-300">Loading communities...</p>
           </div>
         </div>
       </MainLayout>
@@ -151,111 +175,166 @@ const Communities = () => {
 
   return (
     <MainLayout>
-      <div className="container mx-auto py-8 px-4">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-sidebar-foreground mb-4">Communities</h1>
-          
-          {/* Search and Create */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                type="text"
-                placeholder="Search communities..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-sidebar border-sidebar-border text-sidebar-foreground"
-              />
+      <div className="space-y-6 w-full max-w-full overflow-x-hidden">
+        {/* Hero Section */}
+        <div className="relative rounded-lg overflow-hidden h-[350px]">
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: 'url(/banner.jpeg)',
+              backgroundPosition: 'center 30%'
+            }}
+          >
+          </div>
+          <div className="relative z-10 p-6 pb-5 text-white flex flex-col justify-end h-full">
+            {/* Stats in top right */}
+            <div className="absolute top-6 right-6 flex gap-4">
+              <div className="text-center bg-sidebar/60 hover:bg-sidebar/80 backdrop-blur-sm border border-sidebar-border/50 rounded-lg px-3 py-2 transition-all duration-300">
+                <div className="text-lg font-bold text-purple-400">{communities.length}</div>
+                <div className="text-xs text-gray-200 flex items-center gap-1">
+                  <Users className="w-3 h-3" />
+                  Communities
+                </div>
+              </div>
             </div>
-            {isLoggedIn && (
-              <Button 
-                onClick={() => navigate('/create-community')}
-                className="bg-sidebar-primary hover:bg-sidebar-primary/90 text-white"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Create Community
-              </Button>
-            )}
+
+            {/* Full Width Glassy Search bar */}
+            <div className="w-full">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-300 w-4 h-4" />
+                <Input 
+                  placeholder="Search communities..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="bg-sidebar/60 hover:bg-sidebar/80 border-sidebar-border/50 text-white placeholder:text-gray-300 rounded-full px-4 py-2 text-sm backdrop-blur-sm w-full pl-10"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
-        {error && (
-          <div className="text-red-400 mb-4 text-center">
-            {error}
+        {/* Search Results Info */}
+        {searchTerm && (
+          <div className="bg-sidebar/30 border border-sidebar-border rounded-lg p-4">
+            <p className="text-foreground break-words">
+              Showing results for: <span className="font-semibold break-all">"{searchTerm}"</span>
+              {filteredCommunities.length > 0 && (
+                <span className="text-muted-foreground ml-2">({filteredCommunities.length} results)</span>
+              )}
+            </p>
           </div>
         )}
 
-        {/* Communities Grid - 2 per row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredCommunities.map((community) => (
-            <Card key={community.id} className="overflow-hidden bg-sidebar border-sidebar-border hover:border-sidebar-primary/50 transition-all duration-200">
-              {/* Banner */}
-              <div 
-                className="h-24 bg-gradient-to-r from-sidebar-primary to-sidebar-primary/80"
-                style={community.bannerImage ? { 
-                  backgroundImage: `url(${community.bannerImage})`, 
-                  backgroundSize: 'cover', 
-                  backgroundPosition: 'center' 
-                } : {}}
-              />
-              
-              <CardContent className="relative pt-8 pb-4">
-                {/* Community Icon */}
-                <div className="absolute -top-6 left-4">
-                  <div className="w-12 h-12 bg-sidebar-primary text-white rounded-full flex items-center justify-center border-4 border-sidebar">
-                    {community.icon ? (
-                      <img src={community.icon} alt={community.name} className="w-full h-full rounded-full object-cover" />
-                    ) : (
-                      <span className="text-lg font-bold">r/</span>
-                    )}
-                  </div>
+        {/* Single Communities Container */}
+        <div className="space-y-0 w-full max-w-full">
+          {/* Header section with rounded top corners */}
+          <div className="bg-sidebar border border-sidebar-border rounded-t-lg border-b-0 overflow-x-hidden">
+            <div className="border-t border-sidebar-border p-4">
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <div>
+                  <h1 className="text-xl font-bold text-sidebar-foreground">Communities</h1>
+                  <p className="text-muted-foreground text-sm">Discover and join amazing communities</p>
                 </div>
-
-                <div className="ml-16">
-                  <h3 
-                    className="text-xl font-bold text-sidebar-foreground mb-2 cursor-pointer hover:text-sidebar-primary"
-                    onClick={() => navigate(`/r/${community.name}`)}
-                  >
-                    r/{community.name}
-                  </h3>
-                  
-                  <p className="text-gray-300 text-sm mb-4 line-clamp-2">{community.description}</p>
-                  
-                  <div className="flex items-center gap-4 text-sm text-gray-400 mb-4">
-                    <div className="flex items-center gap-1">
-                      <Users size={14} />
-                      <span>{formatMemberCount(community.memberCount)} members</span>
-                    </div>
-                    <div>
-                      <span>Created {new Date(community.createdAt).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                  
+                {isLoggedIn && (
                   <Button 
-                    onClick={() => handleJoinLeave(community.id, community.isJoined)}
-                    className={community.isJoined 
-                      ? "w-full bg-gray-600 hover:bg-gray-700 text-white" 
-                      : "w-full bg-sidebar-primary hover:bg-sidebar-primary/90 text-white"
-                    }
-                    size="sm"
+                    onClick={() => navigate('/create-community')}
+                    className="bg-sidebar-primary hover:bg-sidebar-primary/90 text-white w-full sm:w-auto"
                   >
-                    {community.isJoined ? 'Leave' : 'Join'}
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Community
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {filteredCommunities.length === 0 && !loading && (
-          <div className="text-center py-12">
-            <p className="text-gray-400 text-lg mb-4">No communities found</p>
-            {searchTerm && (
-              <p className="text-gray-500">Try adjusting your search terms</p>
-            )}
+                )}
+              </div>
+              
+              <div className="text-xs text-gray-400 mt-2">
+                Showing {filteredCommunities.length} communities
+              </div>
+            </div>
           </div>
-        )}
+
+          {/* Communities Content */}
+          {error && (
+            <div className="bg-sidebar border border-sidebar-border rounded-b-lg border-t-0 p-4">
+              <div className="text-red-400 text-center">
+                {error}
+              </div>
+            </div>
+          )}
+
+          {filteredCommunities.length === 0 && !loading ? (
+            <div className="bg-sidebar border border-sidebar-border rounded-b-lg border-t-0 p-12 text-center">
+              <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-xl font-semibold mb-2">No Communities Found</h3>
+              <p className="text-muted-foreground">
+                {searchTerm ? 'No communities match your search criteria.' : 'Be the first to create a community!'}
+              </p>
+            </div>
+          ) : (
+            <div className="bg-sidebar border border-sidebar-border rounded-b-lg border-t-0 p-6">
+              {/* Communities Grid - 2 per row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {filteredCommunities.map((community) => (
+                  <Card key={community.id} className="overflow-hidden bg-sidebar border-sidebar-border hover:border-sidebar-primary/50 transition-all duration-200">
+                    {/* Banner */}
+                    <div 
+                      className="h-24 bg-gradient-to-r from-sidebar-primary to-sidebar-primary/80"
+                      style={community.bannerImage ? { 
+                        backgroundImage: `url(${community.bannerImage})`, 
+                        backgroundSize: 'cover', 
+                        backgroundPosition: 'center' 
+                      } : {}}
+                    />
+                    
+                    <CardContent className="relative pt-8 pb-4">
+                      {/* Community Icon */}
+                      <div className="absolute -top-6 left-4">
+                        <div className="w-12 h-12 bg-sidebar-primary text-white rounded-full flex items-center justify-center border-4 border-sidebar">
+                          {community.icon ? (
+                            <img src={community.icon} alt={community.name} className="w-full h-full rounded-full object-cover" />
+                          ) : (
+                            <span className="text-lg font-bold">r/</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="ml-16">
+                        <h3 
+                          className="text-xl font-bold text-sidebar-foreground mb-2 cursor-pointer hover:text-sidebar-primary"
+                          onClick={() => navigate(`/r/${community.name}`)}
+                        >
+                          r/{community.name}
+                        </h3>
+                        
+                        <p className="text-gray-300 text-sm mb-4 line-clamp-2">{community.description}</p>
+                        
+                        <div className="flex items-center gap-4 text-sm text-gray-400 mb-4">
+                          <div className="flex items-center gap-1">
+                            <Users size={14} />
+                            <span>{formatMemberCount(community.memberCount)} members</span>
+                          </div>
+                          <div>
+                            <span>Created {new Date(community.createdAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                        
+                        <Button 
+                          onClick={() => handleJoinLeave(community.id, community.isJoined)}
+                          className={community.isJoined 
+                            ? "w-full bg-gray-600 hover:bg-gray-700 text-white" 
+                            : "w-full bg-sidebar-primary hover:bg-sidebar-primary/90 text-white"
+                          }
+                          size="sm"
+                        >
+                          {community.isJoined ? 'Leave' : 'Join'}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </MainLayout>
   );
