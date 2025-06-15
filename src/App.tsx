@@ -50,6 +50,7 @@ function App() {
               <Route path="/manage-communities" element={<ManageCommunities />} />
               <Route path="/chat" element={<Chat />} />
               <Route path="/events" element={<Events />} />
+              <Route path="/events/:id" element={<EventDetail />} />
               <Route path="/districts" element={<IndianDistricts />} />
               <Route path="/u/:username" element={<UserProfile />} />
               <Route path="/search" element={<Search />} />

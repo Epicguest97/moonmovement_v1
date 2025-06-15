@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, MapPin, Users, Clock, Share } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -49,6 +50,8 @@ const EventCard = ({
   isUserRegistered,
   isLoggedIn
 }: EventCardProps) => {
+  const navigate = useNavigate();
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -60,13 +63,17 @@ const EventCard = ({
   const isEventFull = event.maxAttendees ? event._count.registrations >= event.maxAttendees : false;
   const isRegistered = isUserRegistered(event);
 
+  const handleCardClick = () => {
+    navigate(`/events/${event.id}`);
+  };
+
   return (
-    <Card className={`event-card overflow-hidden bg-sidebar border-0
+    <Card className={`event-card overflow-hidden bg-sidebar border-0 cursor-pointer hover:bg-sidebar-accent/50 transition-colors
       ${!isFirst && !isLast ? "rounded-none" : ""}
       ${isFirst && !isLast ? "rounded-t-lg rounded-b-none" : ""}
       ${!isFirst && isLast ? "rounded-b-lg rounded-t-none" : ""}
       ${isFirst && isLast ? "" : ""}
-    `}>
+    `} onClick={handleCardClick}>
       <div className="flex flex-col">
         {event.imageUrl && (
           <div className="w-full md:hidden">
@@ -105,7 +112,7 @@ const EventCard = ({
               <span className="text-gray-500">by {event.organizer.username}</span>
             </div>
             
-            <div className="block cursor-pointer" onClick={() => onEventSelect(event)}>
+            <div>
               <h3 className="text-base sm:text-lg font-bold mb-2 text-white hover:text-sidebar-primary transition-colors">
                 {event.title}
               </h3>
@@ -131,7 +138,10 @@ const EventCard = ({
                   variant="outline" 
                   size="sm" 
                   className="text-xs border-sidebar-border bg-transparent text-sidebar-primary hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  onClick={() => onEventSelect(event)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEventSelect(event);
+                  }}
                 >
                   View Details
                 </Button>
@@ -150,7 +160,10 @@ const EventCard = ({
               <div className="flex gap-2">
                 {isLoggedIn && !isRegistered && !isEventFull && (
                   <Button
-                    onClick={() => onRegister(event.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRegister(event.id);
+                    }}
                     size="sm"
                     className="text-xs"
                   >
