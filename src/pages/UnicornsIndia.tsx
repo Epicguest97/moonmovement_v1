@@ -96,7 +96,7 @@ const UnicornsIndia = () => {
       <MainLayout>
         <div className="space-y-6 w-full max-w-full overflow-x-hidden">
           {/* Hero Section Skeleton */}
-          <div className="relative rounded-lg overflow-hidden">
+          <div className="relative rounded-lg overflow-hidden h-[300px]">
             <div 
               className="absolute inset-0 bg-cover bg-center"
               style={{
@@ -106,8 +106,8 @@ const UnicornsIndia = () => {
             >
               <div className="absolute inset-0 bg-black/60"></div>
             </div>
-            <div className="relative z-10 p-8 text-white text-center">
-              <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="relative z-10 p-8 text-white flex flex-col justify-end h-full">
+              <div className="flex items-center gap-3 mb-4">
                 <Trophy className="w-8 h-8 text-yellow-500 animate-pulse" />
                 <div className="h-12 bg-white/20 rounded w-64 animate-pulse"></div>
                 <Crown className="w-8 h-8 text-yellow-500 animate-pulse" />
@@ -142,8 +142,8 @@ const UnicornsIndia = () => {
   return (
     <MainLayout>
       <div className="space-y-6 w-full max-w-full overflow-x-hidden">
-        {/* Hero Section - Similar to main page */}
-        <div className="relative rounded-lg overflow-hidden">
+        {/* Hero Section - Similar to home page */}
+        <div className="relative rounded-lg overflow-hidden h-[300px]">
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{
@@ -153,7 +153,7 @@ const UnicornsIndia = () => {
           >
             <div className="absolute inset-0 bg-black/60"></div>
           </div>
-          <div className="relative z-10 p-8 text-white">
+          <div className="relative z-10 p-8 text-white flex flex-col justify-end h-full">
             <div className="text-xs opacity-90 mb-2">Hall of Fame</div>
             <div className="flex items-center gap-3 mb-4">
               <Trophy className="w-8 h-8 text-yellow-500" />
@@ -162,9 +162,6 @@ const UnicornsIndia = () => {
               </h1>
               <Crown className="w-8 h-8 text-yellow-500" />
             </div>
-            <p className="text-lg text-gray-200 mb-6 max-w-2xl">
-              The most valuable startups and unicorns shaping India's innovation landscape
-            </p>
             
             {/* Search bar in hero */}
             <div className="relative max-w-md">
@@ -180,208 +177,215 @@ const UnicornsIndia = () => {
         </div>
 
         {/* Stats and Quick Filters */}
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap gap-3">
-            <div className="flex items-center gap-2 bg-sidebar px-4 py-2 rounded-full border border-sidebar-border">
-              <Building2 className="w-4 h-4 text-sidebar-primary" />
-              <span className="text-sm font-medium text-white">{startups.length} Companies</span>
+        <div className="bg-sidebar border border-sidebar-border rounded-lg p-4">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+            <div className="flex flex-wrap gap-3">
+              <div className="flex items-center gap-2 bg-sidebar-accent px-3 py-2 rounded-full">
+                <Building2 className="w-4 h-4 text-sidebar-primary" />
+                <span className="text-sm font-medium text-white">{startups.length} Companies</span>
+              </div>
+              <div className="flex items-center gap-2 bg-sidebar-accent px-3 py-2 rounded-full">
+                <TrendingUp className="w-4 h-4 text-green-500" />
+                <span className="text-sm font-medium text-white">{startups.filter(s => s.isUnicorn).length} Unicorns</span>
+              </div>
+              <div className="flex items-center gap-2 bg-sidebar-accent px-3 py-2 rounded-full">
+                <MapPin className="w-4 h-4 text-blue-500" />
+                <span className="text-sm font-medium text-white">{cities.length} Cities</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 bg-sidebar px-4 py-2 rounded-full border border-sidebar-border">
-              <TrendingUp className="w-4 h-4 text-green-500" />
-              <span className="text-sm font-medium text-white">{startups.filter(s => s.isUnicorn).length} Unicorns</span>
-            </div>
-            <div className="flex items-center gap-2 bg-sidebar px-4 py-2 rounded-full border border-sidebar-border">
-              <MapPin className="w-4 h-4 text-blue-500" />
-              <span className="text-sm font-medium text-white">{cities.length} Cities</span>
+            
+            <div className="flex gap-2">
+              <Button 
+                variant={filterType === 'all' ? 'default' : 'outline'} 
+                size="sm"
+                onClick={() => setFilterType('all')}
+                className="rounded-full"
+              >
+                All
+              </Button>
+              <Button 
+                variant={filterType === 'unicorns' ? 'default' : 'outline'} 
+                size="sm"
+                onClick={() => setFilterType('unicorns')}
+                className="rounded-full"
+              >
+                🦄 Unicorns
+              </Button>
+              <Button 
+                variant={filterType === 'sunicorns' ? 'default' : 'outline'} 
+                size="sm"
+                onClick={() => setFilterType('sunicorns')}
+                className="rounded-full"
+              >
+                🌟 Soonicorns
+              </Button>
             </div>
           </div>
+
+          {/* Advanced Filters */}
+          <div className="flex items-center gap-2 mb-4">
+            <Filter className="w-4 h-4 text-sidebar-primary" />
+            <h3 className="font-medium text-white">Filters</h3>
+          </div>
           
-          <div className="flex gap-2">
-            <Button 
-              variant={filterType === 'all' ? 'default' : 'outline'} 
-              size="sm"
-              onClick={() => setFilterType('all')}
-              className="rounded-full"
-            >
-              All
-            </Button>
-            <Button 
-              variant={filterType === 'unicorns' ? 'default' : 'outline'} 
-              size="sm"
-              onClick={() => setFilterType('unicorns')}
-              className="rounded-full"
-            >
-              🦄 Unicorns
-            </Button>
-            <Button 
-              variant={filterType === 'sunicorns' ? 'default' : 'outline'} 
-              size="sm"
-              onClick={() => setFilterType('sunicorns')}
-              className="rounded-full"
-            >
-              🌟 Soonicorns
-            </Button>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Select value={sectorFilter} onValueChange={setSectorFilter}>
+              <SelectTrigger className="bg-sidebar-accent border-sidebar-border">
+                <SelectValue placeholder="Sector" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Sectors</SelectItem>
+                {sectors.map(sector => (
+                  <SelectItem key={sector} value={sector}>{sector}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={cityFilter} onValueChange={setCityFilter}>
+              <SelectTrigger className="bg-sidebar-accent border-sidebar-border">
+                <SelectValue placeholder="City" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Cities</SelectItem>
+                {cities.map(city => (
+                  <SelectItem key={city} value={city}>{city}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={yearFilter} onValueChange={setYearFilter}>
+              <SelectTrigger className="bg-sidebar-accent border-sidebar-border">
+                <SelectValue placeholder="Founded After" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Years</SelectItem>
+                {yearRanges.map(year => (
+                  <SelectItem key={year} value={year}>{year}+</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+              <SelectTrigger className="bg-sidebar-accent border-sidebar-border">
+                <SelectValue placeholder="Sort By" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="valuation">Valuation</SelectItem>
+                <SelectItem value="founded">Founded Year</SelectItem>
+                <SelectItem value="name">Name</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        {/* Advanced Filters - Collapsible */}
-        <Card className="bg-sidebar border-sidebar-border">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Filter className="w-4 h-4 text-sidebar-primary" />
-              <h3 className="font-medium text-white">Advanced Filters</h3>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Select value={sectorFilter} onValueChange={setSectorFilter}>
-                <SelectTrigger className="bg-sidebar-accent border-sidebar-border">
-                  <SelectValue placeholder="Sector" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Sectors</SelectItem>
-                  {sectors.map(sector => (
-                    <SelectItem key={sector} value={sector}>{sector}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={cityFilter} onValueChange={setCityFilter}>
-                <SelectTrigger className="bg-sidebar-accent border-sidebar-border">
-                  <SelectValue placeholder="City" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Cities</SelectItem>
-                  {cities.map(city => (
-                    <SelectItem key={city} value={city}>{city}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={yearFilter} onValueChange={setYearFilter}>
-                <SelectTrigger className="bg-sidebar-accent border-sidebar-border">
-                  <SelectValue placeholder="Founded After" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Years</SelectItem>
-                  {yearRanges.map(year => (
-                    <SelectItem key={year} value={year}>{year}+</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-                <SelectTrigger className="bg-sidebar-accent border-sidebar-border">
-                  <SelectValue placeholder="Sort By" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="valuation">Valuation</SelectItem>
-                  <SelectItem value="founded">Founded Year</SelectItem>
-                  <SelectItem value="name">Name</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Results */}
+        {/* Results - Big rectangle container like posts */}
         {filteredCompanies.length > 0 ? (
-          <>
-            <div className="text-sm text-gray-400">
-              Showing {filteredCompanies.length} of {startups.length} companies
+          <div className="bg-sidebar border border-sidebar-border rounded-lg overflow-hidden">
+            <div className="p-4 border-b border-sidebar-border">
+              <div className="text-sm text-gray-400">
+                Showing {filteredCompanies.length} of {startups.length} companies
+              </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredCompanies.map((company, index) => (
-                <Card key={company.id} className="group bg-sidebar border-sidebar-border hover:border-sidebar-primary transition-all duration-300">
-                  <CardContent className="p-0">
-                    <div className="relative">
-                      {/* Rank Badge */}
-                      <div className="absolute top-3 left-3 z-10">
-                        <div className={`px-2 py-1 rounded-full text-xs font-bold ${
-                          index === 0 ? 'bg-yellow-500 text-black' :
-                          index === 1 ? 'bg-gray-300 text-black' :
-                          index === 2 ? 'bg-amber-600 text-white' :
-                          'bg-sidebar-accent text-sidebar-accent-foreground'
-                        }`}>
-                          #{index + 1}
-                        </div>
-                      </div>
+            <div className="p-4 space-y-4">
+              {Array.from({ length: Math.ceil(filteredCompanies.length / 3) }, (_, rowIndex) => (
+                <div key={rowIndex} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {filteredCompanies.slice(rowIndex * 3, (rowIndex + 1) * 3).map((company, index) => {
+                    const globalIndex = rowIndex * 3 + index;
+                    return (
+                      <Card key={company.id} className="group bg-sidebar-accent border-sidebar-border hover:border-sidebar-primary transition-all duration-300">
+                        <CardContent className="p-4">
+                          <div className="relative">
+                            {/* Rank Badge */}
+                            <div className="absolute top-0 left-0 z-10">
+                              <div className={`px-2 py-1 rounded-full text-xs font-bold ${
+                                globalIndex === 0 ? 'bg-yellow-500 text-black' :
+                                globalIndex === 1 ? 'bg-gray-300 text-black' :
+                                globalIndex === 2 ? 'bg-amber-600 text-white' :
+                                'bg-sidebar-primary text-white'
+                              }`}>
+                                #{globalIndex + 1}
+                              </div>
+                            </div>
 
-                      {/* Status Badge */}
-                      <div className="absolute top-3 right-3 z-10">
-                        {company.isUnicorn ? (
-                          <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-xs font-bold">
-                            🦄
-                          </div>
-                        ) : (
-                          <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold">
-                            🌟
-                          </div>
-                        )}
-                      </div>
+                            {/* Status Badge */}
+                            <div className="absolute top-0 right-0 z-10">
+                              {company.isUnicorn ? (
+                                <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                                  🦄
+                                </div>
+                              ) : (
+                                <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                                  🌟
+                                </div>
+                              )}
+                            </div>
 
-                      {/* Company Header */}
-                      <div className="h-32 bg-gradient-to-br from-sidebar-accent to-sidebar-primary/20 flex items-center justify-center relative">
-                        {company.logoUrl ? (
-                          <img 
-                            src={company.logoUrl} 
-                            alt={`${company.name} logo`} 
-                            className="w-16 h-16 object-contain rounded-full bg-white p-2"
-                          />
-                        ) : (
-                          <div className="w-16 h-16 bg-sidebar-primary rounded-full flex items-center justify-center">
-                            <Building2 className="w-8 h-8 text-white" />
-                          </div>
-                        )}
-                      </div>
+                            {/* Company Logo */}
+                            <div className="flex justify-center mb-4 pt-8">
+                              {company.logoUrl ? (
+                                <img 
+                                  src={company.logoUrl} 
+                                  alt={`${company.name} logo`} 
+                                  className="w-12 h-12 object-contain rounded-full bg-white p-1"
+                                />
+                              ) : (
+                                <div className="w-12 h-12 bg-sidebar-primary rounded-full flex items-center justify-center">
+                                  <Building2 className="w-6 h-6 text-white" />
+                                </div>
+                              )}
+                            </div>
 
-                      {/* Company Info */}
-                      <div className="p-4 space-y-3">
-                        <div>
-                          <Link to={`/startup/${company.id}`}>
-                            <h3 className="font-bold text-white hover:text-sidebar-primary transition-colors cursor-pointer">
-                              {company.name}
-                            </h3>
-                          </Link>
-                          <p className="text-gray-400 text-sm line-clamp-2">{company.description}</p>
-                        </div>
+                            {/* Company Info */}
+                            <div className="space-y-3 text-center">
+                              <div>
+                                <Link to={`/startup/${company.id}`}>
+                                  <h3 className="font-bold text-white hover:text-sidebar-primary transition-colors cursor-pointer">
+                                    {company.name}
+                                  </h3>
+                                </Link>
+                                <p className="text-gray-400 text-sm line-clamp-2 mt-1">{company.description}</p>
+                              </div>
 
-                        <div className="space-y-2 text-xs">
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Valuation</span>
-                            <span className="font-bold text-green-400">{company.valuation}</span>
-                          </div>
-                          
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Sector</span>
-                            <span className="text-gray-300">{company.sector}</span>
-                          </div>
-                          
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Location</span>
-                            <span className="text-gray-300">{company.city}</span>
-                          </div>
-                          
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Founded</span>
-                            <span className="text-gray-300">{company.foundedYear}</span>
-                          </div>
-                        </div>
+                              <div className="space-y-2 text-xs">
+                                <div className="flex justify-between">
+                                  <span className="text-gray-400">Valuation</span>
+                                  <span className="font-bold text-green-400">{company.valuation}</span>
+                                </div>
+                                
+                                <div className="flex justify-between">
+                                  <span className="text-gray-400">Sector</span>
+                                  <span className="text-gray-300">{company.sector}</span>
+                                </div>
+                                
+                                <div className="flex justify-between">
+                                  <span className="text-gray-400">Location</span>
+                                  <span className="text-gray-300">{company.city}</span>
+                                </div>
+                                
+                                <div className="flex justify-between">
+                                  <span className="text-gray-400">Founded</span>
+                                  <span className="text-gray-300">{company.foundedYear}</span>
+                                </div>
+                              </div>
 
-                        <Link to={`/startup/${company.id}`}>
-                          <Button size="sm" className="w-full bg-sidebar-primary hover:bg-sidebar-primary/90">
-                            View Details
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                              <Link to={`/startup/${company.id}`}>
+                                <Button size="sm" className="w-full bg-sidebar-primary hover:bg-sidebar-primary/90 mt-3">
+                                  View Details
+                                </Button>
+                              </Link>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
               ))}
             </div>
-          </>
+          </div>
         ) : (
-          <div className="text-center py-16">
+          <div className="bg-sidebar border border-sidebar-border rounded-lg p-8 text-center">
             <Building2 className="w-16 h-16 text-gray-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-400 mb-2">No companies found</h3>
             <p className="text-gray-500 mb-4">Try adjusting your search or filters.</p>
