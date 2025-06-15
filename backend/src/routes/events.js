@@ -87,9 +87,10 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { title, description, location, eventDate, eventTime, maxAttendees, imageUrl, category } = req.body;
-    const { organizerName = "Anonymous" } = req.body;
+    // Extract organizerName but don't use it in the Prisma create data
+    const { organizerName } = req.body;
     
-    // Find or create a system user without the isActive field
+    // Find or create a system user
     let systemUser = await prisma.user.findFirst({
       where: { username: "system" }
     });
@@ -99,8 +100,7 @@ router.post('/', async (req, res) => {
         data: {
           username: "system",
           email: "system@example.com",
-          password: "systempassword123" // This won't be used
-          // Removed isActive field
+          password: "systempassword123" 
         }
       });
     }
@@ -115,9 +115,8 @@ router.post('/', async (req, res) => {
         maxAttendees: maxAttendees ? parseInt(maxAttendees) : null,
         imageUrl,
         category,
-        organizerId: systemUser.id,
-        // Store the provided organizer name
-        organizerName
+        organizerId: systemUser.id
+        // Removed organizerName field - it doesn't exist in the schema
       },
       include: {
         organizer: {
