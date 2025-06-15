@@ -153,7 +153,7 @@ const Events = () => {
             <div 
               className="absolute inset-0 bg-cover bg-center"
               style={{
-                backgroundImage: 'url(/banner.jpeg)',
+                backgroundImage: 'url(/events.jpeg)',
                 backgroundPosition: 'center 30%'
               }}
             >
@@ -188,7 +188,7 @@ const Events = () => {
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: 'url(/banner.jpeg)',
+              backgroundImage: 'url(/events.jpeg)',
               backgroundPosition: 'center 30%'
             }}
           >
