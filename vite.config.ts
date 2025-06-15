@@ -10,8 +10,18 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     watch: {
-      usePolling: false,
-      ignored: ['**/node_modules/**', '**/dist/**', '**/.git/**']
+      usePolling: true,
+      interval: 1000,
+      ignored: [
+        '**/node_modules/**',
+        '**/dist/**', 
+        '**/.git/**',
+        '**/coverage/**',
+        '**/.nyc_output/**',
+        '**/build/**',
+        '**/tmp/**',
+        '**/temp/**'
+      ]
     }
   },
   plugins: [
@@ -24,4 +34,7 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    exclude: ['lovable-tagger']
+  }
 }));
