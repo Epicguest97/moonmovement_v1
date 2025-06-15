@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 const prisma = require('../utils/prisma');
@@ -85,9 +84,27 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create new event
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { title, description, location, eventDate, eventTime, maxAttendees, imageUrl, category } = req.body;
+    // Add organizer username if provided, otherwise use "Anonymous"
+    const { organizerName = "Anonymous" } = req.body;
+    
+    // Create a system user for anonymous posts if it doesn't exist
+    let systemUser = await prisma.user.findFirst({
+      where: { username: "system" }
+    });
+    
+    if (!systemUser) {
+      systemUser = await prisma.user.create({
+        data: {
+          username: "system",
+          email: "system@example.com",
+          password: "systempassword123", // This won't be used
+          isActive: true
+        }
+      });
+    }
     
     const event = await prisma.event.create({
       data: {
@@ -99,7 +116,9 @@ router.post('/', authenticateToken, async (req, res) => {
         maxAttendees: maxAttendees ? parseInt(maxAttendees) : null,
         imageUrl,
         category,
-        organizerId: req.user.userId
+        organizerId: systemUser.id,
+        // Store the provided organizer name as a property
+        organizerName
       },
       include: {
         organizer: {

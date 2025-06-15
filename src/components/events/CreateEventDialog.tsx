@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Calendar, MapPin, Clock, Users } from 'lucide-react';
 import {
@@ -48,16 +47,17 @@ const CreateEventDialog = ({ open, onOpenChange, onEventCreated }: CreateEventDi
 
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      // Remove the token from the request
       const response = await fetch('https://moonmovement.onrender.com/api/events', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           ...formData,
           maxAttendees: formData.maxAttendees ? parseInt(formData.maxAttendees) : null,
+          // Optionally add organizer name if you want to display who created it
+          organizerName: "Guest User"
         }),
       });
 
