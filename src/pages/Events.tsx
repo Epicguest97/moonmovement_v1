@@ -1,15 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
-import { Calendar, MapPin, Users, Clock, Plus, Filter, Search } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, Plus, Search } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import CreateEventDialog from '@/components/events/CreateEventDialog';
 import EventRegistrationDialog from '@/components/events/EventRegistrationDialog';
+import EventsList from '@/components/events/EventsList';
 
 interface Event {
   id: number;
@@ -39,8 +38,6 @@ interface Event {
 const Events = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [showUpcoming, setShowUpcoming] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [showRegistrationDialog, setShowRegistrationDialog] = useState(false);
@@ -50,11 +47,7 @@ const Events = () => {
 
   const fetchEvents = async () => {
     try {
-      const params = new URLSearchParams();
-      if (categoryFilter !== 'all') params.append('category', categoryFilter);
-      if (showUpcoming) params.append('upcoming', 'true');
-
-      const response = await fetch(`https://moonmovement.onrender.com/api/events?${params}`);
+      const response = await fetch(`https://moonmovement.onrender.com/api/events`);
       if (response.ok) {
         const data = await response.json();
         setEvents(data);
@@ -73,7 +66,7 @@ const Events = () => {
 
   useEffect(() => {
     fetchEvents();
-  }, [categoryFilter, showUpcoming]);
+  }, []);
 
   const handleRegisterEvent = async (eventId: number) => {
     if (!isLoggedIn) {
@@ -122,17 +115,6 @@ const Events = () => {
   const isUserRegistered = (event: Event) => {
     return event.registrations.some(reg => reg.user.id === parseInt(user?.id || '0'));
   };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const categories = ['all', 'networking', 'workshop', 'conference', 'meetup', 'seminar'];
 
   const filteredEvents = events.filter(event => {
     if (!searchQuery.trim()) return true;
@@ -231,148 +213,33 @@ const Events = () => {
           </div>
         )}
 
-        {/* Single Events Container - Similar to hall of fame */}
+        {/* Single Events Container */}
         <div className="space-y-0 w-full max-w-full">
-          {/* Filters section with rounded top corners */}
-          <div className="bg-sidebar border border-sidebar-border rounded-t-lg border-b-0 overflow-x-hidden">
-            <div className="border-t border-sidebar-border p-4">
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4" />
-                  <span className="text-sm font-medium">Filters:</span>
-                </div>
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className="w-full sm:w-48">
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category === 'all' ? 'All Categories' : category.charAt(0).toUpperCase() + category.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  variant={showUpcoming ? "default" : "outline"}
-                  onClick={() => setShowUpcoming(!showUpcoming)}
-                  className="w-full sm:w-auto"
-                >
-                  {showUpcoming ? 'Upcoming Events' : 'All Events'}
-                </Button>
+          {/* Events Content */}
+          <div className="bg-sidebar border border-sidebar-border rounded-lg p-6">
+            <div className="space-y-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-white">Events</h2>
                 {isLoggedIn && (
-                  <Button onClick={() => setShowCreateDialog(true)} className="w-full sm:w-auto ml-auto">
+                  <Button onClick={() => setShowCreateDialog(true)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Create Event
                   </Button>
                 )}
               </div>
-              
-              <div className="text-xs text-gray-400 mt-2">
-                Showing {filteredEvents.length} events
-              </div>
+
+              <EventsList 
+                events={filteredEvents}
+                onEventSelect={(event) => {
+                  setSelectedEvent(event);
+                  setShowRegistrationDialog(true);
+                }}
+                onRegister={handleRegisterEvent}
+                isUserRegistered={isUserRegistered}
+                isLoggedIn={isLoggedIn}
+              />
             </div>
           </div>
-
-          {/* Events Content */}
-          {filteredEvents.length === 0 ? (
-            <div className="bg-sidebar border border-sidebar-border rounded-b-lg border-t-0 p-12 text-center">
-              <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-xl font-semibold mb-2">No Events Found</h3>
-              <p className="text-muted-foreground">
-                {searchQuery ? 'No events match your search criteria.' :
-                 categoryFilter !== 'all' || showUpcoming 
-                  ? 'Try adjusting your filters to see more events.'
-                  : 'Be the first to create an event!'
-                }
-              </p>
-            </div>
-          ) : (
-            <div className="bg-sidebar border border-sidebar-border rounded-b-lg border-t-0 p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredEvents.map((event) => (
-                  <Card key={event.id} className="hover:shadow-lg transition-shadow">
-                    {event.imageUrl && (
-                      <div className="aspect-video w-full overflow-hidden rounded-t-lg">
-                        <img 
-                          src={event.imageUrl} 
-                          alt={event.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    <CardHeader className="pb-3">
-                      <div className="flex justify-between items-start mb-2">
-                        <Badge variant="secondary" className="text-xs">
-                          {event.category}
-                        </Badge>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Users className="w-4 h-4 mr-1" />
-                          {event._count.registrations}
-                          {event.maxAttendees && `/${event.maxAttendees}`}
-                        </div>
-                      </div>
-                      <CardTitle className="text-lg line-clamp-2">{event.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                        {event.description}
-                      </p>
-                      
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Calendar className="w-4 h-4 mr-2" />
-                          {formatDate(event.eventDate)}
-                        </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Clock className="w-4 h-4 mr-2" />
-                          {event.eventTime}
-                        </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <MapPin className="w-4 h-4 mr-2" />
-                          {event.location}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-2">
-                        <Button
-                          onClick={() => {
-                            setSelectedEvent(event);
-                            setShowRegistrationDialog(true);
-                          }}
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                        >
-                          View Details
-                        </Button>
-                        
-                        {isLoggedIn && !isUserRegistered(event) && (
-                          <Button
-                            onClick={() => handleRegisterEvent(event.id)}
-                            size="sm"
-                            className="w-full"
-                            disabled={event.maxAttendees ? event._count.registrations >= event.maxAttendees : false}
-                          >
-                            {event.maxAttendees && event._count.registrations >= event.maxAttendees 
-                              ? 'Event Full' 
-                              : 'Register'
-                            }
-                          </Button>
-                        )}
-                        
-                        {isUserRegistered(event) && (
-                          <Badge variant="default" className="w-full justify-center py-2">
-                            Registered
-                          </Badge>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Create Event Dialog */}
