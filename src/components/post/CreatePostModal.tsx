@@ -33,6 +33,7 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
   const [communities, setCommunities] = useState<{id: number, name: string, memberCount: number}[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   
   const { user } = useAuth();
   const titleInputRef = useRef<HTMLTextAreaElement>(null);
@@ -163,6 +164,82 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
     ));
   };
 
+  const uploadImageToCloudinary = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'ml_default'); // You'll need to set this up in Cloudinary
+    
+    try {
+      const response = await fetch('https://api.cloudinary.com/v1_1/your-cloud-name/image/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+      
+      const data = await response.json();
+      return data.secure_url;
+    } catch (error) {
+      console.error('Error uploading to Cloudinary:', error);
+      throw error;
+    }
+  };
+
+  const uploadToImgur = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+      const response = await fetch('https://api.imgur.com/3/image', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Client-ID YOUR_IMGUR_CLIENT_ID', // You'll need to get this from Imgur
+        },
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+      
+      const data = await response.json();
+      return data.data.link;
+    } catch (error) {
+      console.error('Error uploading to Imgur:', error);
+      throw error;
+    }
+  };
+
+  // Simple fallback - convert to base64 (not recommended for production)
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  const handleFilesSelected = async (files: File[]) => {
+    if (files.length === 0) return;
+    
+    setIsUploading(true);
+    try {
+      // For now, let's use base64 as a fallback
+      // In production, you should use a proper image hosting service
+      const base64Url = await convertToBase64(files[0]);
+      setImageUrl(base64Url);
+      setUploadedFiles(files);
+    } catch (error) {
+      console.error('Error processing image:', error);
+      alert('Failed to process image. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!title.trim() || !user) return;
 
@@ -209,16 +286,6 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
   const selectCommunity = (communityName: string) => {
     setSubreddit(communityName);
     setSelectedCommunity(communityName);
-  };
-
-  const handleFilesSelected = (files: File[]) => {
-    setUploadedFiles(files);
-    // You would typically upload these to your server and get URLs back
-    // For now, just set the first image as the imageUrl
-    if (files.length > 0) {
-      // This is a placeholder. In a real app, you'd upload the file and get a URL
-      setImageUrl(URL.createObjectURL(files[0]));
-    }
   };
 
   if (!isOpen) return null;
@@ -295,33 +362,40 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
               {/* Media inputs */}
               {activeMediaType === 'image' && (
                 <div className="mt-4">
-                  <FileUploader 
-                    onFilesSelected={handleFilesSelected}
-                    maxFiles={4}
-                    maxSizeMB={4}
-                  />
+                  {isUploading && (
+                    <div className="text-center py-4">
+                      <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                      <p className="text-sm text-gray-400 mt-2">Processing image...</p>
+                    </div>
+                  )}
                   
-                  {/* Show uploaded image previews */}
-                  {uploadedFiles.length > 0 && (
-                    <div className="mt-4 grid grid-cols-2 gap-2">
-                      {uploadedFiles.map((file, index) => (
-                        <div key={index} className="relative aspect-video bg-sidebar-accent rounded-md overflow-hidden">
-                          <img 
-                            src={URL.createObjectURL(file)} 
-                            alt={`Upload ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                          <button 
-                            className="absolute top-1 right-1 bg-black/70 rounded-full p-1"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setUploadedFiles(uploadedFiles.filter((_, i) => i !== index));
-                            }}
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ))}
+                  {!imageUrl && !isUploading && (
+                    <FileUploader 
+                      onFilesSelected={handleFilesSelected}
+                      maxFiles={1}
+                      maxSizeMB={10}
+                    />
+                  )}
+                  
+                  {/* Show uploaded image preview */}
+                  {imageUrl && (
+                    <div className="mt-4 relative">
+                      <div className="relative aspect-video bg-sidebar-accent rounded-md overflow-hidden max-w-md">
+                        <img 
+                          src={imageUrl} 
+                          alt="Upload preview"
+                          className="w-full h-full object-cover"
+                        />
+                        <button 
+                          className="absolute top-2 right-2 bg-black/70 hover:bg-black/90 rounded-full p-1.5"
+                          onClick={() => {
+                            setImageUrl('');
+                            setUploadedFiles([]);
+                          }}
+                        >
+                          <X className="h-4 w-4 text-white" />
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -421,10 +495,10 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
             {/* Post button (only enabled if community is selected) */}
             <div className="flex justify-end pt-4 border-t border-sidebar-border mt-4">
               <Button
-                disabled={!selectedCommunity}
+                disabled={!selectedCommunity || isSubmitting}
                 onClick={handleSubmit}
                 className={`px-8 py-2 rounded-full font-medium transition-all duration-200 ${
-                  selectedCommunity
+                  selectedCommunity && !isSubmitting
                     ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                     : 'bg-muted text-muted-foreground cursor-not-allowed'
                 }`}

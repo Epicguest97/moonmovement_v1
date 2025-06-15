@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { ImageIcon, Link2Icon, X } from 'lucide-react';
+import FileUploader from '@/components/ui/FileUploader';
 
 interface Community {
   id: number;
@@ -27,6 +28,8 @@ const Submit = () => {
   const [communitiesLoading, setCommunitiesLoading] = useState(true);
   const [tags, setTags] = useState<string[]>([]);
   const [currentTag, setCurrentTag] = useState('');
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
   const navigate = useNavigate();
 
   const username = localStorage.getItem('username');
@@ -59,6 +62,34 @@ const Submit = () => {
 
     fetchCommunities();
   }, []);
+
+  // Simple fallback - convert to base64 (not recommended for production)
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  const handleFilesSelected = async (files: File[]) => {
+    if (files.length === 0) return;
+    
+    setIsUploading(true);
+    try {
+      // For now, let's use base64 as a fallback
+      // In production, you should use a proper image hosting service
+      const base64Url = await convertToBase64(files[0]);
+      setImageUrl(base64Url);
+      setUploadedFiles(files);
+    } catch (error) {
+      console.error('Error processing image:', error);
+      alert('Failed to process image. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && currentTag.trim() && !tags.includes(currentTag.trim())) {
@@ -94,7 +125,7 @@ const Submit = () => {
       subreddit: selectedCommunity,
       imageUrl: imageUrl || undefined,
       linkUrl: linkUrl || undefined,
-      tags: tags.length > 0 ? tags.join(',') : null, // Convert array to comma-separated string
+      tags: tags.length > 0 ? tags.join(',') : null,
     };
 
     try {
@@ -102,7 +133,7 @@ const Submit = () => {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // Add the authorization token
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(postData),
       });
@@ -211,19 +242,50 @@ const Submit = () => {
                 />
               </div>
 
-              {/* Image URL */}
+              {/* Image Upload */}
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <ImageIcon size={16} className="text-gray-400" />
-                  <label className="text-sm text-gray-400">Image URL (optional)</label>
+                  <label className="text-sm text-gray-400">Upload Image</label>
                 </div>
-                <Input
-                  placeholder="https://example.com/image.jpg"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  className="bg-sidebar-accent border-sidebar-border text-sidebar-foreground placeholder:text-gray-400"
-                  type="url"
-                />
+                
+                {isUploading && (
+                  <div className="text-center py-4">
+                    <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                    <p className="text-sm text-gray-400 mt-2">Processing image...</p>
+                  </div>
+                )}
+                
+                {!imageUrl && !isUploading && (
+                  <FileUploader 
+                    onFilesSelected={handleFilesSelected}
+                    maxFiles={1}
+                    maxSizeMB={10}
+                  />
+                )}
+                
+                {/* Show uploaded image preview */}
+                {imageUrl && (
+                  <div className="mt-4 relative">
+                    <div className="relative aspect-video bg-sidebar-accent rounded-md overflow-hidden max-w-md">
+                      <img 
+                        src={imageUrl} 
+                        alt="Upload preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <button 
+                        type="button"
+                        className="absolute top-2 right-2 bg-black/70 hover:bg-black/90 rounded-full p-1.5"
+                        onClick={() => {
+                          setImageUrl('');
+                          setUploadedFiles([]);
+                        }}
+                      >
+                        <X className="h-4 w-4 text-white" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Link URL */}
@@ -255,7 +317,7 @@ const Submit = () => {
             <Button 
               type="submit" 
               className="bg-sidebar-primary hover:bg-sidebar-primary/90 text-white"
-              disabled={!title.trim() || !selectedCommunity || loading}
+              disabled={!title.trim() || !selectedCommunity || loading || isUploading}
             >
               {loading ? 'Posting...' : 'Post'}
             </Button>
