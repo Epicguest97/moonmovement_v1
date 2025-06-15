@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -160,7 +159,7 @@ const UnicornsIndia = () => {
   return (
     <MainLayout>
       <div className="space-y-6 w-full max-w-full overflow-x-hidden">
-        {/* Enhanced Hero Section with Stats */}
+        {/* Enhanced Hero Section with Glassy Effects */}
         <div className="relative rounded-lg overflow-hidden h-[350px]">
           <div 
             className="absolute inset-0 bg-cover bg-center"
@@ -172,7 +171,7 @@ const UnicornsIndia = () => {
             <div className="absolute inset-0 bg-black/60"></div>
           </div>
           <div className="relative z-10 p-8 text-white h-full flex flex-col justify-between">
-            {/* Header with Stats */}
+            {/* Header with Glassy Stats */}
             <div className="flex justify-between items-start">
               <div>
                 <div className="text-xs opacity-90 mb-2">Hall of Fame</div>
@@ -185,25 +184,25 @@ const UnicornsIndia = () => {
                 </div>
               </div>
               
-              {/* Stats Cards */}
+              {/* Glassy Stats Cards */}
               <div className="flex gap-6">
-                <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
+                <div className="text-center bg-sidebar/60 hover:bg-sidebar/80 backdrop-blur-sm border border-sidebar-border/50 rounded-lg px-4 py-2 transition-all duration-300">
                   <div className="text-2xl font-bold text-yellow-400">{startups.length}</div>
-                  <div className="text-xs text-gray-300 flex items-center gap-1">
+                  <div className="text-xs text-gray-200 flex items-center gap-1">
                     <Building2 className="w-3 h-3" />
                     Companies
                   </div>
                 </div>
-                <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
+                <div className="text-center bg-sidebar/60 hover:bg-sidebar/80 backdrop-blur-sm border border-sidebar-border/50 rounded-lg px-4 py-2 transition-all duration-300">
                   <div className="text-2xl font-bold text-green-400">{startups.filter(s => s.isUnicorn).length}</div>
-                  <div className="text-xs text-gray-300 flex items-center gap-1">
+                  <div className="text-xs text-gray-200 flex items-center gap-1">
                     <TrendingUp className="w-3 h-3" />
                     Unicorns
                   </div>
                 </div>
-                <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
+                <div className="text-center bg-sidebar/60 hover:bg-sidebar/80 backdrop-blur-sm border border-sidebar-border/50 rounded-lg px-4 py-2 transition-all duration-300">
                   <div className="text-2xl font-bold text-blue-400">{cities.length}</div>
-                  <div className="text-xs text-gray-300 flex items-center gap-1">
+                  <div className="text-xs text-gray-200 flex items-center gap-1">
                     <MapPin className="w-3 h-3" />
                     Cities
                   </div>
@@ -211,15 +210,15 @@ const UnicornsIndia = () => {
               </div>
             </div>
             
-            {/* Search bar */}
+            {/* Glassy Search bar */}
             <div className="max-w-md">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-300 w-4 h-4" />
                 <Input 
                   placeholder="Search companies..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-sidebar/60 hover:bg-sidebar/80 border-sidebar-border/50 text-white placeholder:text-gray-300 rounded-full pl-10 backdrop-blur-sm"
+                  className="bg-sidebar/60 hover:bg-sidebar/80 border-sidebar-border/50 text-white placeholder:text-gray-300 rounded-full pl-10 backdrop-blur-sm transition-all duration-300"
                 />
               </div>
             </div>
