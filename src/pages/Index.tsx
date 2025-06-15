@@ -124,8 +124,8 @@ const Index = () => {
   return (
     <MainLayout>
       <div className="space-y-6 w-full max-w-full overflow-x-hidden">
-        {/* Hero Section with natural landscape background - TALLER VERSION */}
-        <div className="relative rounded-lg overflow-hidden h-[400px]">
+        {/* Hero Section with natural landscape background */}
+        <div className="relative rounded-lg overflow-hidden h-[350px]">
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{
@@ -135,8 +135,7 @@ const Index = () => {
           >
           </div>
           <div className="relative z-10 p-6 pb-5 text-white flex flex-col justify-end h-full">
-            <div className="text-xs opacity-90">02:23 PM</div>
-            <h1 className="text-xl font-medium mb-2">Build It!</h1>
+            {/* Removed time and "Build It!" text */}
             
             {/* Embed the input box directly in the hero section */}
             <div onClick={() => setIsCreatePostModalOpen(true)} className="block">

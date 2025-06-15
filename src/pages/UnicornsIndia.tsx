@@ -99,7 +99,7 @@ const UnicornsIndia = () => {
             <div 
               className="absolute inset-0 bg-cover bg-center"
               style={{
-                backgroundImage: 'url(/lovable-uploads/6ee929f6-d821-4271-bd62-f3e8869d5dc0.png)',
+                backgroundImage: 'url(/unicorns.jpeg)',
                 backgroundPosition: 'center 30%'
               }}
             >
@@ -164,11 +164,12 @@ const UnicornsIndia = () => {
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: 'url(/lovable-uploads/6ee929f6-d821-4271-bd62-f3e8869d5dc0.png)',
+              backgroundImage: 'url(/unicorns.jpeg)',
               backgroundPosition: 'center 30%'
             }}
           >
-            <div className="absolute inset-0 bg-black/60"></div>
+            {/* Remove this line completely for full opacity */}
+            {/* Or change to a lower opacity like bg-black/20 for slight dimming */}
           </div>
           <div className="relative z-10 p-6 pb-5 text-white flex flex-col justify-end h-full">
             {/* Header with Glassy Stats moved to top */}
@@ -196,18 +197,6 @@ const UnicornsIndia = () => {
               </div>
             </div>
 
-            {/* Title Section */}
-            <div className="mb-4">
-              <div className="text-xs opacity-90 mb-2">Hall of Fame</div>
-              <div className="flex items-center gap-3">
-                <Trophy className="w-8 h-8 text-yellow-500" />
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
-                  India's Elite
-                </h1>
-                <Crown className="w-8 h-8 text-yellow-500" />
-              </div>
-            </div>
-            
             {/* Full Width Glassy Search bar - exactly like main page */}
             <div className="w-full">
               <div className="relative">
