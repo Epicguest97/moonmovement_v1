@@ -104,12 +104,48 @@ div.overflow-hidden.border.border-sidebar-border.rounded-b-lg {
   border-width: 0.5px !important;
 }
 
-/* Mobile-specific styles for full-screen posts */
+/* Mobile-specific global styles */
 @media (max-width: 767px) {
+  /* Prevent zoom on input focus */
+  input, select, textarea {
+    font-size: 16px !important;
+    transform-origin: left top;
+    zoom: 1;
+  }
+  
+  /* Ensure proper viewport */
+  html, body {
+    width: 100% !important;
+    overflow-x: hidden !important;
+    -webkit-text-size-adjust: 100% !important;
+    -ms-text-size-adjust: 100% !important;
+  }
+  
+  /* Mobile container fixes */
+  .container, .mx-auto {
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  
+  /* Mobile card adjustments */
+  .card {
+    border-radius: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  /* Mobile text sizing */
+  body, input, button, select, textarea {
+    font-size: 16px !important;
+  }
+  
   /* Mobile post detail page - pure black background */
   .mobile-post-detail {
     background-color: #000000 !important;
     min-height: 100vh !important;
+    width: 100vw !important;
+    overflow-x: hidden !important;
   }
   
   /* Mobile post detail header */
@@ -160,5 +196,23 @@ div.overflow-hidden.border.border-sidebar-border.rounded-b-lg {
     border-left: 1px solid #333 !important;
     margin-left: 8px !important;
     padding-left: 12px !important;
+  }
+  
+  /* Mobile-specific layout fixes */
+  .mobile-layout {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Mobile form elements */
+  .mobile-form input,
+  .mobile-form textarea,
+  .mobile-form select {
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 }

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -63,7 +62,6 @@ const PostDetail = () => {
   const fetchPost = () => {
     if (id) {
       console.log('Fetching post with ID:', id);
-      // Fetch the specific post by ID
       fetch(`https://moonmovement.onrender.com/api/posts/${id}`)
         .then(res => {
           if (!res.ok) {
@@ -76,7 +74,7 @@ const PostDetail = () => {
           const transformedPost = {
             ...data,
             id: data.id.toString(),
-            voteScore: data.likeCount || 0, // Use likeCount from backend
+            voteScore: data.likeCount || 0,
             commentCount: data.comments?.length || 0,
             timestamp: new Date(data.createdAt).toLocaleString(),
             subreddit: data.subreddit || 'general'
@@ -95,7 +93,6 @@ const PostDetail = () => {
 
   const fetchComments = () => {
     if (id) {
-      // Fetch comments for this specific post
       fetch(`https://moonmovement.onrender.com/api/comments/post/${id}`)
         .then(res => res.json())
         .then(data => {
@@ -131,7 +128,7 @@ const PostDetail = () => {
       if (!res.ok) throw new Error('Failed to like post');
       
       const updatedPost = await res.json();
-      setLikeScore(updatedPost.likeCount || 0); // Use likeCount from backend
+      setLikeScore(updatedPost.likeCount || 0);
       setIsLiked(!isLiked);
     } catch (err) {
       console.error('Failed to like post:', err);
@@ -218,7 +215,7 @@ const PostDetail = () => {
         throw new Error(errorData.error || 'Failed to submit reply');
       }
       
-      fetchComments(); // Refresh comments after reply
+      fetchComments();
       setPost({ ...post, commentCount: post.commentCount + 1 });
     } catch (err) {
       console.error('Error submitting reply:', err);
@@ -257,8 +254,8 @@ const PostDetail = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className={isMobile ? "min-h-screen bg-black text-white flex items-center justify-center" : "max-w-3xl mx-auto p-4"}>
-          <div className={isMobile ? "text-center" : "bg-sidebar p-6 rounded-md border border-sidebar-border text-center"}>
+        <div className={isMobile ? "min-h-screen bg-black text-white flex items-center justify-center px-4" : "max-w-3xl mx-auto p-4"}>
+          <div className={isMobile ? "text-center w-full" : "bg-sidebar p-6 rounded-md border border-sidebar-border text-center"}>
             <h2 className="text-lg font-bold mb-2 text-white">Loading...</h2>
             <p className="text-gray-300">Fetching post details...</p>
           </div>
@@ -271,9 +268,9 @@ const PostDetail = () => {
     return (
       <MainLayout>
         <div className={isMobile ? "min-h-screen bg-black text-white flex items-center justify-center p-4" : "max-w-3xl mx-auto p-4"}>
-          <div className={isMobile ? "text-center" : "bg-sidebar p-6 rounded-md border border-sidebar-border text-center"}>
+          <div className={isMobile ? "text-center w-full" : "bg-sidebar p-6 rounded-md border border-sidebar-border text-center"}>
             <h2 className="text-lg font-bold mb-2 text-white">Post Not Found</h2>
-            <p className="text-gray-300">
+            <p className="text-gray-300 mb-4">
               {error || "The post you're looking for doesn't exist or has been removed."}
             </p>
             <Link to="/" className="mt-4 inline-block">
@@ -293,17 +290,26 @@ const PostDetail = () => {
   if (isMobile) {
     return (
       <MainLayout>
-        <div className="min-h-screen bg-black text-white">
-          <div className="px-4 py-2">
-            <div className="flex items-center text-xs text-gray-400 mb-3">
-              <span className="text-gray-200 font-medium">r/{post.subreddit}</span>
-              <span className="mx-2">•</span>
-              <span>u/{authorName}</span>
-              <span className="mx-2">•</span>
-              <span>{post.timestamp}</span>
+        <div className="min-h-screen bg-black text-white w-full overflow-x-hidden">
+          {/* Mobile Header */}
+          <div className="sticky top-0 bg-black border-b border-gray-800 z-10 px-4 py-3">
+            <div className="flex items-center space-x-3">
+              <Link to="/">
+                <Button variant="ghost" size="sm" className="p-1">
+                  <ArrowLeft size={20} className="text-white" />
+                </Button>
+              </Link>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs text-gray-400 truncate">
+                  r/{post.subreddit} • u/{authorName}
+                </div>
+              </div>
             </div>
-            
-            <h1 className="text-lg font-semibold mb-4 text-white leading-tight">
+          </div>
+
+          {/* Mobile Content */}
+          <div className="px-4 py-3">
+            <h1 className="text-lg font-semibold mb-3 text-white leading-tight break-words">
               {post.title}
             </h1>
             
@@ -311,33 +317,28 @@ const PostDetail = () => {
               <PostContent post={post} isDetailView={true} />
             </div>
             
-            <div className="flex items-center justify-between text-xs text-gray-400 mt-3 pt-2">
-              <div className="flex items-center space-x-4">
-                <LikeButton 
-                  score={likeScore}
-                  isLiked={isLiked}
-                  onLike={handleLike}
-                />
-                
-                <PostFooter 
-                  commentCount={post.commentCount}
-                  postId={post.id}
-                  subreddit={post.subreddit}
-                  authorUsername={authorName}
-                  onEditClick={() => setIsEditDialogOpen(true)}
-                />
+            {/* Action Bar */}
+            <div className="flex items-center justify-between py-3 border-t border-b border-gray-800">
+              <LikeButton 
+                score={likeScore}
+                isLiked={isLiked}
+                onLike={handleLike}
+              />
+              
+              <div className="flex items-center space-x-4 text-xs text-gray-400">
+                <span>{post.commentCount} comments</span>
+                <span>{post.timestamp}</span>
               </div>
             </div>
             
-            <div className="mt-6 mb-4">
+            {/* Comment Box */}
+            <div className="py-4">
               <CommentBox onSubmit={handleCommentSubmit} />
             </div>
             
+            {/* Comments */}
             {comments.length > 0 && (
-              <div className="mt-6">
-                <h3 className="font-medium mb-4 text-white text-sm">
-                  {comments.length} Comments
-                </h3>
+              <div className="border-t border-gray-800 pt-4">
                 <CommentList 
                   comments={comments} 
                   postId={post.id}
