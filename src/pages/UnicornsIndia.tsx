@@ -127,7 +127,7 @@ const UnicornsIndia = () => {
                 </div>
               </div>
               
-              <div className="max-w-md">
+              <div className="w-full">
                 <div className="h-10 bg-white/20 rounded-full animate-pulse"></div>
               </div>
             </div>
@@ -170,55 +170,53 @@ const UnicornsIndia = () => {
           >
             <div className="absolute inset-0 bg-black/60"></div>
           </div>
-          <div className="relative z-10 p-8 text-white h-full flex flex-col justify-between">
-            {/* Header with Glassy Stats */}
-            <div className="flex justify-between items-start">
-              <div>
-                <div className="text-xs opacity-90 mb-2">Hall of Fame</div>
-                <div className="flex items-center gap-3 mb-4">
-                  <Trophy className="w-8 h-8 text-yellow-500" />
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
-                    India's Elite
-                  </h1>
-                  <Crown className="w-8 h-8 text-yellow-500" />
+          <div className="relative z-10 p-6 pb-5 text-white flex flex-col justify-end h-full">
+            {/* Header with Glassy Stats moved to top */}
+            <div className="absolute top-6 right-6 flex gap-4">
+              <div className="text-center bg-sidebar/60 hover:bg-sidebar/80 backdrop-blur-sm border border-sidebar-border/50 rounded-lg px-3 py-2 transition-all duration-300">
+                <div className="text-lg font-bold text-yellow-400">{startups.length}</div>
+                <div className="text-xs text-gray-200 flex items-center gap-1">
+                  <Building2 className="w-3 h-3" />
+                  Companies
                 </div>
               </div>
-              
-              {/* Glassy Stats Cards */}
-              <div className="flex gap-6">
-                <div className="text-center bg-sidebar/60 hover:bg-sidebar/80 backdrop-blur-sm border border-sidebar-border/50 rounded-lg px-4 py-2 transition-all duration-300">
-                  <div className="text-2xl font-bold text-yellow-400">{startups.length}</div>
-                  <div className="text-xs text-gray-200 flex items-center gap-1">
-                    <Building2 className="w-3 h-3" />
-                    Companies
-                  </div>
+              <div className="text-center bg-sidebar/60 hover:bg-sidebar/80 backdrop-blur-sm border border-sidebar-border/50 rounded-lg px-3 py-2 transition-all duration-300">
+                <div className="text-lg font-bold text-green-400">{startups.filter(s => s.isUnicorn).length}</div>
+                <div className="text-xs text-gray-200 flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3" />
+                  Unicorns
                 </div>
-                <div className="text-center bg-sidebar/60 hover:bg-sidebar/80 backdrop-blur-sm border border-sidebar-border/50 rounded-lg px-4 py-2 transition-all duration-300">
-                  <div className="text-2xl font-bold text-green-400">{startups.filter(s => s.isUnicorn).length}</div>
-                  <div className="text-xs text-gray-200 flex items-center gap-1">
-                    <TrendingUp className="w-3 h-3" />
-                    Unicorns
-                  </div>
-                </div>
-                <div className="text-center bg-sidebar/60 hover:bg-sidebar/80 backdrop-blur-sm border border-sidebar-border/50 rounded-lg px-4 py-2 transition-all duration-300">
-                  <div className="text-2xl font-bold text-blue-400">{cities.length}</div>
-                  <div className="text-xs text-gray-200 flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
-                    Cities
-                  </div>
+              </div>
+              <div className="text-center bg-sidebar/60 hover:bg-sidebar/80 backdrop-blur-sm border border-sidebar-border/50 rounded-lg px-3 py-2 transition-all duration-300">
+                <div className="text-lg font-bold text-blue-400">{cities.length}</div>
+                <div className="text-xs text-gray-200 flex items-center gap-1">
+                  <MapPin className="w-3 h-3" />
+                  Cities
                 </div>
               </div>
             </div>
+
+            {/* Title Section */}
+            <div className="mb-4">
+              <div className="text-xs opacity-90 mb-2">Hall of Fame</div>
+              <div className="flex items-center gap-3">
+                <Trophy className="w-8 h-8 text-yellow-500" />
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                  India's Elite
+                </h1>
+                <Crown className="w-8 h-8 text-yellow-500" />
+              </div>
+            </div>
             
-            {/* Glassy Search bar */}
-            <div className="max-w-md">
+            {/* Full Width Glassy Search bar - exactly like main page */}
+            <div className="w-full">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-300 w-4 h-4" />
                 <Input 
                   placeholder="Search companies..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-sidebar/60 hover:bg-sidebar/80 border-sidebar-border/50 text-white placeholder:text-gray-300 rounded-full pl-10 backdrop-blur-sm transition-all duration-300"
+                  className="bg-sidebar/60 hover:bg-sidebar/80 border-sidebar-border/50 cursor-pointer text-white placeholder:text-gray-300 rounded-full px-4 py-2 text-sm backdrop-blur-sm w-full pl-10"
                 />
               </div>
             </div>
