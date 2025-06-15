@@ -14,7 +14,7 @@ const News = () => {
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: 'url(/banner.jpeg)',
+              backgroundImage: 'url(/news.jpeg)',
               backgroundPosition: 'center 30%'
             }}
           >

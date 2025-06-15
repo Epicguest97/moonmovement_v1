@@ -146,7 +146,7 @@ const Communities = () => {
             <div 
               className="absolute inset-0 bg-cover bg-center"
               style={{
-                backgroundImage: 'url(/banner.jpeg)',
+                backgroundImage: 'url(/community.jpeg)',
                 backgroundPosition: 'center 30%'
               }}
             >
@@ -181,7 +181,7 @@ const Communities = () => {
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: 'url(/banner.jpeg)',
+              backgroundImage: 'url(/community.jpeg)',
               backgroundPosition: 'center 30%'
             }}
           >
