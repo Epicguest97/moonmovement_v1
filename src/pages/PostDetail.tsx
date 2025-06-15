@@ -254,10 +254,10 @@ const PostDetail = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className={isMobile ? "min-h-screen bg-black text-white flex items-center justify-center px-4" : "max-w-3xl mx-auto p-4"}>
+        <div className={isMobile ? "min-h-screen bg-background text-foreground flex items-center justify-center px-4" : "max-w-3xl mx-auto p-4"}>
           <div className={isMobile ? "text-center w-full" : "bg-sidebar p-6 rounded-md border border-sidebar-border text-center"}>
-            <h2 className="text-lg font-bold mb-2 text-white">Loading...</h2>
-            <p className="text-gray-300">Fetching post details...</p>
+            <h2 className="text-lg font-bold mb-2 text-foreground">Loading...</h2>
+            <p className="text-muted-foreground">Fetching post details...</p>
           </div>
         </div>
       </MainLayout>
@@ -267,10 +267,10 @@ const PostDetail = () => {
   if (error || !post) {
     return (
       <MainLayout>
-        <div className={isMobile ? "min-h-screen bg-black text-white flex items-center justify-center p-4" : "max-w-3xl mx-auto p-4"}>
+        <div className={isMobile ? "min-h-screen bg-background text-foreground flex items-center justify-center p-4" : "max-w-3xl mx-auto p-4"}>
           <div className={isMobile ? "text-center w-full" : "bg-sidebar p-6 rounded-md border border-sidebar-border text-center"}>
-            <h2 className="text-lg font-bold mb-2 text-white">Post Not Found</h2>
-            <p className="text-gray-300 mb-4">
+            <h2 className="text-lg font-bold mb-2 text-foreground">Post Not Found</h2>
+            <p className="text-muted-foreground mb-4">
               {error || "The post you're looking for doesn't exist or has been removed."}
             </p>
             <Link to="/" className="mt-4 inline-block">
@@ -290,17 +290,17 @@ const PostDetail = () => {
   if (isMobile) {
     return (
       <MainLayout>
-        <div className="min-h-screen bg-black text-white w-full overflow-x-hidden">
+        <div className="min-h-screen bg-background text-foreground w-full overflow-x-hidden">
           {/* Mobile Header */}
-          <div className="sticky top-0 bg-black border-b border-gray-800 z-10 px-4 py-3">
+          <div className="sticky top-0 bg-sidebar border-b border-sidebar-border z-10 px-4 py-3">
             <div className="flex items-center space-x-3">
               <Link to="/">
                 <Button variant="ghost" size="sm" className="p-1">
-                  <ArrowLeft size={20} className="text-white" />
+                  <ArrowLeft size={20} className="text-foreground" />
                 </Button>
               </Link>
               <div className="flex-1 min-w-0">
-                <div className="text-xs text-gray-400 truncate">
+                <div className="text-xs text-muted-foreground truncate">
                   r/{post.subreddit} • u/{authorName}
                 </div>
               </div>
@@ -308,45 +308,47 @@ const PostDetail = () => {
           </div>
 
           {/* Mobile Content */}
-          <div className="px-4 py-3">
-            <h1 className="text-lg font-semibold mb-3 text-white leading-tight break-words">
-              {post.title}
-            </h1>
-            
-            <div className="mb-4">
-              <PostContent post={post} isDetailView={true} />
-            </div>
-            
-            {/* Action Bar */}
-            <div className="flex items-center justify-between py-3 border-t border-b border-gray-800">
-              <LikeButton 
-                score={likeScore}
-                isLiked={isLiked}
-                onLike={handleLike}
-              />
+          <div className="bg-sidebar">
+            <div className="px-4 py-4">
+              <h1 className="text-lg font-semibold mb-3 text-foreground leading-tight break-words">
+                {post.title}
+              </h1>
               
-              <div className="flex items-center space-x-4 text-xs text-gray-400">
-                <span>{post.commentCount} comments</span>
-                <span>{post.timestamp}</span>
+              <div className="mb-4">
+                <PostContent post={post} isDetailView={true} />
               </div>
-            </div>
-            
-            {/* Comment Box */}
-            <div className="py-4">
-              <CommentBox onSubmit={handleCommentSubmit} />
-            </div>
-            
-            {/* Comments */}
-            {comments.length > 0 && (
-              <div className="border-t border-gray-800 pt-4">
-                <CommentList 
-                  comments={comments} 
-                  postId={post.id}
-                  onReplySubmit={handleReplySubmit}
-                  onCommentUpdate={fetchComments}
+              
+              {/* Action Bar */}
+              <div className="flex items-center justify-between py-3 border-t border-b border-sidebar-border">
+                <LikeButton 
+                  score={likeScore}
+                  isLiked={isLiked}
+                  onLike={handleLike}
                 />
+                
+                <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+                  <span>{post.commentCount} comments</span>
+                  <span>{post.timestamp}</span>
+                </div>
               </div>
-            )}
+              
+              {/* Comment Box */}
+              <div className="py-4">
+                <CommentBox onSubmit={handleCommentSubmit} />
+              </div>
+              
+              {/* Comments */}
+              {comments.length > 0 && (
+                <div className="border-t border-sidebar-border pt-4">
+                  <CommentList 
+                    comments={comments} 
+                    postId={post.id}
+                    onReplySubmit={handleReplySubmit}
+                    onCommentUpdate={fetchComments}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

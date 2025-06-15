@@ -27,9 +27,9 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   };
 
   return (
-    <div className={`flex flex-col min-h-screen bg-background ${isMobile && isPostDetailPage ? 'mobile-post-detail' : ''} ${isMobile ? 'mobile-layout' : ''}`}>
+    <div className={`flex flex-col min-h-screen bg-background ${isMobile ? 'mobile-layout' : ''}`}>
       <div className="fixed top-0 left-0 right-0 z-50 bg-background" style={{ 
-        backgroundColor: isMobile && isPostDetailPage ? '#000000' : '#111114',
+        backgroundColor: '#111114',
         boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
       }}>
         <Header onToggleMobileSidebar={toggleMobileSidebar} />
@@ -53,7 +53,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         <div className={`flex-1 ${showDesktopSidebar ? 'ml-[356px]' : ''} ${isMobile ? 'w-full overflow-x-hidden' : ''}`}>
           <div className="flex justify-center">
             <main className={`relative min-h-[calc(100vh-4rem)] pt-4 w-full ${isMobile ? 'px-0' : 'pr-8'} ${isMobile ? 'max-w-full' : 'max-w-3xl'}`}>
-              <div className={`w-full max-w-full overflow-x-hidden ${isMobile && isPostDetailPage ? 'mobile-text-fix' : ''}`}>
+              <div className="w-full max-w-full overflow-x-hidden">
                 {children}
               </div>
             </main>
