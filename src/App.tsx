@@ -19,6 +19,7 @@ import Communities from '@/pages/Communities';
 import ManageCommunities from '@/pages/ManageCommunities';
 import Chat from '@/pages/Chat';
 import Events from '@/pages/Events';
+import EventDetail from '@/pages/EventDetail';
 import IndianDistricts from '@/pages/IndianDistricts';
 import UserProfile from '@/pages/UserProfile';
 import Search from '@/pages/Search';
