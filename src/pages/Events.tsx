@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, Users, Clock, Plus, Filter, Search } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
@@ -173,7 +172,7 @@ const Events = () => {
           </div>
           
           <div className="text-center">
-            <p className="text-gray-300">Loading networking events...</p>
+            <p className="text-gray-300">Loading events...</p>
           </div>
         </div>
       </MainLayout>
@@ -194,7 +193,7 @@ const Events = () => {
           >
           </div>
           <div className="relative z-10 p-6 pb-5 text-white flex flex-col justify-end h-full">
-            {/* Stats in top right - removed categories */}
+            {/* Stats in top right */}
             <div className="absolute top-6 right-6 flex gap-4">
               <div className="text-center bg-sidebar/60 hover:bg-sidebar/80 backdrop-blur-sm border border-sidebar-border/50 rounded-lg px-3 py-2 transition-all duration-300">
                 <div className="text-lg font-bold text-green-400">{events.length}</div>
@@ -232,24 +231,10 @@ const Events = () => {
           </div>
         )}
 
-        {/* Main Events Container - Similar to main page posts */}
+        {/* Single Events Container - Similar to hall of fame */}
         <div className="space-y-0 w-full max-w-full">
-          {/* Header with filters and create button - rounded top corners */}
+          {/* Filters section with rounded top corners */}
           <div className="bg-sidebar border border-sidebar-border rounded-t-lg border-b-0 overflow-x-hidden">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4">
-              <div>
-                <h1 className="text-2xl font-bold">Networking Events</h1>
-                <p className="text-muted-foreground">Discover and join amazing networking events</p>
-              </div>
-              {isLoggedIn && (
-                <Button onClick={() => setShowCreateDialog(true)} className="w-full sm:w-auto">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Event
-                </Button>
-              )}
-            </div>
-
-            {/* Filters */}
             <div className="border-t border-sidebar-border p-4">
               <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                 <div className="flex items-center gap-2">
@@ -275,6 +260,12 @@ const Events = () => {
                 >
                   {showUpcoming ? 'Upcoming Events' : 'All Events'}
                 </Button>
+                {isLoggedIn && (
+                  <Button onClick={() => setShowCreateDialog(true)} className="w-full sm:w-auto ml-auto">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Event
+                  </Button>
+                )}
               </div>
               
               <div className="text-xs text-gray-400 mt-2">
