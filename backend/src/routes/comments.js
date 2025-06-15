@@ -1,3 +1,4 @@
+
 const express = require('express');
 const router = express.Router();
 const prisma = require('../utils/prisma');
@@ -56,33 +57,53 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
-// PUT (update) a comment by id - requires authentication
+// PUT (update) a comment by id - requires authentication and ownership
 router.put('/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { content } = req.body;
   
   try {
-    // Check if the comment belongs to the authenticated user
+    // Check if the comment exists and belongs to the authenticated user
     const existingComment = await prisma.comment.findUnique({
-      where: { id: Number(id) }
+      where: { id: Number(id) },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true
+          }
+        }
+      }
     });
     
     if (!existingComment) {
       return res.status(404).json({ error: 'Comment not found' });
     }
     
-    if (existingComment.authorId !== req.user.id) {
+    // Check if the authenticated user is the author of the comment
+    if (existingComment.authorId !== req.user.userId) {
       return res.status(403).json({ error: 'You can only edit your own comments' });
     }
     
+    // Update the comment
     const updated = await prisma.comment.update({
       where: { id: Number(id) },
       data: { content },
-      include: { author: true, post: true }
+      include: { 
+        author: {
+          select: {
+            id: true,
+            username: true
+          }
+        }, 
+        post: true 
+      }
     });
+    
     res.json(updated);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to update comment' });
+    console.error('Error updating comment:', err);
+    res.status(500).json({ error: 'Failed to update comment', details: err.message });
   }
 });
 

@@ -200,11 +200,35 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
-// PUT (update) a post by id
-router.put('/:id', async (req, res) => {
+// PUT (update) a post by id - requires authentication and ownership
+router.put('/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { title, content, tags } = req.body;
+  
   try {
+    // Check if the post exists and belongs to the authenticated user
+    const existingPost = await prisma.post.findUnique({
+      where: { id: Number(id) },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true
+          }
+        }
+      }
+    });
+    
+    if (!existingPost) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+    
+    // Check if the authenticated user is the author of the post
+    if (existingPost.authorId !== req.user.userId) {
+      return res.status(403).json({ error: 'You can only edit your own posts' });
+    }
+    
+    // Update the post
     const updated = await prisma.post.update({
       where: { id: Number(id) },
       data: {
@@ -232,7 +256,7 @@ router.put('/:id', async (req, res) => {
     });
   } catch (err) {
     console.error('PUT /:id Error:', err);
-    res.status(404).json({ error: 'Post not found', details: err.message });
+    res.status(500).json({ error: 'Failed to update post', details: err.message });
   }
 });
 
