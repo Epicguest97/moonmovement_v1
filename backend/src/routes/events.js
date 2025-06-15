@@ -1,3 +1,4 @@
+
 const express = require('express');
 const router = express.Router();
 const prisma = require('../utils/prisma');
@@ -114,6 +115,40 @@ router.post('/', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Error creating event:', error);
     res.status(500).json({ error: 'Failed to create event' });
+  }
+});
+
+// DELETE an event by ID
+router.delete('/:id', authenticateToken, async (req, res) => {
+  try {
+    const eventId = parseInt(req.params.id);
+    
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        organizer: {
+          select: { id: true, username: true }
+        }
+      }
+    });
+    
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    
+    // Check if user is the organizer (optional security check)
+    if (event.organizerId !== req.user.userId) {
+      return res.status(403).json({ error: 'Not authorized to delete this event' });
+    }
+    
+    await prisma.event.delete({
+      where: { id: eventId }
+    });
+    
+    res.json({ message: 'Event deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    res.status(500).json({ error: 'Failed to delete event' });
   }
 });
 

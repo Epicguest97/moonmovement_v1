@@ -54,4 +54,23 @@ router.post('/', async (req, res) => {
   }
 });
 
+// DELETE a news item by ID
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const newsItem = await prisma.news.findUnique({
+      where: { id: Number(id) }
+    });
+    if (!newsItem) return res.status(404).json({ error: 'News item not found' });
+    
+    await prisma.news.delete({
+      where: { id: Number(id) }
+    });
+    res.json({ message: 'News item deleted successfully' });
+  } catch (err) {
+    console.error('DELETE /:id Error:', err);
+    res.status(500).json({ error: 'Failed to delete news item' });
+  }
+});
+
 module.exports = router;
