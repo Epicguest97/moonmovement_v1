@@ -130,7 +130,7 @@ router.post('/', authenticateToken, async (req, res) => {
         content,
         subreddit: subreddit || 'general',
         imageUrl,
-        // Remove videoUrl from here since it doesn't exist in the schema
+        videoUrl,  // Make sure this field is included
         linkUrl,
         tags,
         authorId: userId

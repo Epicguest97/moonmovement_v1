@@ -3,6 +3,7 @@ import { X, Image, Video, Link as LinkIcon, List, Smile, ArrowLeft } from 'lucid
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import FileUploader from '@/components/ui/FileUploader';
+import { uploadToCloudinary } from '@/utils/mediaUpload';
 
 interface CreatePostModalProps {
   isOpen: boolean;
@@ -34,6 +35,7 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
   
   const { user } = useAuth();
   const titleInputRef = useRef<HTMLTextAreaElement>(null);
@@ -142,9 +144,29 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
   }, [isOpen]);
 
   const toggleMediaType = (type: MediaType) => {
-    setActiveMediaType(activeMediaType === type ? null : type);
+    if (activeMediaType === type) {
+      setActiveMediaType(null);
+    } else {
+      setActiveMediaType(type);
+      // Reset other media data when switching types
+      if (type !== 'image') {
+        setImageUrl('');
+        setUploadedFiles([]);
+      }
+      if (type !== 'video') {
+        setVideoUrl('');
+        setVideoFile(null);
+      }
+      if (type !== 'link') {
+        setLinkUrl('');
+      }
+      if (type !== 'poll') {
+        setPollQuestion('');
+        setPollOptions([{ id: '1', text: '' }, { id: '2', text: '' }]);
+      }
+    }
   };
-
+  
   const addPollOption = () => {
     if (pollOptions.length < 5) {
       const newId = (pollOptions.length + 1).toString();
@@ -190,52 +212,67 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
     }
   };
 
-  const handleFilesSelected = async (files: File[]) => {
+  const handleImageFilesSelected = async (files: File[]) => {
     if (files.length === 0) return;
     
     setIsUploading(true);
     try {
-      console.log('Processing file:', files[0].name, 'Size:', (files[0].size / 1024 / 1024).toFixed(2) + 'MB');
+      console.log('Processing image file:', files[0].name, 'Size:', (files[0].size / 1024 / 1024).toFixed(2) + 'MB');
       
-      // Use only Cloudinary
-      const cloudinaryUrl = await uploadImageToCloudinary(files[0]);
+      const cloudinaryUrl = await uploadToCloudinary(files[0], 'image');
       
-      // Verify this is a Cloudinary URL (not a base64 string)
       if (!cloudinaryUrl.startsWith('https://res.cloudinary.com/')) {
         throw new Error('Invalid Cloudinary URL returned');
       }
       
-      console.log('Cloudinary URL:', cloudinaryUrl);
+      console.log('Cloudinary Image URL:', cloudinaryUrl);
       setImageUrl(cloudinaryUrl);
       setUploadedFiles(files);
       
     } catch (error) {
-      console.error('Error uploading to Cloudinary:', error);
+      console.error('Error uploading image to Cloudinary:', error);
       alert('Image upload failed. Please try again or use a different image.');
-      
-      // Don't set imageUrl on error - this prevents fallback to base64
     } finally {
       setIsUploading(false);
     }
   };
-
+  
+  const handleVideoFilesSelected = async (files: File[]) => {
+    if (files.length === 0) return;
+    
+    setIsUploading(true);
+    try {
+      console.log('Processing video file:', files[0].name, 'Size:', (files[0].size / 1024 / 1024).toFixed(2) + 'MB');
+      
+      const cloudinaryUrl = await uploadToCloudinary(files[0], 'video');
+      
+      if (!cloudinaryUrl.startsWith('https://res.cloudinary.com/')) {
+        throw new Error('Invalid Cloudinary URL returned');
+      }
+      
+      console.log('Cloudinary Video URL:', cloudinaryUrl);
+      setVideoUrl(cloudinaryUrl);
+      setVideoFile(files[0]);
+      
+    } catch (error) {
+      console.error('Error uploading video to Cloudinary:', error);
+      alert('Video upload failed. Please try again or use a different video.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+  
   const handleSubmit = async () => {
     if (!title.trim() || !user) return;
 
     setIsSubmitting(true);
     try {
-      // Make sure imageUrl is a Cloudinary URL, not base64
-      if (activeMediaType === 'image' && imageUrl && imageUrl.startsWith('data:image')) {
-        throw new Error('Cannot submit with base64 image. Please upload to Cloudinary first.');
-      }
-      
       const postData: any = {
         title: title,
         content: content,
         subreddit,
         imageUrl: activeMediaType === 'image' ? imageUrl : null,
-        // REMOVE this line if videoUrl isn't in your schema
-        // videoUrl: activeMediaType === 'video' ? videoUrl : null,
+        videoUrl: activeMediaType === 'video' ? videoUrl : null,
         linkUrl: activeMediaType === 'link' ? linkUrl : null
       };
 
@@ -259,7 +296,8 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
         handleClose();
         window.location.reload(); // Refresh to show new post
       } else {
-        console.error('Failed to create post');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create post');
       }
     } catch (error) {
       console.error('Error creating post:', error);
@@ -357,7 +395,7 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
                   
                   {!imageUrl && !isUploading && (
                     <FileUploader 
-                      onFilesSelected={handleFilesSelected}
+                      onFilesSelected={handleImageFilesSelected}
                       maxFiles={1}
                       maxSizeMB={2}
                     />
@@ -385,6 +423,54 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
                       {uploadedFiles.length > 0 && (
                         <p className="text-xs text-gray-500 mt-1">
                           Size: {(uploadedFiles[0].size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Video Upload UI */}
+              {activeMediaType === 'video' && (
+                <div className="mt-4">
+                  {isUploading && (
+                    <div className="text-center py-4">
+                      <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                      <p className="text-sm text-gray-400 mt-2">Processing video...</p>
+                    </div>
+                  )}
+                  
+                  {!videoUrl && !isUploading && (
+                    <FileUploader 
+                      onFilesSelected={handleVideoFilesSelected}
+                      maxFiles={1}
+                      maxSizeMB={50}
+                      fileType="video"
+                    />
+                  )}
+                  
+                  {/* Show uploaded video preview */}
+                  {videoUrl && (
+                    <div className="mt-4 relative">
+                      <div className="relative aspect-video bg-sidebar-accent rounded-md overflow-hidden max-w-md">
+                        <video 
+                          src={videoUrl} 
+                          controls
+                          className="w-full h-full object-contain"
+                        />
+                        <button 
+                          className="absolute top-2 right-2 bg-black/70 hover:bg-black/90 rounded-full p-1.5"
+                          onClick={() => {
+                            setVideoUrl('');
+                            setVideoFile(null);
+                          }}
+                        >
+                          <X className="h-4 w-4 text-white" />
+                        </button>
+                      </div>
+                      {videoFile && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Size: {(videoFile.size / 1024 / 1024).toFixed(2)} MB
                         </p>
                       )}
                     </div>

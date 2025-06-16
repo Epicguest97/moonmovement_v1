@@ -38,10 +38,11 @@ model User {
 model Post {
   id                Int                @id @default(autoincrement())
   title             String
-  content           String
+  content           String?
   authorId          Int
-  subreddit         String
+  subreddit         String    @default("general")
   imageUrl          String?
+  videoUrl          String?   // Add this field
   linkUrl           String?
   createdAt         DateTime           @default(now())
   tags              String?

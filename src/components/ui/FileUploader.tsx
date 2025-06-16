@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Upload } from 'lucide-react';
 
@@ -8,14 +7,16 @@ interface FileUploaderProps {
   maxFiles?: number;
   maxSizeMB?: number;
   className?: string;
+  fileType?: 'image' | 'video' | 'any';
 }
 
 const FileUploader: React.FC<FileUploaderProps> = ({
   onFilesSelected,
   accept = 'image/*',
-  maxFiles = 4,
-  maxSizeMB = 2, // Reduced from 4MB to 2MB
+  maxFiles = 1,
+  maxSizeMB = 10, // Increased for videos
   className = '',
+  fileType = 'image',
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
@@ -38,7 +39,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
     e.stopPropagation();
   };
 
-  // Compress image to reduce file size
+  // Compress image to reduce file size (keep this for images)
   const compressImage = (file: File): Promise<File> => {
     return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
@@ -80,10 +81,10 @@ const FileUploader: React.FC<FileUploaderProps> = ({
     });
   };
 
-  const validateAndCompressFiles = async (fileList: FileList | null): Promise<File[]> => {
+  const validateAndProcessFiles = async (fileList: FileList | null): Promise<File[]> => {
     if (!fileList) return [];
     
-    setIsCompressing(true);
+    setIsCompressing(fileType === 'image');
     const validFiles: File[] = [];
     const files = Array.from(fileList);
     
@@ -91,16 +92,21 @@ const FileUploader: React.FC<FileUploaderProps> = ({
       for (let i = 0; i < Math.min(files.length, maxFiles); i++) {
         const file = files[i];
         
-        // Check if it's an image
-        if (!file.type.startsWith('image/')) {
+        // Check file type
+        if (fileType === 'image' && !file.type.startsWith('image/')) {
           console.warn(`File ${file.name} is not an image`);
+          continue;
+        }
+        
+        if (fileType === 'video' && !file.type.startsWith('video/')) {
+          console.warn(`File ${file.name} is not a video`);
           continue;
         }
         
         let processedFile = file;
         
-        // Compress if file is too large
-        if (file.size > maxSizeMB * 1024 * 1024) {
+        // Only compress images, not videos
+        if (fileType === 'image' && file.size > maxSizeMB * 1024 * 1024) {
           try {
             processedFile = await compressImage(file);
             console.log(`Compressed ${file.name} from ${(file.size / 1024 / 1024).toFixed(2)}MB to ${(processedFile.size / 1024 / 1024).toFixed(2)}MB`);
@@ -110,11 +116,11 @@ const FileUploader: React.FC<FileUploaderProps> = ({
           }
         }
         
-        // Final size check after compression
+        // Final size check
         if (processedFile.size <= maxSizeMB * 1024 * 1024) {
           validFiles.push(processedFile);
         } else {
-          console.warn(`File ${file.name} is still too large after compression`);
+          console.warn(`File ${file.name} is too large (${(processedFile.size / 1024 / 1024).toFixed(2)}MB). Max size is ${maxSizeMB}MB.`);
         }
       }
     } finally {
@@ -129,21 +135,17 @@ const FileUploader: React.FC<FileUploaderProps> = ({
     e.stopPropagation();
     setIsDragging(false);
     
-    const validFiles = await validateAndCompressFiles(e.dataTransfer.files);
+    const validFiles = await validateAndProcessFiles(e.dataTransfer.files);
     if (validFiles.length > 0) {
       onFilesSelected(validFiles);
     }
   };
 
   const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const validFiles = await validateAndCompressFiles(e.target.files);
+    const validFiles = await validateAndProcessFiles(e.target.files);
     if (validFiles.length > 0) {
       onFilesSelected(validFiles);
     }
-  };
-
-  const handleClick = () => {
-    fileInputRef.current?.click();
   };
 
   return (
@@ -153,7 +155,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
           ? 'border-primary bg-primary/10' 
           : 'border-gray-600 hover:border-gray-500 bg-transparent'
       } ${className}`}
-      onClick={handleClick}
+      onClick={() => fileInputRef.current?.click()}
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -163,7 +165,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
         ref={fileInputRef}
         type="file"
         multiple={maxFiles > 1}
-        accept={accept}
+        accept={fileType === 'image' ? 'image/*' : fileType === 'video' ? 'video/*' : 'image/*,video/*'}
         onChange={handleFileInputChange}
         className="hidden"
       />
@@ -175,10 +177,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
             </div>
             <p className="mb-2 text-gray-300 font-medium">
-              Compressing image...
-            </p>
-            <p className="text-sm text-gray-500">
-              Please wait while we optimize your image
+              Processing...
             </p>
           </>
         ) : (
@@ -187,13 +186,14 @@ const FileUploader: React.FC<FileUploaderProps> = ({
               <Upload className="h-6 w-6 text-gray-400" />
             </div>
             <p className="mb-2 text-gray-300 font-medium">
-              Drag & drop images here, or click to select images...
+              {fileType === 'video' 
+                ? "Drag & drop video here, or click to select..."
+                : "Drag & drop images here, or click to select..."}
             </p>
             <p className="text-sm text-gray-500">
-              You can upload {maxFiles} images (up to {maxSizeMB} MB each)
-            </p>
-            <p className="text-xs text-gray-600 mt-1">
-              Images will be automatically compressed if needed
+              {fileType === 'video' 
+                ? `You can upload 1 video (up to ${maxSizeMB} MB)`
+                : `You can upload ${maxFiles} images (up to ${maxSizeMB} MB each)`}
             </p>
           </>
         )}
