@@ -24,7 +24,13 @@ const Index = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch('https://moonmovement.onrender.com/api/posts');
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch('https://moonmovement.onrender.com/api/posts', {
+          headers: {
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          }
+        });
         
         if (!response.ok) {
           throw new Error('Failed to fetch posts');
@@ -36,10 +42,11 @@ const Index = () => {
         const transformedPosts: Post[] = data.map((post: any) => ({
           ...post,
           id: post.id.toString(),
-          voteScore: post.likeCount || 0, // Use likeCount from backend
+          voteScore: post.likeCount || 0,
           commentCount: post.comments?.length || 0,
           timestamp: new Date(post.createdAt).toLocaleString(),
-          subreddit: post.subreddit || 'general'
+          subreddit: post.subreddit || 'general',
+          poll: post.poll || null // Add this line to preserve poll data
         }));
         
         setPosts(transformedPosts);

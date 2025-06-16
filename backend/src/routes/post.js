@@ -35,7 +35,16 @@ router.get('/', async (req, res) => {
             isRemoved: false
           }
         },
-        votes: true
+        votes: true,
+        poll: {  // Add this block to include poll data
+          include: {
+            options: {
+              include: {
+                votes: true
+              }
+            }
+          }
+        }
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -465,7 +474,16 @@ router.get('/community/:subreddit', async (req, res) => {
             isRemoved: false
           }
         },
-        votes: true
+        votes: true,
+        poll: {  // Add this block
+          include: {
+            options: {
+              include: {
+                votes: true
+              }
+            }
+          }
+        }
       },
       orderBy: { createdAt: 'desc' }
     });
