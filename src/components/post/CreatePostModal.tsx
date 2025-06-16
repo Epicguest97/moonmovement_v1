@@ -433,6 +433,11 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
               {/* Video Upload UI */}
               {activeMediaType === 'video' && (
                 <div className="mt-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Video size={16} className="text-gray-400" />
+                    <label className="text-sm text-gray-400">Upload Video</label>
+                  </div>
+                  
                   {isUploading && (
                     <div className="text-center py-4">
                       <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
