@@ -185,12 +185,12 @@ const Community = () => {
         
         if (response.ok) {
           const postsData = await response.json();
-          // Transform posts to match the expected format with timestamp and author password
+          // Transform posts to match the expected format with timestamp and author
           const transformedPosts = postsData.map((post: any) => ({
             ...post,
             author: {
-              ...post.author,
-              password: '' // Add empty password field to match interface
+              id: post.author.id.toString(), // Convert id to string
+              username: post.author.username
             },
             timestamp: new Date(post.createdAt).toLocaleDateString()
           }));
