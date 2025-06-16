@@ -91,7 +91,10 @@ const PostContent = ({
   const renderPoll = () => {
     if (post.poll) {
       return (
-        <div className="mt-3 mb-2">
+        <div 
+          className="mt-3 mb-2 relative z-20" 
+          onClick={(e) => e.stopPropagation()}
+        >
           <PollComponent poll={post.poll} postId={post.id} />
         </div>
       );
