@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -76,12 +77,15 @@ const PollComponent = ({ poll, postId }: PollComponentProps) => {
 
   return (
     <div 
-      className="bg-sidebar-accent/30 rounded-lg p-4 space-y-3 relative z-20"
+      className="bg-background border border-border rounded-lg p-4 space-y-3 relative z-20 mt-3"
       onClick={(e) => e.stopPropagation()}
     >
-      <h4 className="font-medium text-foreground">{poll.question}</h4>
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-2 h-2 bg-primary rounded-full"></div>
+        <h4 className="font-medium text-foreground text-sm">Poll</h4>
+      </div>
       
-      <div className="space-y-2">
+      <div className="space-y-3">
         {poll.options.map((option) => {
           const percentage = getPercentage(option.votes.length);
           const isSelected = selectedOption === option.id;
@@ -90,12 +94,12 @@ const PollComponent = ({ poll, postId }: PollComponentProps) => {
             <div key={option.id} className="relative" onClick={(e) => e.stopPropagation()}>
               <Button
                 variant="outline"
-                className={`w-full justify-start text-left h-auto p-3 relative overflow-hidden ${
+                className={`w-full justify-between text-left h-auto p-3 relative overflow-hidden border transition-all duration-200 ${
                   hasVoted || isExpired
-                    ? 'cursor-default' 
-                    : 'hover:bg-sidebar-accent/50'
+                    ? 'cursor-default hover:bg-transparent' 
+                    : 'hover:bg-accent/50 hover:border-primary/50'
                 } ${
-                  isSelected ? 'border-primary bg-primary/10' : ''
+                  isSelected ? 'border-primary bg-primary/5' : 'border-border'
                 }`}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -106,17 +110,24 @@ const PollComponent = ({ poll, postId }: PollComponentProps) => {
                 {/* Vote percentage background */}
                 {hasVoted && (
                   <div 
-                    className="absolute left-0 top-0 h-full bg-primary/20 transition-all duration-300 rounded"
+                    className="absolute left-0 top-0 h-full bg-primary/10 transition-all duration-500 ease-out rounded-md"
                     style={{ width: `${percentage}%` }}
                   />
                 )}
                 
                 <div className="flex justify-between items-center w-full relative z-10">
-                  <span className={isSelected ? 'font-medium' : ''}>{option.text}</span>
+                  <span className={`text-sm ${isSelected ? 'font-medium text-primary' : 'text-foreground'}`}>
+                    {option.text}
+                  </span>
                   {hasVoted && (
-                    <span className="text-sm text-muted-foreground">
-                      {percentage}% ({option.votes.length})
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {percentage}%
+                      </span>
+                      <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                        {option.votes.length}
+                      </span>
+                    </div>
                   )}
                 </div>
               </Button>
@@ -125,19 +136,25 @@ const PollComponent = ({ poll, postId }: PollComponentProps) => {
         })}
       </div>
       
-      <div className="text-sm text-muted-foreground">
-        {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
-        {poll.expiresAt && (
-          <span className={isExpired ? 'text-red-400' : ''}>
-            {' • '}{isExpired ? 'Expired' : 'Expires'} {new Date(poll.expiresAt).toLocaleDateString()}
-          </span>
-        )}
-        {!user && !hasVoted && (
-          <div className="text-xs text-muted-foreground mt-1">
-            Login to vote on this poll
-          </div>
-        )}
+      <div className="flex items-center justify-between pt-2 border-t border-border">
+        <div className="text-xs text-muted-foreground">
+          {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
+        </div>
+        
+        <div className="text-xs text-muted-foreground">
+          {poll.expiresAt && (
+            <span className={isExpired ? 'text-destructive' : 'text-primary'}>
+              {isExpired ? 'Expired' : 'Expires'} {new Date(poll.expiresAt).toLocaleDateString()}
+            </span>
+          )}
+        </div>
       </div>
+      
+      {!user && !hasVoted && (
+        <div className="text-xs text-muted-foreground text-center pt-2 border-t border-border">
+          Login to vote on this poll
+        </div>
+      )}
     </div>
   );
 };

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Post } from './PostCard';
 import { Link } from 'react-router-dom';
@@ -88,31 +89,10 @@ const PostContent = ({
     return null;
   };
   
-  const renderLinkContent = () => {
-    // Don't render link if hideTextContent is true
-    if (hideTextContent) return null;
-    
-    if (post.linkUrl && (isDetailView || !post.imageUrl)) {
-      return (
-        <div className="mt-2 mb-2 overflow-hidden">
-          <a 
-            href={post.linkUrl} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-sm text-blue-500 hover:underline break-all overflow-wrap-anywhere"
-          >
-            {post.linkUrl}
-          </a>
-        </div>
-      );
-    }
-    return null;
-  };
-  
   const renderPoll = () => {
     if (post.poll) {
       return (
-        <div className="mt-3 mb-2">
+        <div className="mt-2 mb-2">
           <PollComponent poll={post.poll} postId={post.id} />
         </div>
       );
@@ -125,7 +105,6 @@ const PostContent = ({
       {renderImage()}
       {renderVideo()}
       {renderTextContent()}
-      {renderLinkContent()}
       {renderPoll()}
       
       {!isDetailView && (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Image, Video, Link as LinkIcon, List, Smile, ArrowLeft } from 'lucide-react';
+import { X, Image, Video, List, Smile, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import FileUploader from '@/components/ui/FileUploader';
@@ -25,8 +25,6 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated = () => {} }: CreatePo
   const [activeMediaType, setActiveMediaType] = useState<MediaType>(null);
   const [imageUrl, setImageUrl] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
-  const [linkUrl, setLinkUrl] = useState('');
-  const [pollQuestion, setPollQuestion] = useState('');
   const [pollOptions, setPollOptions] = useState<PollOption[]>([
     { id: '1', text: '' }, { id: '2', text: '' }
   ]);
@@ -37,7 +35,6 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated = () => {} }: CreatePo
   const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [pollDuration, setPollDuration] = useState('');
 
   const { user } = useAuth();
   const titleInputRef = useRef<HTMLTextAreaElement>(null);
@@ -94,10 +91,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated = () => {} }: CreatePo
     setActiveMediaType(null);
     setImageUrl('');
     setVideoUrl('');
-    setLinkUrl('');
-    setPollQuestion('');
     setPollOptions([{ id: '1', text: '' }, { id: '2', text: '' }]);
-    setPollDuration('');
     setSubreddit('general');
     setUploadedFiles([]);
     setSelectedCommunity(null);
@@ -160,13 +154,8 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated = () => {} }: CreatePo
         setVideoUrl('');
         setVideoFile(null);
       }
-      if (type !== 'link') {
-        setLinkUrl('');
-      }
       if (type !== 'poll') {
-        setPollQuestion('');
         setPollOptions([{ id: '1', text: '' }, { id: '2', text: '' }]);
-        setPollDuration('');
       }
     }
   };
@@ -276,21 +265,17 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated = () => {} }: CreatePo
         content: content,
         subreddit,
         imageUrl: activeMediaType === 'image' ? imageUrl : null,
-        videoUrl: activeMediaType === 'video' ? videoUrl : null,
-        linkUrl: activeMediaType === 'link' ? linkUrl : null
+        videoUrl: activeMediaType === 'video' ? videoUrl : null
       };
 
-      if (activeMediaType === 'poll' && pollQuestion.trim() && pollOptions.some(opt => opt.text.trim())) {
-        let expiresAt = null;
-        if (pollDuration) {
-          const days = parseInt(pollDuration);
-          const expiry = new Date();
-          expiry.setDate(expiry.getDate() + days);
-          expiresAt = expiry.toISOString();
-        }
+      if (activeMediaType === 'poll' && pollOptions.some(opt => opt.text.trim())) {
+        // Automatically set poll duration to 1 day
+        const expiry = new Date();
+        expiry.setDate(expiry.getDate() + 1);
+        const expiresAt = expiry.toISOString();
         
         postData.poll = {
-          question: pollQuestion,
+          question: title, // Use post title as poll question
           options: pollOptions.filter(opt => opt.text.trim()).map(opt => opt.text),
           expiresAt
         };
@@ -502,26 +487,16 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated = () => {} }: CreatePo
                 </div>
               )}
               
-              {/* Poll Creation UI */}
+              {/* Poll Creation UI - Simplified */}
               {activeMediaType === 'poll' && (
                 <div className="mt-4">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-4">
                     <List size={16} className="text-gray-400" />
-                    <label className="text-sm text-gray-400">Create Poll</label>
+                    <label className="text-sm text-gray-400">Create Poll Options</label>
+                    <span className="text-xs text-gray-500">(expires in 1 day)</span>
                   </div>
                   
-                  <div className="space-y-4">
-                    {/* Poll Question */}
-                    <div>
-                      <input
-                        type="text"
-                        placeholder="Ask a question..."
-                        value={pollQuestion}
-                        onChange={(e) => setPollQuestion(e.target.value)}
-                        className="w-full p-2 rounded-md bg-sidebar-accent border border-sidebar-border text-sidebar-foreground placeholder:text-gray-400"
-                      />
-                    </div>
-                    
+                  <div className="space-y-3">
                     {/* Poll Options */}
                     <div className="space-y-2">
                       {pollOptions.map((option, index) => (
@@ -531,12 +506,12 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated = () => {} }: CreatePo
                             placeholder={`Option ${index + 1}`}
                             value={option.text}
                             onChange={(e) => updatePollOption(option.id, e.target.value)}
-                            className="flex-1 p-2 rounded-md bg-sidebar-accent border border-sidebar-border text-sidebar-foreground placeholder:text-gray-400"
+                            className="flex-1 p-3 rounded-md bg-sidebar-accent border border-sidebar-border text-sidebar-foreground placeholder:text-gray-400 focus:border-primary focus:outline-none"
                           />
                           {pollOptions.length > 2 && (
                             <button
                               onClick={() => removePollOption(option.id)}
-                              className="p-1 text-gray-400 hover:text-gray-200"
+                              className="p-2 text-gray-400 hover:text-gray-200 hover:bg-sidebar-accent rounded-md"
                             >
                               <X size={16} />
                             </button>
@@ -556,24 +531,6 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated = () => {} }: CreatePo
                         + Add Option
                       </Button>
                     )}
-                    
-                    {/* Poll Duration (Optional) */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-sm text-gray-400">Poll Duration (Optional)</span>
-                      </div>
-                      <select
-                        value={pollDuration}
-                        onChange={(e) => setPollDuration(e.target.value)}
-                        className="w-full p-2 rounded-md bg-sidebar-accent border border-sidebar-border text-sidebar-foreground"
-                      >
-                        <option value="">No end date</option>
-                        <option value="1">1 day</option>
-                        <option value="3">3 days</option>
-                        <option value="7">7 days</option>
-                        <option value="30">30 days</option>
-                      </select>
-                    </div>
                   </div>
                 </div>
               )}
@@ -582,30 +539,24 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated = () => {} }: CreatePo
             {/* Divider */}
             <div className="h-px bg-sidebar-border w-full"></div>
 
-            {/* Footer */}
+            {/* Footer - Removed link button */}
             <div className="p-4 flex justify-between items-center">
               <div className="flex items-center gap-4">
                 <button 
                   onClick={() => toggleMediaType('image')} 
-                  className={`text-gray-400 hover:text-gray-200 ${activeMediaType === 'image' ? 'text-primary' : ''}`}
+                  className={`text-gray-400 hover:text-gray-200 transition-colors ${activeMediaType === 'image' ? 'text-primary' : ''}`}
                 >
                   <Image className="h-5 w-5" />
                 </button>
                 <button 
                   onClick={() => toggleMediaType('video')} 
-                  className={`text-gray-400 hover:text-gray-200 ${activeMediaType === 'video' ? 'text-primary' : ''}`}
+                  className={`text-gray-400 hover:text-gray-200 transition-colors ${activeMediaType === 'video' ? 'text-primary' : ''}`}
                 >
                   <Video className="h-5 w-5" />
                 </button>
                 <button 
-                  onClick={() => toggleMediaType('link')} 
-                  className={`text-gray-400 hover:text-gray-200 ${activeMediaType === 'link' ? 'text-primary' : ''}`}
-                >
-                  <LinkIcon className="h-5 w-5" />
-                </button>
-                <button 
                   onClick={() => toggleMediaType('poll')} 
-                  className={`text-gray-400 hover:text-gray-200 ${activeMediaType === 'poll' ? 'text-primary' : ''}`}
+                  className={`text-gray-400 hover:text-gray-200 transition-colors ${activeMediaType === 'poll' ? 'text-primary' : ''}`}
                 >
                   <List className="h-5 w-5" />
                 </button>
