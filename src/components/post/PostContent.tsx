@@ -37,6 +37,26 @@ const PostContent = ({
     return null;
   };
   
+  const renderVideo = () => {
+    if (post.videoUrl) {
+      return (
+        <div 
+          className="mt-1 mb-0 overflow-hidden relative z-20" 
+          onClick={(e) => e.stopPropagation()}
+        >
+          <video 
+            src={post.videoUrl} 
+            controls
+            className="max-w-full w-full h-auto rounded-md object-contain"
+            preload="metadata"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      );
+    }
+    return null;
+  };
+  
   const renderTextContent = () => {
     if (hideTextContent) return null;
     
@@ -91,6 +111,7 @@ const PostContent = ({
   return (
     <div className="relative overflow-hidden py-0">
       {renderImage()}
+      {renderVideo()}
       {renderTextContent()}
       {renderLinkContent()}
       
