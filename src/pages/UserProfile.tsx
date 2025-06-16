@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -61,7 +60,12 @@ const UserProfile = () => {
 
   useEffect(() => {
     const fetchUserProfile = async () => {
-      if (!username) return;
+      // Better check that handles "undefined" string too
+      if (!username || username === "undefined") {
+        setError("Invalid username");
+        setLoading(false);
+        return;
+      }
       
       try {
         setLoading(true);
