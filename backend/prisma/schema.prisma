@@ -33,6 +33,7 @@ model User {
   moderatedSubreddits  SubredditModerator[]
   activities           UserActivity[]
   votes                Vote[]
+  pollVotes            PollVote[]           // Add this line to create the opposite relation
 }
 
 model Post {
@@ -40,9 +41,8 @@ model Post {
   title             String
   content           String?
   authorId          Int
-  subreddit         String    @default("general")
+  subreddit         String             @default("general")
   imageUrl          String?
-  videoUrl          String?   // Add this field
   linkUrl           String?
   createdAt         DateTime           @default(now())
   tags              String?
@@ -50,11 +50,13 @@ model Post {
   removalReason     String?
   removedAt         DateTime?
   removedBy         Int?
+  videoUrl          String?
   comments          Comment[]
   Like              Like[]
   moderationActions ModerationAction[]
   author            User               @relation(fields: [authorId], references: [id])
   votes             Vote[]
+  poll              Poll?
 }
 
 model Comment {
@@ -274,4 +276,36 @@ model Like {
   User      User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, postId])
+}
+
+model Poll {
+  id        Int         @id @default(autoincrement())
+  postId    Int         @unique
+  question  String
+  expiresAt DateTime?
+  createdAt DateTime    @default(now())
+  post      Post        @relation(fields: [postId], references: [id], onDelete: Cascade)
+  options   PollOption[]
+  votes     PollVote[]
+}
+
+model PollOption {
+  id      Int        @id @default(autoincrement())
+  pollId  Int
+  text    String
+  poll    Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes   PollVote[]
+}
+
+model PollVote {
+  id           Int        @id @default(autoincrement())
+  userId       Int
+  pollId       Int
+  pollOptionId Int
+  createdAt    DateTime   @default(now())
+  user         User       @relation(fields: [userId], references: [id])
+  poll         Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  option       PollOption @relation(fields: [pollOptionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, pollId])
 }

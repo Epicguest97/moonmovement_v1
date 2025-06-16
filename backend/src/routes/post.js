@@ -60,20 +60,18 @@ router.get('/:id', async (req, res) => {
     const post = await prisma.post.findUnique({
       where: { id: Number(id) },
       include: {
-        author: {
-          select: {
-            id: true,
-            username: true,
-            email: true,
-            createdAt: true
+        author: true,
+        comments: true,
+        votes: true,
+        poll: {
+          include: {
+            options: {
+              include: {
+                votes: true
+              }
+            }
           }
-        },
-        comments: {
-          where: {
-            isRemoved: false
-          }
-        },
-        votes: true
+        }
       }
     });
     if (!post) return res.status(404).json({ error: 'Post not found' });

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Post } from './PostCard';
 import { Link } from 'react-router-dom';
@@ -92,7 +91,7 @@ const PostContent = ({
   const renderPoll = () => {
     if (post.poll) {
       return (
-        <div className="mt-2 mb-2">
+        <div className="mt-3 mb-2">
           <PollComponent poll={post.poll} postId={post.id} />
         </div>
       );
