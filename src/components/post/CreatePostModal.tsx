@@ -176,50 +176,18 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to upload image');
+        const errorData = await response.json();
+        console.error('Cloudinary error:', errorData);
+        throw new Error('Upload to Cloudinary failed: ' + (errorData.message || 'Unknown error'));
       }
       
       const data = await response.json();
+      console.log('Cloudinary response:', data);
       return data.secure_url;
     } catch (error) {
       console.error('Error uploading to Cloudinary:', error);
       throw error;
     }
-  };
-
-  const uploadToImgur = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append('image', file);
-    
-    try {
-      const response = await fetch('https://api.imgur.com/3/image', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Client-ID YOUR_IMGUR_CLIENT_ID', // You'll need to get this from Imgur
-        },
-        body: formData,
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to upload image');
-      }
-      
-      const data = await response.json();
-      return data.data.link;
-    } catch (error) {
-      console.error('Error uploading to Imgur:', error);
-      throw error;
-    }
-  };
-
-  // Simple fallback - convert to base64 (not recommended for production)
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-    });
   };
 
   const handleFilesSelected = async (files: File[]) => {
@@ -229,15 +197,23 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
     try {
       console.log('Processing file:', files[0].name, 'Size:', (files[0].size / 1024 / 1024).toFixed(2) + 'MB');
       
-      // Upload to Cloudinary instead of converting to base64
+      // Use only Cloudinary
       const cloudinaryUrl = await uploadImageToCloudinary(files[0]);
+      
+      // Verify this is a Cloudinary URL (not a base64 string)
+      if (!cloudinaryUrl.startsWith('https://res.cloudinary.com/')) {
+        throw new Error('Invalid Cloudinary URL returned');
+      }
+      
+      console.log('Cloudinary URL:', cloudinaryUrl);
       setImageUrl(cloudinaryUrl);
       setUploadedFiles(files);
       
-      console.log('Image uploaded successfully to Cloudinary');
     } catch (error) {
-      console.error('Error processing image:', error);
-      alert('Failed to upload image. Please try again.');
+      console.error('Error uploading to Cloudinary:', error);
+      alert('Image upload failed. Please try again or use a different image.');
+      
+      // Don't set imageUrl on error - this prevents fallback to base64
     } finally {
       setIsUploading(false);
     }
@@ -248,12 +224,18 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
 
     setIsSubmitting(true);
     try {
+      // Make sure imageUrl is a Cloudinary URL, not base64
+      if (activeMediaType === 'image' && imageUrl && imageUrl.startsWith('data:image')) {
+        throw new Error('Cannot submit with base64 image. Please upload to Cloudinary first.');
+      }
+      
       const postData: any = {
         title: title,
         content: content,
         subreddit,
         imageUrl: activeMediaType === 'image' ? imageUrl : null,
-        videoUrl: activeMediaType === 'video' ? videoUrl : null,
+        // REMOVE this line if videoUrl isn't in your schema
+        // videoUrl: activeMediaType === 'video' ? videoUrl : null,
         linkUrl: activeMediaType === 'link' ? linkUrl : null
       };
 
@@ -281,6 +263,7 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
       }
     } catch (error) {
       console.error('Error creating post:', error);
+      alert('Failed to create post: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
       setIsSubmitting(false);
     }
