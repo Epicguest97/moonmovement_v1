@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -38,13 +37,49 @@ const CommunitySettings = ({ community, onCommunityUpdate }: CommunitySettingsPr
     }));
   };
 
-  const handleImageUpload = (field: 'bannerImage' | 'icon', event: React.ChangeEvent<HTMLInputElement>) => {
+  // Add the Cloudinary upload function
+  const uploadImageToCloudinary = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'moonmovement');
+    
+    try {
+      const response = await fetch('https://api.cloudinary.com/v1_1/deb30prxc/image/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+      
+      const data = await response.json();
+      return data.secure_url;
+    } catch (error) {
+      console.error('Error uploading to Cloudinary:', error);
+      throw error;
+    }
+  };
+
+  // Update the handleImageUpload function
+  const handleImageUpload = async (field: 'bannerImage' | 'icon', event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // In a real app, you'd upload to a file storage service
-      // For now, we'll create a local URL
-      const imageUrl = URL.createObjectURL(file);
-      handleInputChange(field, imageUrl);
+      try {
+        setLoading(true);
+        // Upload to Cloudinary
+        const imageUrl = await uploadImageToCloudinary(file);
+        handleInputChange(field, imageUrl);
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        toast({
+          title: "Error",
+          description: "Failed to upload image",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 

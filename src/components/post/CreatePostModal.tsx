@@ -167,10 +167,10 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
   const uploadImageToCloudinary = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', 'ml_default'); // You'll need to set this up in Cloudinary
+    formData.append('upload_preset', 'moonmovement'); 
     
     try {
-      const response = await fetch('https://api.cloudinary.com/v1_1/your-cloud-name/image/upload', {
+      const response = await fetch('https://api.cloudinary.com/v1_1/deb30prxc/image/upload', {
         method: 'POST',
         body: formData,
       });
@@ -229,15 +229,15 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
     try {
       console.log('Processing file:', files[0].name, 'Size:', (files[0].size / 1024 / 1024).toFixed(2) + 'MB');
       
-      // Convert to base64 for display
-      const base64Url = await convertToBase64(files[0]);
-      setImageUrl(base64Url);
+      // Upload to Cloudinary instead of converting to base64
+      const cloudinaryUrl = await uploadImageToCloudinary(files[0]);
+      setImageUrl(cloudinaryUrl);
       setUploadedFiles(files);
       
-      console.log('Image processed successfully');
+      console.log('Image uploaded successfully to Cloudinary');
     } catch (error) {
       console.error('Error processing image:', error);
-      alert('Failed to process image. Please try a smaller image.');
+      alert('Failed to upload image. Please try again.');
     } finally {
       setIsUploading(false);
     }

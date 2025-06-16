@@ -63,16 +63,31 @@ const Submit = () => {
     fetchCommunities();
   }, []);
 
-  // Simple fallback - convert to base64 (not recommended for production)
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-    });
+  // Add the Cloudinary upload function
+  const uploadImageToCloudinary = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'moonmovement');
+    
+    try {
+      const response = await fetch('https://api.cloudinary.com/v1_1/deb30prxc/image/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+      
+      const data = await response.json();
+      return data.secure_url;
+    } catch (error) {
+      console.error('Error uploading to Cloudinary:', error);
+      throw error;
+    }
   };
 
+  // Update the handleFilesSelected function
   const handleFilesSelected = async (files: File[]) => {
     if (files.length === 0) return;
     
@@ -80,15 +95,15 @@ const Submit = () => {
     try {
       console.log('Processing file:', files[0].name, 'Size:', (files[0].size / 1024 / 1024).toFixed(2) + 'MB');
       
-      // Convert to base64 for display
-      const base64Url = await convertToBase64(files[0]);
-      setImageUrl(base64Url);
+      // Upload to Cloudinary instead of converting to base64
+      const cloudinaryUrl = await uploadImageToCloudinary(files[0]);
+      setImageUrl(cloudinaryUrl);
       setUploadedFiles(files);
       
-      console.log('Image processed successfully');
+      console.log('Image uploaded successfully to Cloudinary');
     } catch (error) {
-      console.error('Error processing image:', error);
-      alert('Failed to process image. Please try a smaller image.');
+      console.error('Error uploading image to Cloudinary:', error);
+      alert('Failed to upload image. Please try again.');
     } finally {
       setIsUploading(false);
     }
