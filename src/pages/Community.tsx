@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, Eye, Settings } from 'lucide-react';
 import ModerationPanel from '@/components/moderation/ModerationPanel';
 import PostCard from '@/components/post/PostCard';
+import { Post } from '@/components/post/PostCard';
 
 interface Community {
   id: number;
@@ -18,28 +19,6 @@ interface Community {
   bannerImage?: string;
   icon?: string;
   createdAt: string;
-}
-
-interface Post {
-  id: string;
-  title: string;
-  content: string;
-  author: {
-    id: number;
-    username: string;
-    email: string;
-    password: string;
-    createdAt: string;
-  };
-  subreddit: string;
-  createdAt: string;
-  voteScore: number;
-  likeCount: number;
-  commentCount: number;
-  imageUrl?: string;
-  videoUrl?: string;
-  linkUrl?: string;
-  timestamp: string;
 }
 
 const communityCache = new Map();
