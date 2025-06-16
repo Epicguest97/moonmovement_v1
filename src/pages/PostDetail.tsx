@@ -77,7 +77,8 @@ const PostDetail = () => {
             voteScore: data.likeCount || 0,
             commentCount: data.comments?.length || 0,
             timestamp: new Date(data.createdAt).toLocaleString(),
-            subreddit: data.subreddit || 'general'
+            subreddit: data.subreddit || 'general',
+            poll: data.poll || null // Ensure poll data is preserved
           };
           setPost(transformedPost);
           setLikeScore(transformedPost.voteScore);

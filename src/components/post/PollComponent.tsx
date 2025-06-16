@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -76,7 +75,10 @@ const PollComponent = ({ poll, postId }: PollComponentProps) => {
   const isExpired = poll.expiresAt ? new Date(poll.expiresAt) < new Date() : false;
 
   return (
-    <div className="bg-sidebar-accent/30 rounded-lg p-4 space-y-3">
+    <div 
+      className="bg-sidebar-accent/30 rounded-lg p-4 space-y-3 relative z-20"
+      onClick={(e) => e.stopPropagation()}
+    >
       <h4 className="font-medium text-foreground">{poll.question}</h4>
       
       <div className="space-y-2">
@@ -85,7 +87,7 @@ const PollComponent = ({ poll, postId }: PollComponentProps) => {
           const isSelected = selectedOption === option.id;
           
           return (
-            <div key={option.id} className="relative">
+            <div key={option.id} className="relative" onClick={(e) => e.stopPropagation()}>
               <Button
                 variant="outline"
                 className={`w-full justify-start text-left h-auto p-3 relative overflow-hidden ${
@@ -95,7 +97,10 @@ const PollComponent = ({ poll, postId }: PollComponentProps) => {
                 } ${
                   isSelected ? 'border-primary bg-primary/10' : ''
                 }`}
-                onClick={() => !hasVoted && !isExpired && !loading && handleVote(option.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!hasVoted && !isExpired && !loading) handleVote(option.id);
+                }}
                 disabled={hasVoted || isExpired || loading}
               >
                 {/* Vote percentage background */}

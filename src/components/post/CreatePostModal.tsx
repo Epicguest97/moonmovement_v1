@@ -8,6 +8,7 @@ import { uploadToCloudinary } from '@/utils/mediaUpload';
 interface CreatePostModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onPostCreated?: () => void;
 }
 
 interface PollOption {
@@ -17,7 +18,7 @@ interface PollOption {
 
 type MediaType = 'image' | 'video' | 'link' | 'poll' | null;
 
-const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
+const CreatePostModal = ({ isOpen, onClose, onPostCreated = () => {} }: CreatePostModalProps) => {
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -36,7 +37,8 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
   const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [videoFile, setVideoFile] = useState<File | null>(null);
-  
+  const [pollDuration, setPollDuration] = useState('');
+
   const { user } = useAuth();
   const titleInputRef = useRef<HTMLTextAreaElement>(null);
   const contentInputRef = useRef<HTMLTextAreaElement>(null);
@@ -95,6 +97,7 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
     setLinkUrl('');
     setPollQuestion('');
     setPollOptions([{ id: '1', text: '' }, { id: '2', text: '' }]);
+    setPollDuration('');
     setSubreddit('general');
     setUploadedFiles([]);
     setSelectedCommunity(null);
@@ -163,6 +166,7 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
       if (type !== 'poll') {
         setPollQuestion('');
         setPollOptions([{ id: '1', text: '' }, { id: '2', text: '' }]);
+        setPollDuration('');
       }
     }
   };
@@ -186,13 +190,13 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
     ));
   };
 
-  const uploadImageToCloudinary = async (file: File): Promise<string> => {
+  const uploadToCloudinary = async (file: File, resourceType: 'image' | 'video'): Promise<string> => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', 'moonmovement'); 
     
     try {
-      const response = await fetch('https://api.cloudinary.com/v1_1/deb30prxc/image/upload', {
+      const response = await fetch(`https://api.cloudinary.com/v1_1/deb30prxc/${resourceType}/upload`, {
         method: 'POST',
         body: formData,
       });
@@ -277,9 +281,18 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
       };
 
       if (activeMediaType === 'poll' && pollQuestion.trim() && pollOptions.some(opt => opt.text.trim())) {
+        let expiresAt = null;
+        if (pollDuration) {
+          const days = parseInt(pollDuration);
+          const expiry = new Date();
+          expiry.setDate(expiry.getDate() + days);
+          expiresAt = expiry.toISOString();
+        }
+        
         postData.poll = {
           question: pollQuestion,
-          options: pollOptions.filter(opt => opt.text.trim()).map(opt => opt.text)
+          options: pollOptions.filter(opt => opt.text.trim()).map(opt => opt.text),
+          expiresAt
         };
       }
 
@@ -294,6 +307,7 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
 
       if (response.ok) {
         handleClose();
+        onPostCreated();
         window.location.reload(); // Refresh to show new post
       } else {
         const errorData = await response.json();
@@ -386,6 +400,11 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
               {/* Media inputs */}
               {activeMediaType === 'image' && (
                 <div className="mt-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Image size={16} className="text-gray-400" />
+                    <label className="text-sm text-gray-400">Upload Image</label>
+                  </div>
+                  
                   {isUploading && (
                     <div className="text-center py-4">
                       <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
@@ -483,7 +502,81 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
                 </div>
               )}
               
-              {/* Other media types would go here */}
+              {/* Poll Creation UI */}
+              {activeMediaType === 'poll' && (
+                <div className="mt-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <List size={16} className="text-gray-400" />
+                    <label className="text-sm text-gray-400">Create Poll</label>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {/* Poll Question */}
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="Ask a question..."
+                        value={pollQuestion}
+                        onChange={(e) => setPollQuestion(e.target.value)}
+                        className="w-full p-2 rounded-md bg-sidebar-accent border border-sidebar-border text-sidebar-foreground placeholder:text-gray-400"
+                      />
+                    </div>
+                    
+                    {/* Poll Options */}
+                    <div className="space-y-2">
+                      {pollOptions.map((option, index) => (
+                        <div key={option.id} className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            placeholder={`Option ${index + 1}`}
+                            value={option.text}
+                            onChange={(e) => updatePollOption(option.id, e.target.value)}
+                            className="flex-1 p-2 rounded-md bg-sidebar-accent border border-sidebar-border text-sidebar-foreground placeholder:text-gray-400"
+                          />
+                          {pollOptions.length > 2 && (
+                            <button
+                              onClick={() => removePollOption(option.id)}
+                              className="p-1 text-gray-400 hover:text-gray-200"
+                            >
+                              <X size={16} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Add Option Button */}
+                    {pollOptions.length < 5 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={addPollOption}
+                        className="w-full border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent"
+                      >
+                        + Add Option
+                      </Button>
+                    )}
+                    
+                    {/* Poll Duration (Optional) */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm text-gray-400">Poll Duration (Optional)</span>
+                      </div>
+                      <select
+                        value={pollDuration}
+                        onChange={(e) => setPollDuration(e.target.value)}
+                        className="w-full p-2 rounded-md bg-sidebar-accent border border-sidebar-border text-sidebar-foreground"
+                      >
+                        <option value="">No end date</option>
+                        <option value="1">1 day</option>
+                        <option value="3">3 days</option>
+                        <option value="7">7 days</option>
+                        <option value="30">30 days</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Divider */}

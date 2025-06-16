@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import PostHeader from './PostHeader';
@@ -12,28 +11,23 @@ import { useLocation } from 'react-router-dom';
 export interface Post {
   id: string;
   title: string;
-  content: string;
-  author: {
-    username: string;
-    id?: number;
-    email?: string;
-    password?: string;
-  };
+  content?: string;
+  imageUrl?: string;
+  videoUrl?: string;
+  linkUrl?: string;
+  author: string | { username: string; id: string };
   subreddit: string;
   voteScore: number;
   commentCount: number;
   timestamp: string;
-  imageUrl?: string;
-  videoUrl?: string;
-  linkUrl?: string;
   poll?: {
     id: number;
     question: string;
-    options: Array<{
+    options: {
       id: number;
       text: string;
       votes: any[];
-    }>;
+    }[];
     expiresAt?: string;
   };
 }

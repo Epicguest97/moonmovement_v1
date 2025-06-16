@@ -3,6 +3,7 @@ import { Post } from './PostCard';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import PollComponent from './PollComponent';
 
 interface PostContentProps {
   post: Post;
@@ -107,6 +108,17 @@ const PostContent = ({
     }
     return null;
   };
+  
+  const renderPoll = () => {
+    if (post.poll) {
+      return (
+        <div className="mt-3 mb-2">
+          <PollComponent poll={post.poll} postId={post.id} />
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="relative overflow-hidden py-0">
@@ -114,6 +126,7 @@ const PostContent = ({
       {renderVideo()}
       {renderTextContent()}
       {renderLinkContent()}
+      {renderPoll()}
       
       {!isDetailView && (
         <Link to={`/post/${post.id}`} className="absolute inset-0 z-10">
