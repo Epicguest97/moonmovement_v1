@@ -94,7 +94,7 @@ const LoginForm = ({ onSwitchToSignup }: LoginFormProps) => {
       }
       
       login(data.user, data.token);
-      navigate('/home');
+      navigate('/');
     } catch (err: any) {
       console.error('Auth error:', err);
       setError(err.message);
@@ -116,7 +116,7 @@ const LoginForm = ({ onSwitchToSignup }: LoginFormProps) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Login failed');
       login(data.user, data.token);
-      navigate('/home');
+      navigate('/');
     } catch (err: any) {
       setError(err.message);
     } finally {
