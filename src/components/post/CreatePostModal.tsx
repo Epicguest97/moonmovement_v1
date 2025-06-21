@@ -331,7 +331,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated = () => {} }: CreatePo
           {step === 1 ? (
             <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
               Create a Post 
-              <span className="bg-green-500/20 text-green-500 text-xs px-1.5 py-0.5 rounded-full">✓</span>
+              
             </h2>
           ) : (
             <div className="flex items-center gap-2">
@@ -386,8 +386,8 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated = () => {} }: CreatePo
               {activeMediaType === 'image' && (
                 <div className="mt-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <Image size={16} className="text-gray-400" />
-                    <label className="text-sm text-gray-400">Upload Image</label>
+                  
+                    
                   </div>
                   
                   {isUploading && (
@@ -438,8 +438,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated = () => {} }: CreatePo
               {activeMediaType === 'video' && (
                 <div className="mt-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <Video size={16} className="text-gray-400" />
-                    <label className="text-sm text-gray-400">Upload Video</label>
+                    
                   </div>
                   
                   {isUploading && (
