@@ -24,6 +24,7 @@ import IndianDistricts from '@/pages/IndianDistricts';
 import UserProfile from '@/pages/UserProfile';
 import Search from '@/pages/Search';
 import NotFound from '@/pages/NotFound';
+import ComingSoon from './pages/ComingSoon';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -50,11 +51,12 @@ function App() {
               <Route path="/communities" element={<Communities />} />
               <Route path="/manage-communities" element={<ManageCommunities />} />
               <Route path="/chat" element={<Chat />} />
-              <Route path="/events" element={<Events />} />
+              <Route path="/events" element={<ComingSoon />} />
               <Route path="/events/:id" element={<EventDetail />} />
-              <Route path="/districts" element={<IndianDistricts />} />
+              <Route path="/districts" element={<ComingSoon />} />
               <Route path="/u/:username" element={<UserProfile />} />
               <Route path="/search" element={<Search />} />
+              <Route path="/misc" element={<ComingSoon />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
