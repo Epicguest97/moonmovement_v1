@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, MessageSquare, Users, TrendingUp, UserPlus, Link, ExternalLink } from 'lucide-react';
@@ -201,13 +201,25 @@ const UserProfile = () => {
     <div className="bg-sidebar border border-sidebar-border rounded-lg overflow-hidden w-full">
       {/* Profile Header with Avatar */}
       <div className="p-6 bg-gradient-to-b from-sidebar-accent/30 to-sidebar flex flex-col items-center text-center border-b border-sidebar-border">
-        <Avatar className="h-24 w-24 mb-4">
-          <AvatarFallback className="bg-sidebar-primary text-white text-2xl">
-            {profile.username.charAt(0).toUpperCase()}
-          </AvatarFallback>
+        {/* Background image if available */}
+        {profile.backgroundImage && (
+          <div className="absolute top-0 left-0 right-0 h-32 bg-cover bg-center" style={{ 
+            backgroundImage: `url('${profile.backgroundImage}')`,
+            opacity: 0.7
+          }} />
+        )}
+        
+        <Avatar className="h-24 w-24 mb-4 relative z-10">
+          {profile.profileImage ? (
+            <AvatarImage src={profile.profileImage} />
+          ) : (
+            <AvatarFallback className="bg-sidebar-primary text-white text-2xl">
+              {profile.username.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          )}
         </Avatar>
         
-        <h2 className="text-2xl font-bold text-white mb-1">u/{profile.username}</h2>
+        <h2 className="text-2xl font-bold text-white mb-1 relative z-10">u/{profile.username}</h2>
         
         {/* Karma display */}
         <div className="flex items-center justify-center gap-2 text-sidebar-primary mb-3">

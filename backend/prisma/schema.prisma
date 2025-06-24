@@ -34,6 +34,10 @@ model User {
   activities           UserActivity[]
   votes                Vote[]
   pollVotes            PollVote[]           // Add this line to create the opposite relation
+  profileImage         String?
+  backgroundImage      String?
+  bio                  String?
+  location             String?
 }
 
 model Post {

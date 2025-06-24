@@ -1,4 +1,3 @@
-
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const { PrismaClient } = require('@prisma/client');
@@ -7,24 +6,34 @@ const { authenticateToken } = require('../middleware/auth');
 const prisma = new PrismaClient();
 const router = express.Router();
 
-// Update user profile (display name, bio, location)
+// Update user profile (display name, bio, location, profile and background images)
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
-    const { displayName, bio, location } = req.body;
+    const { displayName, bio, location, profileImage, backgroundImage } = req.body;
     const userId = req.user.userId;
 
-    // For now, we'll just return success since the User model doesn't have these fields
-    // In a real implementation, you'd add these fields to the User model
-    console.log('Profile update requested for user:', userId, { displayName, bio, location });
-    
+    // Actually update the user in the database now that we have the fields
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        bio,
+        location,
+        profileImage,
+        backgroundImage
+      },
+      select: {
+        id: true,
+        username: true,
+        bio: true,
+        location: true,
+        profileImage: true,
+        backgroundImage: true
+      }
+    });
+
     res.json({ 
       message: 'Profile updated successfully',
-      user: {
-        id: userId,
-        displayName,
-        bio,
-        location
-      }
+      user: updatedUser
     });
   } catch (error) {
     console.error('Profile update error:', error);
@@ -142,6 +151,10 @@ router.get('/user/:username', async (req, res) => {
         username: true,
         email: false, // Don't expose email to others
         createdAt: true,
+        profileImage: true, // Add this
+        backgroundImage: true, // Add this
+        bio: true, // Change from mock data to actual field
+        location: true, // Change from mock data to actual field
         posts: {
           select: {
             id: true,
@@ -203,10 +216,8 @@ router.get('/user/:username', async (req, res) => {
 
     res.json({
       ...user,
-      karma,
-      // Add mock profile data for now
-      bio: 'This user hasnt added a bio yet.',
-      location: null
+      karma
+      // No need for the mock bio and location anymore
     });
   } catch (error) {
     console.error('Get user profile error:', error);

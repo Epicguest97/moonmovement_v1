@@ -7,7 +7,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
-import { User, Mail, Calendar, Edit, Save, X, TrendingUp, MessageSquare, ThumbsUp, Users } from 'lucide-react';
+import { User, Mail, Calendar, Edit, Save, X, TrendingUp, MessageSquare, ThumbsUp, Users, Camera } from 'lucide-react';
+import { uploadToCloudinary } from '@/utils/mediaUpload';
+import FileUploader from '@/components/ui/FileUploader';
 
 interface UserProfile {
   id: number;
@@ -15,6 +17,8 @@ interface UserProfile {
   email: string;
   bio?: string;
   avatar?: string;
+  backgroundImage?: string;
+  profileImage?: string;
   createdAt: string;
 }
 
@@ -62,6 +66,10 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedBio, setEditedBio] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isUploadingProfile, setIsUploadingProfile] = useState(false);
+  const [isUploadingBackground, setIsUploadingBackground] = useState(false);
+  const [showProfileUploader, setShowProfileUploader] = useState(false);
+  const [showBackgroundUploader, setShowBackgroundUploader] = useState(false);
 
   useEffect(() => {
     if (!isLoggedIn || !user) return;
@@ -140,6 +148,88 @@ const Profile = () => {
       setProfile({ ...profile, bio: editedBio });
     }
     setIsEditing(false);
+  };
+
+  const handleProfileImageSelected = async (files: File[]) => {
+    if (files.length === 0) return;
+    
+    setIsUploadingProfile(true);
+    try {
+      const cloudinaryUrl = await uploadToCloudinary(files[0], 'image');
+      
+      // Update the profile state
+      if (profile) {
+        setProfile({
+          ...profile,
+          profileImage: cloudinaryUrl
+        });
+      }
+      
+      // Save to backend
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://moonmovement.onrender.com/api/auth/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          profileImage: cloudinaryUrl
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update profile image');
+      }
+      
+      setShowProfileUploader(false);
+    } catch (error) {
+      console.error('Error uploading profile image:', error);
+      alert('Failed to update profile image. Please try again.');
+    } finally {
+      setIsUploadingProfile(false);
+    }
+  };
+
+  const handleBackgroundImageSelected = async (files: File[]) => {
+    if (files.length === 0) return;
+    
+    setIsUploadingBackground(true);
+    try {
+      const cloudinaryUrl = await uploadToCloudinary(files[0], 'image');
+      
+      // Update the profile state
+      if (profile) {
+        setProfile({
+          ...profile,
+          backgroundImage: cloudinaryUrl
+        });
+      }
+      
+      // Save to backend
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://moonmovement.onrender.com/api/auth/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          backgroundImage: cloudinaryUrl
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update background image');
+      }
+      
+      setShowBackgroundUploader(false);
+    } catch (error) {
+      console.error('Error uploading background image:', error);
+      alert('Failed to update background image. Please try again.');
+    } finally {
+      setIsUploadingBackground(false);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -421,17 +511,82 @@ const Profile = () => {
           {/* Profile Header Card */}
           <Card className="mb-6 bg-sidebar border-sidebar-border">
             <CardContent className="p-6">
-              <div className="flex flex-col items-center gap-4">
-                <Avatar className="h-24 w-24">
-                  <AvatarImage src={profile.avatar} />
-                  <AvatarFallback className="bg-sidebar-primary text-white text-2xl">
-                    {profile.username.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+              {/* Profile Header with Avatar */}
+              <div className="p-6 bg-gradient-to-b from-sidebar-accent/30 to-sidebar flex flex-col items-center text-center border-b border-sidebar-border">
+                {/* Background image overlay - conditionally show if exists */}
+                {profile.backgroundImage && (
+                  <div className="absolute top-0 left-0 right-0 h-32 bg-cover bg-center" style={{ 
+                    backgroundImage: `url('${profile.backgroundImage}')`,
+                    opacity: 0.6
+                  }} />
+                )}
+                
+                {/* Background upload button */}
+                <div className="self-end mb-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-300 hover:text-white"
+                    onClick={() => setShowBackgroundUploader(!showBackgroundUploader)}
+                  >
+                    <Camera size={16} className="mr-1" />
+                    {profile.backgroundImage ? 'Change Cover' : 'Add Cover'}
+                  </Button>
+                </div>
+                
+                {showBackgroundUploader && (
+                  <div className="w-full mb-4">
+                    {isUploadingBackground ? (
+                      <div className="text-center py-2">
+                        <div className="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                        <p className="text-xs text-gray-400 mt-1">Uploading...</p>
+                      </div>
+                    ) : (
+                      <FileUploader 
+                        onFilesSelected={handleBackgroundImageSelected}
+                        maxFiles={1}
+                        maxSizeMB={2}
+                      />
+                    )}
+                  </div>
+                )}
+                
+                {/* Avatar with upload overlay */}
+                <div className="relative mb-4">
+                  <Avatar className="h-24 w-24 cursor-pointer group" onClick={() => setShowProfileUploader(!showProfileUploader)}>
+                    {profile.profileImage ? (
+                      <AvatarImage src={profile.profileImage} />
+                    ) : (
+                      <AvatarFallback className="bg-sidebar-primary text-white text-2xl">
+                        {profile.username.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    )}
+                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Camera className="text-white h-8 w-8" />
+                    </div>
+                  </Avatar>
+                </div>
+                
+                {showProfileUploader && (
+                  <div className="w-full mb-4">
+                    {isUploadingProfile ? (
+                      <div className="text-center py-2">
+                        <div className="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                        <p className="text-xs text-gray-400 mt-1">Uploading...</p>
+                      </div>
+                    ) : (
+                      <FileUploader 
+                        onFilesSelected={handleProfileImageSelected}
+                        maxFiles={1}
+                        maxSizeMB={2}
+                      />
+                    )}
+                  </div>
+                )}
+                
+                <h1 className="text-2xl font-bold text-sidebar-foreground mb-2">{profile.username}</h1>
                 
                 <div className="w-full text-center">
-                  <h1 className="text-2xl font-bold text-sidebar-foreground mb-2">{profile.username}</h1>
-                  
                   <div className="flex flex-col items-center gap-2 text-gray-300 mb-4">
                     <div className="flex items-center gap-1">
                       <Mail size={16} />
@@ -477,6 +632,78 @@ const Profile = () => {
                   )}
                 </div>
               </div>
+            </CardContent>
+          </Card>
+          
+          {/* Profile Image Upload Section */}
+          <Card className="mb-6 bg-sidebar border-sidebar-border">
+            <CardHeader>
+              <CardTitle className="text-sidebar-foreground">Profile Image</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center">
+              <div className="relative w-full h-32 rounded-md overflow-hidden mb-4">
+                {profile.avatar ? (
+                  <img src={profile.avatar} alt="Profile Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-800">
+                    <span className="text-gray-500">No image uploaded</span>
+                  </div>
+                )}
+                
+                <Button
+                  onClick={() => setShowProfileUploader(true)}
+                  className="absolute bottom-2 right-2 bg-sidebar-primary hover:bg-sidebar-primary/90 text-white"
+                  size="sm"
+                >
+                  <Camera size={16} className="mr-2" />
+                  Change Image
+                </Button>
+              </div>
+              
+              {showProfileUploader && (
+                <div className="w-full">
+                  <FileUploader 
+                    onFilesSelected={handleProfileImageSelected}
+                    accept="image/*"
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          
+          {/* Background Image Upload Section */}
+          <Card className="mb-6 bg-sidebar border-sidebar-border">
+            <CardHeader>
+              <CardTitle className="text-sidebar-foreground">Background Image</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center">
+              <div className="relative w-full h-32 rounded-md overflow-hidden mb-4">
+                {profile.backgroundImage ? (
+                  <img src={profile.backgroundImage} alt="Background Image" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-800">
+                    <span className="text-gray-500">No image uploaded</span>
+                  </div>
+                )}
+                
+                <Button
+                  onClick={() => setShowBackgroundUploader(true)}
+                  className="absolute bottom-2 right-2 bg-sidebar-primary hover:bg-sidebar-primary/90 text-white"
+                  size="sm"
+                >
+                  <Camera size={16} className="mr-2" />
+                  Change Image
+                </Button>
+              </div>
+              
+              {showBackgroundUploader && (
+                <div className="w-full">
+                  <FileUploader 
+                    onFilesSelected={handleBackgroundImageSelected}
+                    accept="image/*"
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
           
