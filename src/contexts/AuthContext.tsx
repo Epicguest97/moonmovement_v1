@@ -7,6 +7,7 @@ interface User {
   bio?: string;
   profileImage?: string;
   profileComplete?: boolean;
+  displayName?: string;  // Add this line
 }
 
 interface AuthContextType {

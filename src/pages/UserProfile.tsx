@@ -16,6 +16,8 @@ interface UserProfileData {
   karma: number;
   bio?: string;
   location?: string;
+  backgroundImage?: string;
+  profileImage?: string;
   posts: Array<{
     id: number;
     title: string;
