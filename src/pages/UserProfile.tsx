@@ -202,7 +202,7 @@ const UserProfile = () => {
   }
 
   return (
-    <MainLayout>
+    <MainLayout hideChat={true}>
       <div className="max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
         {/* Profile Header */}
         <Card className="mb-4 sm:mb-6 bg-sidebar border-sidebar-border">

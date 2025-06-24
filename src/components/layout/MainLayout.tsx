@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Header from './Header';
 import LeftSidebar from './LeftSidebar';
@@ -10,9 +9,10 @@ import DownloadApp from './DownloadApp';
 
 interface MainLayoutProps {
   children: React.ReactNode;
+  hideChat?: boolean;
 }
 
-const MainLayout = ({ children }: MainLayoutProps) => {
+const MainLayout = ({ children, hideChat = false }: MainLayoutProps) => {
   const isMobile = useIsMobile();
   const location = useLocation();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -69,7 +69,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         </div>
       </div>
 
-      {!isMobile && <FloatingChatWidget />}
+      {!isMobile && !hideChat && <FloatingChatWidget />}
     </div>
   );
 };
