@@ -14,30 +14,29 @@ router.put('/profile', authenticateToken, profileUpload.single('profileImage'), 
     console.log('File received:', req.file);
     
     // Extract fields that match your schema
-    const { bio, name, location } = req.body;
+    const { bio, displayName, location } = req.body;
     const userId = req.user.userId;
 
     // Check if we have a file upload
     let profileImagePath = undefined;
     if (req.file) {
-      // Create a URL path to access the image
       profileImagePath = `/uploads/profiles/${req.file.filename}`;
       console.log('Profile image path:', profileImagePath);
     }
 
-    // Update user in database - use fields that exist in your schema
+    // Update user in database - use displayName instead of name
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
-        ...(name && { name }), // If your schema has a name field
         ...(bio && { bio }),
+        ...(displayName && { displayName }),
         ...(location && { location }),
         ...(profileImagePath && { profileImage: profileImagePath }),
       },
       select: {
         id: true,
         username: true,
-        name: true, // If your schema has this field
+        displayName: true, // Changed from name to displayName
         bio: true,
         location: true,
         profileImage: true,
