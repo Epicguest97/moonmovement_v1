@@ -47,17 +47,25 @@ const ProfileSetupForm = () => {
 
     try {
       const formData = new FormData();
-      formData.append('displayName', name);
+      // Remove displayName since it's not in your schema
+      // formData.append('displayName', name);
+      
+      // Instead, if you want to update a name field, use the field that exists in your schema
+      // For example, if you have a "name" field:
+      formData.append('name', name);
+      
       formData.append('bio', bio);
       if (profilePhoto) formData.append('profileImage', profilePhoto);
 
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Authentication token not found');
 
+      // Important: Don't set Content-Type header when using FormData
       const res = await fetch('https://moonmovement.onrender.com/api/auth/profile', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
+          // Let the browser set the Content-Type with proper boundary
         },
         body: formData
       });
@@ -65,7 +73,7 @@ const ProfileSetupForm = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to create profile');
 
-      // Make sure you're accessing the user data correctly from response
+      // Update user state
       updateUser({
         bio,
         profileImage: data.user?.profileImage || data.profileImage,

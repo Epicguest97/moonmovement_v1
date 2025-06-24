@@ -35,7 +35,11 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/events', eventsRoutes);
 
 // Serve uploaded files from the uploads directory
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+const uploadsPath = path.resolve(__dirname, '../uploads');
+console.log('Serving uploads from:', uploadsPath);
+
+// Serve uploaded files with proper path
+app.use('/uploads', express.static(uploadsPath));
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

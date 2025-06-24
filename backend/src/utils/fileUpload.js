@@ -6,13 +6,17 @@ const fs = require('fs');
 const createDirIfNotExists = (dirPath) => {
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
+    // Set permissions if needed
+    fs.chmodSync(dirPath, 0o755);
   }
 };
 
 // Set up storage for profile images
 const profileStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, '../../uploads/profiles');
+    // Make sure this path is correct - use an absolute path
+    const uploadDir = path.resolve(__dirname, '../../uploads/profiles');
+    console.log('Upload directory:', uploadDir);
     createDirIfNotExists(uploadDir);
     cb(null, uploadDir);
   },

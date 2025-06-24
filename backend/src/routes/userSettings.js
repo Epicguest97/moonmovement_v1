@@ -10,7 +10,11 @@ const router = express.Router();
 // Update user profile with file upload support
 router.put('/profile', authenticateToken, profileUpload.single('profileImage'), async (req, res) => {
   try {
-    const { displayName, bio, location } = req.body;
+    console.log('Received profile update request:', req.body);
+    console.log('File received:', req.file);
+    
+    // Extract fields that match your schema
+    const { bio, name, location } = req.body;
     const userId = req.user.userId;
 
     // Check if we have a file upload
@@ -18,13 +22,14 @@ router.put('/profile', authenticateToken, profileUpload.single('profileImage'), 
     if (req.file) {
       // Create a URL path to access the image
       profileImagePath = `/uploads/profiles/${req.file.filename}`;
+      console.log('Profile image path:', profileImagePath);
     }
 
-    // Update user in database
+    // Update user in database - use fields that exist in your schema
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
-        ...(displayName && { displayName }),
+        ...(name && { name }), // If your schema has a name field
         ...(bio && { bio }),
         ...(location && { location }),
         ...(profileImagePath && { profileImage: profileImagePath }),
@@ -32,6 +37,7 @@ router.put('/profile', authenticateToken, profileUpload.single('profileImage'), 
       select: {
         id: true,
         username: true,
+        name: true, // If your schema has this field
         bio: true,
         location: true,
         profileImage: true,
@@ -39,13 +45,15 @@ router.put('/profile', authenticateToken, profileUpload.single('profileImage'), 
       }
     });
 
+    console.log('Updated user:', updatedUser);
+
     res.json({ 
       message: 'Profile updated successfully',
       user: updatedUser
     });
   } catch (error) {
     console.error('Profile update error:', error);
-    res.status(500).json({ error: 'Failed to update profile' });
+    res.status(500).json({ error: `Failed to update profile: ${error.message}` });
   }
 });
 
