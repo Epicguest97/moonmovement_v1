@@ -120,7 +120,7 @@ const SignupForm = ({ onSwitchToLogin }: SignupFormProps) => {
     <div className="relative h-screen w-full overflow-hidden">
       {/* Full-screen background */}
       <div className="absolute inset-0 bg-cover bg-center" style={{ 
-        backgroundImage: "url('/auth-background2.jpeg')",
+        backgroundImage: "url('/auth-background.jpeg')",
         backgroundSize: 'cover'
       }} />
       
