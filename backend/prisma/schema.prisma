@@ -38,6 +38,7 @@ model User {
   backgroundImage      String?
   bio                  String?
   location             String?
+  displayName          String?              // Add this line
 }
 
 model Post {
