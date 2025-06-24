@@ -88,13 +88,24 @@ const LoginForm = ({ onSwitchToSignup }: LoginFormProps) => {
         throw new Error('Invalid response from server');
       }
       
-      login(data.user, data.token);
-      navigate('/');
+      handleLogin(data.user, data.token);
     } catch (err: any) {
       console.error('Auth error:', err);
       setError(err.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleLogin = async (userData: any, token: string) => {
+    login(userData, token);
+    
+    // Check if user has a complete profile
+    // You might want to check a specific field that indicates if profile setup is needed
+    if (!userData.profileComplete) {
+      navigate('/profile-setup');
+    } else {
+      navigate('/'); // Redirect to homepage if profile is complete
     }
   };
 
@@ -110,8 +121,7 @@ const LoginForm = ({ onSwitchToSignup }: LoginFormProps) => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Login failed');
-      login(data.user, data.token);
-      navigate('/');
+      handleLogin(data.user, data.token);
     } catch (err: any) {
       setError(err.message);
     } finally {

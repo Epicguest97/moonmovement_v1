@@ -105,10 +105,17 @@ const SignupForm = ({ onSwitchToLogin }: SignupFormProps) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Signup failed');
       
-      // On success, store username and switch to login page
+      // On success, store username and token, then log the user in
       localStorage.setItem('username', data.username);
-      alert('Account created successfully! Please log in.');
-      onSwitchToLogin(); // Switch to login page
+      if (data.token) {
+        // If the API returns a token directly, use it to log in
+        login(data.user, data.token);
+        navigate('/profile-setup'); // Redirect to profile setup
+      } else {
+        // Otherwise show a message and switch to login
+        alert('Account created successfully! Please log in.');
+        onSwitchToLogin();
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {

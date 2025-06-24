@@ -4,6 +4,7 @@ const cors = require("cors");
 const app = express();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const path = require('path');
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
@@ -32,6 +33,9 @@ app.use('/api/startups', require('./routes/startups'));
 app.use('/api/community', require('./routes/community'));
 app.use('/api/chat', chatRoutes);
 app.use('/api/events', eventsRoutes);
+
+// Serve uploaded files from the uploads directory
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

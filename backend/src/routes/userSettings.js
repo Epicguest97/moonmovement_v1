@@ -2,24 +2,32 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const { PrismaClient } = require('@prisma/client');
 const { authenticateToken } = require('../middleware/auth');
+const { profileUpload } = require('../utils/fileUpload');
 
 const prisma = new PrismaClient();
 const router = express.Router();
 
-// Update user profile (display name, bio, location, profile and background images)
-router.put('/profile', authenticateToken, async (req, res) => {
+// Update user profile with file upload support
+router.put('/profile', authenticateToken, profileUpload.single('profileImage'), async (req, res) => {
   try {
-    const { displayName, bio, location, profileImage, backgroundImage } = req.body;
+    const { displayName, bio, location } = req.body;
     const userId = req.user.userId;
 
-    // Actually update the user in the database now that we have the fields
+    // Check if we have a file upload
+    let profileImagePath = undefined;
+    if (req.file) {
+      // Create a URL path to access the image
+      profileImagePath = `/uploads/profiles/${req.file.filename}`;
+    }
+
+    // Update user in database
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
-        bio,
-        location,
-        profileImage,
-        backgroundImage
+        ...(displayName && { displayName }),
+        ...(bio && { bio }),
+        ...(location && { location }),
+        ...(profileImagePath && { profileImage: profileImagePath }),
       },
       select: {
         id: true,
