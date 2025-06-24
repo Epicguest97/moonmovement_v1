@@ -61,8 +61,6 @@ const LoginForm = ({ onSwitchToSignup }: LoginFormProps) => {
     setIsLoading(true);
     setError('');
     
-    console.log('Google response:', response); // Debug response object
-    
     try {
       // Make sure credential is available
       if (!response.credential) {
@@ -73,22 +71,19 @@ const LoginForm = ({ onSwitchToSignup }: LoginFormProps) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          googleToken: response.credential,  // Match exactly what backend expects
+          googleToken: response.credential,  
           tokenId: response.credential,
           credential: response.credential 
         })
       });
       
-      // Check for network errors
       if (!res.ok) {
         const data = await res.json();
-        console.error('Server response:', data);
         throw new Error(data.error || data.details || 'Google login failed');
       }
       
       const data = await res.json();
       
-      // Double check we got the required data
       if (!data.token || !data.user) {
         throw new Error('Invalid response from server');
       }
@@ -125,78 +120,98 @@ const LoginForm = ({ onSwitchToSignup }: LoginFormProps) => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto bg-sidebar border-sidebar-border">
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold text-white">Welcome back</CardTitle>
-        <CardDescription className="text-gray-400">
-          Sign in to your account to continue
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-white">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="bg-sidebar-accent border-sidebar-border text-white"
-            />
+    <div className="flex h-screen w-full overflow-hidden">
+      {/* Left side - Image spanning 3/5 of screen */}
+      <div className="hidden md:flex md:w-3/5 relative">
+        <div className="absolute inset-0 bg-cover bg-center" style={{ 
+          backgroundImage: "url('/auth-background.jpg')",
+          backgroundSize: 'cover'
+        }}>
+          <div className="absolute inset-0 bg-black bg-opacity-30"></div>
+          <div className="relative z-10 flex h-full items-center justify-center p-8">
+            <h1 className="text-4xl md:text-5xl font-bold text-white text-shadow-lg text-center">
+              Join the Moon community
+            </h1>
           </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-white">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="bg-sidebar-accent border-sidebar-border text-white"
-            />
-          </div>
-
-          {error && <div className="text-red-500 text-sm">{error}</div>}
-          
-          <Button 
-            type="submit" 
-            className="w-full bg-sidebar-primary hover:bg-sidebar-primary/90"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Signing in...' : 'Sign In'}
-          </Button>
-
-          <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-sidebar-border"></span>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-sidebar px-2 text-gray-400">Or continue with</span>
-            </div>
-          </div>
-          
-          <div className="flex justify-center">
-            <div id="googleSignInButton"></div>
-          </div>
-        </form>
-        
-        <div className="mt-6 text-center">
-          <p className="text-gray-400">
-            Don't have an account?{' '}
-            <button
-              onClick={onSwitchToSignup}
-              className="text-sidebar-primary hover:underline font-medium"
-            >
-              Sign up
-            </button>
-          </p>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+      
+      {/* Right side - Login form taking 2/5 of screen */}
+      <div className="w-full md:w-2/5 flex items-center justify-center p-4 md:p-8">
+        <Card className="w-full max-w-md bg-sidebar border-sidebar-border">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold text-white">Welcome back</CardTitle>
+            <CardDescription className="text-gray-400">
+              Sign in to your account to continue
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-white">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="bg-sidebar-accent border-sidebar-border text-white"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-white">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="bg-sidebar-accent border-sidebar-border text-white"
+                />
+              </div>
+
+              {error && <div className="text-red-500 text-sm">{error}</div>}
+              
+              <Button 
+                type="submit" 
+                className="w-full bg-sidebar-primary hover:bg-sidebar-primary/90"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Signing in...' : 'Sign In'}
+              </Button>
+
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-sidebar-border"></span>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-sidebar px-2 text-gray-400">Or continue with</span>
+                </div>
+              </div>
+              
+              <div className="flex justify-center">
+                <div id="googleSignInButton"></div>
+              </div>
+            </form>
+            
+            <div className="mt-6 text-center">
+              <p className="text-gray-400">
+                Don't have an account?{' '}
+                <button
+                  onClick={onSwitchToSignup}
+                  className="text-sidebar-primary hover:underline font-medium"
+                >
+                  Sign up
+                </button>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 

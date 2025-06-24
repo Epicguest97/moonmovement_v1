@@ -117,104 +117,124 @@ const SignupForm = ({ onSwitchToLogin }: SignupFormProps) => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto bg-sidebar border-sidebar-border">
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold text-white">Create account</CardTitle>
-        <CardDescription className="text-gray-400">
-          Join Reeddit to start sharing and discussing
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="username" className="text-white">Username</Label>
-            <Input
-              id="username"
-              type="text"
-              placeholder="Choose a username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              className="bg-sidebar-accent border-sidebar-border text-white"
-            />
+    <div className="flex h-screen w-full overflow-hidden">
+      {/* Left side - Image spanning 3/5 of screen */}
+      <div className="hidden md:flex md:w-3/5 relative">
+        <div className="absolute inset-0 bg-cover bg-center" style={{ 
+          backgroundImage: "url('/auth-background.jpg')",
+          backgroundSize: 'cover'
+        }}>
+          <div className="absolute inset-0 bg-black bg-opacity-30"></div>
+          <div className="relative z-10 flex h-full items-center justify-center p-8">
+            <h1 className="text-4xl md:text-5xl font-bold text-white text-shadow-lg text-center">
+              Join the Moon community
+            </h1>
           </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-white">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="bg-sidebar-accent border-sidebar-border text-white"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-white">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Create a password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="bg-sidebar-accent border-sidebar-border text-white"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword" className="text-white">Confirm Password</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder="Confirm your password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="bg-sidebar-accent border-sidebar-border text-white"
-            />
-          </div>
-
-          {error && <div className="text-red-500 text-sm">{error}</div>}
-          
-          <Button 
-            type="submit" 
-            className="w-full bg-sidebar-primary hover:bg-sidebar-primary/90"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Creating account...' : 'Sign Up'}
-          </Button>
-
-          <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-sidebar-border"></span>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-sidebar px-2 text-gray-400">Or continue with</span>
-            </div>
-          </div>
-          
-          <div className="flex justify-center">
-            <div id="googleSignUpButton"></div>
-          </div>
-        </form>
-        
-        <div className="mt-6 text-center">
-          <p className="text-gray-400">
-            Already have an account?{' '}
-            <button
-              onClick={onSwitchToLogin}
-              className="text-sidebar-primary hover:underline font-medium"
-            >
-              Sign in
-            </button>
-          </p>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+      
+      {/* Right side - Signup form taking 2/5 of screen */}
+      <div className="w-full md:w-2/5 flex items-center justify-center p-4 md:p-8">
+        <Card className="w-full max-w-md bg-sidebar border-sidebar-border">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold text-white">Create account</CardTitle>
+            <CardDescription className="text-gray-400">
+              Join Reeddit to start sharing and discussing
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-white">Username</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="Choose a username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  className="bg-sidebar-accent border-sidebar-border text-white"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-white">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="bg-sidebar-accent border-sidebar-border text-white"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-white">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Create a password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="bg-sidebar-accent border-sidebar-border text-white"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-white">Confirm Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Confirm your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="bg-sidebar-accent border-sidebar-border text-white"
+                />
+              </div>
+
+              {error && <div className="text-red-500 text-sm">{error}</div>}
+              
+              <Button 
+                type="submit" 
+                className="w-full bg-sidebar-primary hover:bg-sidebar-primary/90"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Creating account...' : 'Sign Up'}
+              </Button>
+
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-sidebar-border"></span>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-sidebar px-2 text-gray-400">Or continue with</span>
+                </div>
+              </div>
+              
+              <div className="flex justify-center">
+                <div id="googleSignUpButton"></div>
+              </div>
+            </form>
+            
+            <div className="mt-6 text-center">
+              <p className="text-gray-400">
+                Already have an account?{' '}
+                <button
+                  onClick={onSwitchToLogin}
+                  className="text-sidebar-primary hover:underline font-medium"
+                >
+                  Sign in
+                </button>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 
