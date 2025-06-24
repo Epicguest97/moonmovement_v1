@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import MainLayout from '@/components/layout/MainLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Cake, MapPin, MessageSquare, Users, TrendingUp, UserPlus } from 'lucide-react';
+import { Calendar, MapPin, MessageSquare, Users, TrendingUp, UserPlus, Link, ExternalLink } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import MainLayout from '@/components/layout/MainLayout';
 
 interface UserProfileData {
   id: number;
@@ -57,10 +57,10 @@ const UserProfile = () => {
   const [error, setError] = useState<string | null>(null);
   const [startingChat, setStartingChat] = useState(false);
   const [addingFriend, setAddingFriend] = useState(false);
+  const [activeTab, setActiveTab] = useState("posts");
 
   useEffect(() => {
     const fetchUserProfile = async () => {
-      // Better check that handles "undefined" string too
       if (!username || username === "undefined") {
         setError("Invalid username");
         setLoading(false);
@@ -101,9 +101,7 @@ const UserProfile = () => {
   };
 
   const handleStartChat = async () => {
-    if (!username) return;
-    
-    if (!isLoggedIn) {
+    if (!username || !isLoggedIn) {
       alert("Please log in to start a chat");
       return;
     }
@@ -121,7 +119,6 @@ const UserProfile = () => {
       });
 
       if (response.ok) {
-        const chatRoom = await response.json();
         navigate('/chat');
       } else {
         console.error('Failed to start chat');
@@ -134,9 +131,7 @@ const UserProfile = () => {
   };
 
   const handleAddFriend = async () => {
-    if (!username) return;
-    
-    if (!isLoggedIn) {
+    if (!username || !isLoggedIn) {
       alert("Please log in to add friends");
       return;
     }
@@ -171,8 +166,8 @@ const UserProfile = () => {
 
   if (loading) {
     return (
-      <MainLayout>
-        <div className="max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
+      <MainLayout hideChat={true}>
+        <div className="container max-w-6xl mx-auto px-4 py-6">
           <div className="text-center">
             <p className="text-sidebar-foreground">Loading profile...</p>
           </div>
@@ -183,8 +178,8 @@ const UserProfile = () => {
 
   if (error || !profile) {
     return (
-      <MainLayout>
-        <div className="max-w-3xl mx-auto p-2 sm:p-4">
+      <MainLayout hideChat={true}>
+        <div className="container max-w-6xl mx-auto px-4 py-6">
           <div className="bg-sidebar p-6 sm:p-10 rounded-md border border-sidebar-border text-center">
             <h2 className="text-xl sm:text-2xl font-bold mb-2 text-sidebar-foreground">
               {error === 'User not found' ? 'User Not Found' : 'Error Loading Profile'}
@@ -201,204 +196,229 @@ const UserProfile = () => {
     );
   }
 
-  return (
-    <MainLayout hideChat={true}>
-      <div className="max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
-        {/* Profile Header */}
-        <Card className="mb-4 sm:mb-6 bg-sidebar border-sidebar-border">
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
-              <Avatar className="h-16 w-16 sm:h-24 sm:w-24 mx-auto sm:mx-0">
-                <AvatarFallback className="bg-sidebar-primary text-white text-lg sm:text-2xl">
-                  {profile.username.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              
-              <div className="flex-1 text-center sm:text-left w-full">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2">
-                  <h1 className="text-2xl sm:text-3xl font-bold text-sidebar-foreground">u/{profile.username}</h1>
-                  {!isCurrentUser && (
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={handleAddFriend}
-                        disabled={addingFriend}
-                        className="bg-green-600 hover:bg-green-700 text-white text-sm sm:text-base"
-                        size="sm"
-                      >
-                        <UserPlus size={16} className="mr-2" />
-                        {addingFriend ? 'Adding...' : 'Add Friend'}
-                      </Button>
-                      <Button
-                        onClick={handleStartChat}
-                        disabled={startingChat}
-                        className="bg-sidebar-primary hover:bg-sidebar-primary/80 text-white text-sm sm:text-base"
-                        size="sm"
-                      >
-                        <MessageSquare size={16} className="mr-2" />
-                        {startingChat ? 'Starting Chat...' : 'Start Chat'}
-                      </Button>
-                    </div>
-                  )}
-                </div>
-                
-                {isCurrentUser && (
-                  <p className="text-sm text-sidebar-primary mb-2">This is your profile</p>
-                )}
-                
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-gray-300 mb-4 text-sm">
-                  <div className="flex items-center justify-center sm:justify-start gap-1">
-                    <Calendar size={16} />
-                    <span>Joined {formatDate(profile.createdAt)}</span>
-                  </div>
-                  {profile.location && (
-                    <div className="flex items-center justify-center sm:justify-start gap-1">
-                      <MapPin size={16} />
-                      <span>{profile.location}</span>
-                    </div>
-                  )}
-                </div>
-                
-                {profile.bio && (
-                  <p className="text-gray-300 text-sm sm:text-base">{profile.bio}</p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
-          <Card className="bg-sidebar border-sidebar-border">
-            <CardContent className="p-3 sm:p-4 text-center">
-              <div className="flex items-center justify-center mb-2">
-                <TrendingUp size={24} className="text-blue-400 sm:h-8 sm:w-8" />
-              </div>
-              <div className="text-lg sm:text-2xl font-bold text-sidebar-foreground">{profile.karma}</div>
-              <div className="text-gray-300 text-xs sm:text-sm">Karma</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-sidebar border-sidebar-border">
-            <CardContent className="p-3 sm:p-4 text-center">
-              <div className="flex items-center justify-center mb-2">
-                <MessageSquare size={24} className="text-green-400 sm:h-8 sm:w-8" />
-              </div>
-              <div className="text-lg sm:text-2xl font-bold text-sidebar-foreground">{profile._count.posts}</div>
-              <div className="text-gray-300 text-xs sm:text-sm">Posts</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-sidebar border-sidebar-border">
-            <CardContent className="p-3 sm:p-4 text-center">
-              <div className="flex items-center justify-center mb-2">
-                <MessageSquare size={24} className="text-green-400 sm:h-8 sm:w-8" />
-              </div>
-              <div className="text-lg sm:text-2xl font-bold text-sidebar-foreground">{profile._count.comments}</div>
-              <div className="text-gray-300 text-xs sm:text-sm">Comments</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-sidebar border-sidebar-border">
-            <CardContent className="p-3 sm:p-4 text-center">
-              <div className="flex items-center justify-center mb-2">
-                <Users size={24} className="text-purple-400 sm:h-8 sm:w-8" />
-              </div>
-              <div className="text-lg sm:text-2xl font-bold text-sidebar-foreground">{profile._count.communityMemberships}</div>
-              <div className="text-gray-300 text-xs sm:text-sm">Communities</div>
-            </CardContent>
-          </Card>
+  // Create the user profile sidebar component
+  const UserProfileSidebar = (
+    <div className="bg-sidebar border border-sidebar-border rounded-lg overflow-hidden w-full">
+      {/* Profile Header with Avatar */}
+      <div className="p-6 bg-gradient-to-b from-sidebar-accent/30 to-sidebar flex flex-col items-center text-center border-b border-sidebar-border">
+        <Avatar className="h-24 w-24 mb-4">
+          <AvatarFallback className="bg-sidebar-primary text-white text-2xl">
+            {profile.username.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        
+        <h2 className="text-2xl font-bold text-white mb-1">u/{profile.username}</h2>
+        
+        {/* Karma display */}
+        <div className="flex items-center justify-center gap-2 text-sidebar-primary mb-3">
+          <TrendingUp size={16} />
+          <span className="font-medium">{profile.karma} karma</span>
         </div>
+        
+        {/* Join date */}
+        <div className="text-sm text-gray-300 flex items-center gap-1 mb-4">
+          <Calendar size={14} />
+          <span>Member since {formatDate(profile.createdAt)}</span>
+        </div>
+        
+        {/* Action Buttons */}
+        {!isCurrentUser && (
+          <div className="flex w-full gap-2">
+            <Button
+              onClick={handleStartChat}
+              disabled={startingChat}
+              className="flex-1 bg-sidebar-primary hover:bg-sidebar-primary/80"
+              size="sm"
+            >
+              <MessageSquare size={16} className="mr-2" />
+              {startingChat ? 'Starting...' : 'Message'}
+            </Button>
+            <Button
+              onClick={handleAddFriend}
+              disabled={addingFriend}
+              className="flex-1 bg-green-600 hover:bg-green-700"
+              size="sm"
+            >
+              <UserPlus size={16} className="mr-2" />
+              {addingFriend ? 'Adding...' : 'Follow'}
+            </Button>
+          </div>
+        )}
+        
+        {isCurrentUser && (
+          <Button
+            onClick={() => navigate('/settings')}
+            className="w-full bg-sidebar-accent hover:bg-sidebar-accent/80"
+            size="sm"
+          >
+            Edit Profile
+          </Button>
+        )}
+      </div>
+      
+      {/* User Bio */}
+      {profile.bio && (
+        <div className="p-4 border-b border-sidebar-border">
+          <h3 className="font-medium text-white mb-2">About</h3>
+          <p className="text-gray-300 text-sm">{profile.bio}</p>
+        </div>
+      )}
+      
+      {/* Location if available */}
+      {profile.location && (
+        <div className="p-4 border-b border-sidebar-border">
+          <div className="flex items-center gap-2 text-gray-300">
+            <MapPin size={16} />
+            <span>{profile.location}</span>
+          </div>
+        </div>
+      )}
+      
+      {/* Stats */}
+      <div className="p-4">
+        <h3 className="font-medium text-white mb-3">Stats</h3>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-gray-300">
+              <MessageSquare size={16} />
+              <span>Posts</span>
+            </div>
+            <span className="font-medium text-white">{profile._count.posts}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-gray-300">
+              <MessageSquare size={16} />
+              <span>Comments</span>
+            </div>
+            <span className="font-medium text-white">{profile._count.comments}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-gray-300">
+              <Users size={16} />
+              <span>Communities</span>
+            </div>
+            <span className="font-medium text-white">{profile._count.communityMemberships}</span>
+          </div>
+        </div>
+      </div>
+      
+      {/* Communities */}
+      {profile.communityMemberships.length > 0 && (
+        <div className="p-4 border-t border-sidebar-border">
+          <h3 className="font-medium text-white mb-3">Active In</h3>
+          <div className="space-y-2">
+            {profile.communityMemberships.slice(0, 5).map((membership) => (
+              <div 
+                key={membership.community.id}
+                className="flex items-center gap-2 text-sm cursor-pointer"
+                onClick={() => navigate(`/r/${membership.community.name}`)}
+              >
+                <div className="w-6 h-6 rounded-full bg-sidebar-primary flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">r/</span>
+                </div>
+                <span className="text-gray-300 hover:text-white">
+                  r/{membership.community.name}
+                </span>
+              </div>
+            ))}
+            {profile.communityMemberships.length > 5 && (
+              <div className="text-sidebar-primary text-sm cursor-pointer hover:underline"
+                   onClick={() => setActiveTab("communities")}>
+                View all communities →
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
-        {/* Content Tabs */}
-        <Tabs defaultValue="posts" className="space-y-4">
-          <TabsList className="bg-sidebar border border-sidebar-border w-full grid grid-cols-3">
-            <TabsTrigger value="posts" className="data-[state=active]:bg-sidebar-accent text-sidebar-foreground text-xs sm:text-sm">
+  return (
+    <MainLayout 
+      hideChat={true} 
+      rightSidebar={UserProfileSidebar}
+      mainContentClassName="max-w-2xl" // Narrower than default 3xl
+      sidebarClassName="w-96" // Wider than default w-72
+    >
+      <div className="bg-sidebar border border-sidebar-border rounded-lg p-4 mb-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="bg-sidebar-accent/20 w-full grid grid-cols-2">
+            <TabsTrigger 
+              value="posts" 
+              className="data-[state=active]:bg-sidebar-primary data-[state=active]:text-white"
+            >
               Posts ({profile.posts.length})
             </TabsTrigger>
-            <TabsTrigger value="comments" className="data-[state=active]:bg-sidebar-accent text-sidebar-foreground text-xs sm:text-sm">
+            <TabsTrigger 
+              value="comments" 
+              className="data-[state=active]:bg-sidebar-primary data-[state=active]:text-white"
+            >
               Comments ({profile.comments.length})
-            </TabsTrigger>
-            <TabsTrigger value="communities" className="data-[state=active]:bg-sidebar-accent text-sidebar-foreground text-xs sm:text-sm">
-              Communities ({profile.communityMemberships.length})
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="posts">
-            <Card className="bg-sidebar border-sidebar-border">
-              <CardContent className="p-4 sm:p-6">
-                {profile.posts.length > 0 ? (
-                  <div className="space-y-4">
-                    {profile.posts.map((post) => (
-                      <div key={post.id} className="border-b border-sidebar-border pb-4 last:border-b-0">
-                        <h3 className="font-semibold text-sidebar-foreground mb-2 text-sm sm:text-base">{post.title}</h3>
-                        {post.content && (
-                          <p className="text-gray-300 text-xs sm:text-sm mb-2 line-clamp-3">{post.content.substring(0, 200)}...</p>
-                        )}
-                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-gray-400">
-                          <Badge variant="outline" className="border-sidebar-border text-gray-300 text-xs">
+          <TabsContent value="posts" className="mt-6">
+            {profile.posts.length > 0 ? (
+              <div className="space-y-6">
+                {profile.posts.map((post) => (
+                  <Card key={post.id} className="bg-sidebar-accent/20 border-sidebar-border overflow-hidden">
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold text-white text-lg mb-2">{post.title}</h3>
+                      {post.content && (
+                        <p className="text-gray-300 mb-4 line-clamp-3">{post.content}</p>
+                      )}
+                      <div className="flex items-center justify-between text-xs text-gray-400">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="border-sidebar-border text-gray-300">
                             r/{post.subreddit}
                           </Badge>
                           <span>{formatDate(post.createdAt)}</span>
-                          <span>{post.votes.reduce((sum, vote) => sum + vote.type, 0)} votes</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="flex items-center gap-1">
+                            <TrendingUp size={14} />
+                            {post.votes.reduce((sum, vote) => sum + vote.type, 0)} votes
+                          </span>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-400">
-                    <MessageSquare size={48} className="mx-auto mb-4 opacity-50" />
-                    <p className="text-sm sm:text-base">{isCurrentUser ? "You haven't posted anything yet." : "No posts yet."}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-400">
+                <MessageSquare size={48} className="mx-auto mb-4 opacity-50" />
+                <p>{isCurrentUser ? "You haven't posted anything yet." : "No posts yet."}</p>
+              </div>
+            )}
           </TabsContent>
           
-          <TabsContent value="comments">
-            <Card className="bg-sidebar border-sidebar-border">
-              <CardContent className="p-4 sm:p-6">
-                {profile.comments.length > 0 ? (
-                  <div className="space-y-4">
-                    {profile.comments.map((comment) => (
-                      <div key={comment.id} className="border-b border-sidebar-border pb-4 last:border-b-0">
-                        <div className="text-xs text-gray-400 mb-2">
-                          Commented on "{comment.post.title}" in r/{comment.post.subreddit}
+          <TabsContent value="comments" className="mt-6">
+            {profile.comments.length > 0 ? (
+              <div className="space-y-6">
+                {profile.comments.map((comment) => (
+                  <Card key={comment.id} className="bg-sidebar-accent/20 border-sidebar-border overflow-hidden">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm text-sidebar-primary">
+                          r/{comment.post.subreddit}
                         </div>
-                        <p className="text-sidebar-foreground text-xs sm:text-sm mb-2">{comment.content}</p>
                         <div className="text-xs text-gray-500">{formatDate(comment.createdAt)}</div>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-400">
-                    <MessageSquare size={48} className="mx-auto mb-4 opacity-50" />
-                    <p className="text-sm sm:text-base">{isCurrentUser ? "You haven't commented yet." : "No comments yet."}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="communities">
-            <Card className="bg-sidebar border-sidebar-border">
-              <CardContent className="p-4 sm:p-6">
-                {profile.communityMemberships.length > 0 ? (
-                  <div className="grid gap-4">
-                    {profile.communityMemberships.map((membership) => (
-                      <div key={membership.community.id} className="p-3 sm:p-4 border border-sidebar-border rounded-lg">
-                        <h3 className="font-semibold text-sidebar-foreground text-sm sm:text-base">r/{membership.community.name}</h3>
-                        <p className="text-gray-300 text-xs sm:text-sm">{membership.community.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-400">
-                    <Users size={48} className="mx-auto mb-4 opacity-50" />
-                    <p className="text-sm sm:text-base">{isCurrentUser ? "You haven't joined any communities yet." : "No communities joined yet."}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                      <h4 className="font-medium text-gray-200 mb-2">
+                        Re: {comment.post.title}
+                      </h4>
+                      <p className="text-gray-300 text-sm">{comment.content}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-400">
+                <MessageSquare size={48} className="mx-auto mb-4 opacity-50" />
+                <p>{isCurrentUser ? "You haven't commented yet." : "No comments yet."}</p>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>

@@ -126,7 +126,7 @@ const Comment = ({ comment, depth = 0, postId, onReplySubmit, onCommentUpdate }:
                       depth % maxDepth === 3 ? 'border-yellow-500' : 
                       'border-purple-500'}`}>
         <div className="flex items-center text-xs text-muted-foreground mb-1">
-          <Link to={`/user/${comment.author}`} className="font-medium text-foreground hover:underline mr-1">
+          <Link to={`/u/${comment.author}`} className="font-medium text-foreground hover:underline mr-1">
             u/{comment.author}
           </Link>
           <span className="mx-1">•</span>

@@ -10,9 +10,18 @@ import DownloadApp from './DownloadApp';
 interface MainLayoutProps {
   children: React.ReactNode;
   hideChat?: boolean;
+  rightSidebar?: React.ReactNode;
+  mainContentClassName?: string; // Add this prop
+  sidebarClassName?: string; // Add this prop
 }
 
-const MainLayout = ({ children, hideChat = false }: MainLayoutProps) => {
+const MainLayout = ({ 
+  children, 
+  hideChat = false, 
+  rightSidebar,
+  mainContentClassName = "max-w-3xl", // Default value
+  sidebarClassName = "w-72" // Default value
+}: MainLayoutProps) => {
   const isMobile = useIsMobile();
   const location = useLocation();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -52,16 +61,16 @@ const MainLayout = ({ children, hideChat = false }: MainLayoutProps) => {
         
         <div className={`flex-1 ${showDesktopSidebar ? 'ml-[356px]' : ''} ${isMobile ? 'w-full overflow-x-hidden' : ''}`}>
           <div className="flex justify-center">
-            <main className={`relative min-h-[calc(100vh-4rem)] pt-4 w-full ${isMobile ? 'px-0' : 'pr-8'} ${isMobile ? 'max-w-full' : 'max-w-3xl'}`}>
+            <main className={`relative min-h-[calc(100vh-4rem)] pt-4 w-full ${isMobile ? 'px-0' : 'pr-8'} ${isMobile ? 'max-w-full' : mainContentClassName}`}>
               <div className="w-full max-w-full overflow-x-hidden">
                 {children}
               </div>
             </main>
             
             {!isMobile && (
-              <aside className="hidden xl:block w-72 pt-4 pr-8">
+              <aside className={`hidden xl:block ${sidebarClassName} pt-4 pr-8`}>
                 <div className="sticky top-20">
-                  <DownloadApp />
+                  {rightSidebar || <DownloadApp />}
                 </div>
               </aside>
             )}

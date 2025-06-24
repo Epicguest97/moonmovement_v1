@@ -376,7 +376,7 @@ const PostDetail = () => {
               </Link>
               <span className="mx-1">•</span>
               <span className="break-words">Posted by{" "}</span>
-              <Link to={`/user/${authorName}`} className="hover:underline mx-1 text-gray-400 break-all">
+              <Link to={`/u/${authorName}`} className="hover:underline mx-1 text-gray-400 break-all">
                 u/{authorName}
               </Link>
               <span className="mx-1">•</span>
