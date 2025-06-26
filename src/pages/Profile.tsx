@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { User, Mail, Calendar, Edit, Save, X, TrendingUp, MessageSquare, ThumbsUp, Users, Camera } from 'lucide-react';
 import { uploadToCloudinary } from '@/utils/mediaUpload';
 import FileUploader from '@/components/ui/FileUploader';
+import PostContent from '@/components/post/PostContent';
 
 interface UserProfile {
   id: number;
@@ -37,6 +38,9 @@ interface Post {
   createdAt: string;
   votes: { type: number }[];
   comments: any[];
+  imageUrl?: string;  // Add this for post images
+  videoUrl?: string;  // Add this for post videos
+  poll?: any;         // Add this for post polls
 }
 
 interface UserActivity {
@@ -121,7 +125,15 @@ const Profile = () => {
         if (postsResponse.ok) {
           const posts = await postsResponse.json();
           const filteredPosts = posts.filter((post: any) => post.author.username === user.username);
-          setUserPosts(filteredPosts);
+          // Make sure each post has the expected structure
+          const processedPosts = filteredPosts.map((post: any) => ({
+            ...post,
+            // If these properties aren't in the original data, provide defaults
+            imageUrl: post.imageUrl || null,
+            videoUrl: post.videoUrl || null,
+            poll: post.poll || null
+          }));
+          setUserPosts(processedPosts);
         }
 
       } catch (error) {
@@ -395,17 +407,52 @@ const Profile = () => {
                 </CardHeader>
                 <CardContent>
                   {userPosts.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                       {userPosts.map((post) => (
-                        <div key={post.id} className="border-b border-sidebar-border pb-4 last:border-b-0">
-                          <h3 className="font-semibold text-sidebar-foreground mb-2">{post.title}</h3>
-                          <div className="flex items-center gap-4 text-sm text-gray-300">
-                            <Badge variant="outline" className="border-sidebar-border text-gray-300">
-                              r/{post.subreddit}
-                            </Badge>
-                            <span>{formatDate(post.createdAt)}</span>
-                            <span>{post.votes.reduce((sum, vote) => sum + vote.type, 0)} karma</span>
-                            <span>{post.comments.length} comments</span>
+                        <div key={post.id} className="border border-sidebar-border rounded-lg overflow-hidden">
+                          <div className="p-4">
+                            {/* Post header */}
+                            <div className="flex justify-between items-start mb-2">
+                              <h3 className="font-semibold text-sidebar-foreground">{post.title}</h3>
+                              <Badge variant="outline" className="border-sidebar-border text-gray-300">
+                                r/{post.subreddit}
+                              </Badge>
+                            </div>
+                            
+                            {/* Post content with images */}
+                            <div className="mt-2">
+                              <PostContent 
+                                post={{
+                                  // Pass existing properties
+                                  ...post,
+                                  id: post.id.toString(), // Convert ID to string
+                                  // Add missing properties
+                                  author: user?.username || "Unknown User",
+                                  voteScore: post.votes.reduce((sum, vote) => sum + vote.type, 0),
+                                  commentCount: post.comments.length,
+                                  timestamp: formatDate(post.createdAt),
+                                  // Optional properties can stay the same
+                                  // imageUrl and videoUrl already exist in your interface
+                                }} 
+                                isCompact={false}
+                                isDetailView={false}
+                              />
+                            </div>
+                            
+                            {/* Post metadata */}
+                            <div className="flex items-center gap-4 text-sm text-gray-300 mt-3 pt-3 border-t border-sidebar-border">
+                              <span>{formatDate(post.createdAt)}</span>
+                              <span>{post.votes.reduce((sum, vote) => sum + vote.type, 0)} karma</span>
+                              <span>{post.comments.length} comments</span>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => window.location.href = `/post/${post.id}`}
+                                className="ml-auto text-sidebar-foreground hover:bg-sidebar-accent"
+                              >
+                                View Post
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       ))}
