@@ -76,4 +76,4 @@ cp .env.example .env
 
 # Run development server
 npm run dev
-
+```
