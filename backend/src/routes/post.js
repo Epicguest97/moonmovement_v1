@@ -13,10 +13,25 @@ const getVoteCounts = (votes) => {
   };
 };
 
-// GET all posts (excluding removed posts for non-mods)
+// GET all posts (excluding removed posts for non-mods) - Updated with pagination
 router.get('/', async (req, res) => {
   try {
     console.log('Fetching posts...');
+    
+    // Parse pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+    
+    console.log(`Pagination: page=${page}, limit=${limit}, offset=${offset}`);
+    
+    // Get total count for pagination info
+    const totalPosts = await prisma.post.count({
+      where: {
+        isRemoved: false
+      }
+    });
+    
     const posts = await prisma.post.findMany({
       where: {
         isRemoved: false
@@ -46,7 +61,9 @@ router.get('/', async (req, res) => {
           }
         }
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      skip: offset,
+      take: limit
     });
 
     const postsWithLikeCount = posts.map(post => ({
@@ -55,7 +72,18 @@ router.get('/', async (req, res) => {
     }));
 
     console.log('Posts fetched successfully:', posts.length);
-    res.json(postsWithLikeCount);
+    
+    // Return posts with pagination metadata
+    res.json({
+      posts: postsWithLikeCount,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalPosts / limit),
+        totalPosts,
+        hasNextPage: page < Math.ceil(totalPosts / limit),
+        hasPreviousPage: page > 1
+      }
+    });
   } catch (err) {
     console.error('Error fetching posts:', err);
     res.status(500).json({ error: 'Failed to fetch posts', details: err.message });
