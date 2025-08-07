@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import { PostCard, Post } from '@/components/post/PostCard';
@@ -12,55 +12,94 @@ const Index = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [sortBy, setSortBy] = useState<'hot' | 'new' | 'top'>('hot');
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState(true);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   
   const searchQuery = searchParams.get('search') || '';
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
+  const fetchPosts = useCallback(async (page: number = 1, append: boolean = false) => {
+    try {
+      if (page === 1) {
         setLoading(true);
-        setError(null);
-        const token = localStorage.getItem('token');
-        
-        const response = await fetch('https://moonmovement.onrender.com/api/posts', {
-          headers: {
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch posts');
+      } else {
+        setLoadingMore(true);
+      }
+      setError(null);
+      
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`https://moonmovement.onrender.com/api/posts?page=${page}&limit=10`, {
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         }
-        
-        const data = await response.json();
-        console.log('API Response:', data);
-        
-        const transformedPosts: Post[] = data.map((post: any) => ({
-          ...post,
-          id: post.id.toString(),
-          voteScore: post.likeCount || 0,
-          commentCount: post.comments?.length || 0,
-          timestamp: new Date(post.createdAt).toLocaleString(),
-          subreddit: post.subreddit || 'general',
-          poll: post.poll || null // Add this line to preserve poll data
-        }));
-        
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch posts');
+      }
+      
+      const data = await response.json();
+      console.log('API Response:', data);
+      
+      const transformedPosts: Post[] = data.posts.map((post: any) => ({
+        ...post,
+        id: post.id.toString(),
+        voteScore: post.likeCount || 0,
+        commentCount: post.comments?.length || 0,
+        timestamp: new Date(post.createdAt).toLocaleString(),
+        subreddit: post.subreddit || 'general',
+        poll: post.poll || null
+      }));
+      
+      if (append) {
+        setPosts(prevPosts => [...prevPosts, ...transformedPosts]);
+      } else {
         setPosts(transformedPosts);
-      } catch (err) {
-        console.error('Failed to fetch posts:', err);
-        setError('Failed to load posts. Please try again.');
+      }
+      
+      setHasNextPage(data.pagination.hasNextPage);
+      setCurrentPage(page);
+      
+    } catch (err) {
+      console.error('Failed to fetch posts:', err);
+      setError('Failed to load posts. Please try again.');
+      if (!append) {
         setPosts([]);
-      } finally {
-        setLoading(false);
+      }
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  }, []);
+
+  // Initial load
+  useEffect(() => {
+    fetchPosts(1, false);
+  }, [fetchPosts]);
+
+  // Infinite scroll handler
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loadingMore || !hasNextPage) return;
+      
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      
+      // Trigger load more when user scrolls to 80% of the page
+      if (scrollTop + windowHeight >= documentHeight * 0.8) {
+        fetchPosts(currentPage + 1, true);
       }
     };
 
-    fetchPosts();
-  }, []);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [currentPage, hasNextPage, loadingMore, fetchPosts]);
 
   const subreddits = useMemo(() => {
     const subs = posts.map(post => post.subreddit || 'general');
@@ -93,13 +132,17 @@ const Index = () => {
 
   const handleSortChange = (newSort: 'hot' | 'new' | 'top') => {
     setSortBy(newSort);
+    // Reset pagination when sorting changes
+    setCurrentPage(1);
+    setHasNextPage(true);
+    fetchPosts(1, false);
   };
 
   const handleCommunityClick = (communityName: string) => {
     navigate(`/r/${communityName}`);
   };
 
-  if (loading) {
+  if (loading && posts.length === 0) {
     return (
       <MainLayout>
         <div className="w-full max-w-full">
@@ -112,14 +155,14 @@ const Index = () => {
     );
   }
 
-  if (error) {
+  if (error && posts.length === 0) {
     return (
       <MainLayout>
         <div className="w-full max-w-full">
           <div className="bg-sidebar/50 p-8 border border-sidebar-border rounded-lg text-center">
             <h2 className="text-xl font-semibold mb-2 text-red-400">Error</h2>
             <p className="text-muted-foreground mb-4 break-words">{error}</p>
-            <Button onClick={() => window.location.reload()}>
+            <Button onClick={() => fetchPosts(1, false)}>
               Try Again
             </Button>
           </div>
@@ -142,9 +185,6 @@ const Index = () => {
           >
           </div>
           <div className="relative z-10 p-6 pb-5 text-white flex flex-col justify-end h-full">
-            {/* Removed time and "Build It!" text */}
-            
-            {/* Embed the input box directly in the hero section */}
             <div onClick={() => setIsCreatePostModalOpen(true)} className="block">
               <Input 
                 placeholder="Create a post..." 
@@ -210,13 +250,27 @@ const Index = () => {
                   <PostCard 
                     post={post} 
                     isFirst={false}
-                    isLast={index === sortedPosts.length - 1}
+                    isLast={index === sortedPosts.length - 1 && !hasNextPage}
                   />
                   {index !== sortedPosts.length - 1 && (
                     <div className="mx-4 h-[1px] bg-gray-700/80"></div>
                   )}
                 </div>
               ))}
+              
+              {/* Loading indicator for infinite scroll */}
+              {loadingMore && (
+                <div className="p-8 text-center border-t border-sidebar-border">
+                  <p className="text-muted-foreground">Loading more posts...</p>
+                </div>
+              )}
+              
+              {/* End of posts indicator */}
+              {!hasNextPage && posts.length > 0 && (
+                <div className="p-4 text-center border-t border-sidebar-border">
+                  <p className="text-muted-foreground text-sm">You've reached the end!</p>
+                </div>
+              )}
             </div>
           ) : (
             <div className="bg-sidebar/30 p-8 border border-sidebar-border rounded-lg text-center w-full">
