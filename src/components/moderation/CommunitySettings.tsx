@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -87,7 +88,7 @@ const CommunitySettings = ({ community, onCommunityUpdate }: CommunitySettingsPr
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://moonmovement.onrender.com/api/community/${community.id}`, {
+      const response = await fetch(`${API_BASE_URL}/community/${community.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

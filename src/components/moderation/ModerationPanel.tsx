@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -75,7 +76,7 @@ const ModerationPanel = ({ subreddit, userPermissions, community, onCommunityUpd
 
   const fetchModerators = async () => {
     try {
-      const response = await fetch(`https://moonmovement.onrender.com/api/moderation/${subreddit}/moderators`);
+      const response = await fetch(`${API_BASE_URL}/moderation/${subreddit}/moderators`);
       if (response.ok) {
         const data = await response.json();
         setModerators(data);
@@ -88,7 +89,7 @@ const ModerationPanel = ({ subreddit, userPermissions, community, onCommunityUpd
   const fetchModerationLog = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://moonmovement.onrender.com/api/moderation/${subreddit}/log`, {
+      const response = await fetch(`${API_BASE_URL}/moderation/${subreddit}/log`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -108,7 +109,7 @@ const ModerationPanel = ({ subreddit, userPermissions, community, onCommunityUpd
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://moonmovement.onrender.com/api/moderation/${subreddit}/moderators`, {
+      const response = await fetch(`${API_BASE_URL}/moderation/${subreddit}/moderators`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -150,7 +151,7 @@ const ModerationPanel = ({ subreddit, userPermissions, community, onCommunityUpd
   const removeModerator = async (userId: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://moonmovement.onrender.com/api/moderation/${subreddit}/moderators/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/moderation/${subreddit}/moderators/${userId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

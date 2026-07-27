@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -38,7 +39,7 @@ const Communities = () => {
   const fetchCommunities = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://moonmovement.onrender.com/api/community');
+      const response = await fetch(`${API_BASE_URL}/community`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch communities');
@@ -53,7 +54,7 @@ const Communities = () => {
           communitiesData.map(async (community: Community) => {
             try {
               const membershipResponse = await fetch(
-                `https://moonmovement.onrender.com/api/community/${community.id}/membership`,
+                `${API_BASE_URL}/community/${community.id}/membership`,
                 {
                   headers: {
                     'Authorization': `Bearer ${token}`
@@ -95,7 +96,7 @@ const Communities = () => {
       const endpoint = isCurrentlyJoined ? 'leave' : 'join';
       const method = isCurrentlyJoined ? 'DELETE' : 'POST';
       
-      const response = await fetch(`https://moonmovement.onrender.com/api/community/${communityId}/${endpoint}`, {
+      const response = await fetch(`${API_BASE_URL}/community/${communityId}/${endpoint}`, {
         method,
         headers: {
           'Authorization': `Bearer ${token}`

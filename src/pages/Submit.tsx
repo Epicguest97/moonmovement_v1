@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -45,7 +46,7 @@ const Submit = () => {
     const fetchCommunities = async () => {
       try {
         setCommunitiesLoading(true);
-        const response = await fetch('https://moonmovement.onrender.com/api/community');
+        const response = await fetch(`${API_BASE_URL}/community`);
         
         if (response.ok) {
           const data = await response.json();
@@ -147,7 +148,7 @@ const Submit = () => {
     };
 
     try {
-      const response = await fetch('https://moonmovement.onrender.com/api/posts', {
+      const response = await fetch(`${API_BASE_URL}/posts`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

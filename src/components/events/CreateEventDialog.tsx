@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useState } from 'react';
 import { Calendar, MapPin, Clock, Users } from 'lucide-react';
 import {
@@ -48,7 +49,7 @@ const CreateEventDialog = ({ open, onOpenChange, onEventCreated }: CreateEventDi
     setLoading(true);
     try {
       // Remove the token from the request
-      const response = await fetch('https://moonmovement.onrender.com/api/events', {
+      const response = await fetch(`${API_BASE_URL}/events`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

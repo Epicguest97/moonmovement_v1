@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
@@ -59,7 +60,7 @@ const IndianDistricts = () => {
   const fetchStartups = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://moonmovement.onrender.com/api/startups');
+      const response = await fetch(`${API_BASE_URL}/startups`);
       if (!response.ok) throw new Error('Failed to fetch startups');
       const data = await response.json();
       setStartups(data);

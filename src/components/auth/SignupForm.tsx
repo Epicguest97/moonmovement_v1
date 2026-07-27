@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -61,7 +62,7 @@ const SignupForm = ({ onSwitchToLogin }: SignupFormProps) => {
     console.log('Google response:', response); // Debug response object
     
     try {
-      const res = await fetch('https://moonmovement.onrender.com/api/auth/google', {
+      const res = await fetch(`${API_BASE_URL}/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -97,7 +98,7 @@ const SignupForm = ({ onSwitchToLogin }: SignupFormProps) => {
     }
     setIsLoading(true);
     try {
-      const res = await fetch('https://moonmovement.onrender.com/api/auth/signup', {
+      const res = await fetch(`${API_BASE_URL}/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, email, password })

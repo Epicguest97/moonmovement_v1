@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,7 +58,7 @@ const ChatWindow = ({ room, currentUserId, onMessageSent, onBack, isMobile = fal
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://moonmovement.onrender.com/api/chat/rooms/${room.id}/messages`, {
+      const response = await fetch(`${API_BASE_URL}/chat/rooms/${room.id}/messages`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -81,7 +82,7 @@ const ChatWindow = ({ room, currentUserId, onMessageSent, onBack, isMobile = fal
     try {
       setSending(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://moonmovement.onrender.com/api/chat/rooms/${room.id}/messages`, {
+      const response = await fetch(`${API_BASE_URL}/chat/rooms/${room.id}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

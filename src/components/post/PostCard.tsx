@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import PostHeader from './PostHeader';
@@ -56,7 +57,7 @@ export const PostCard = ({ post, isFirst = true, isLast = false, onPostUpdate }:
     }
 
     try {
-      const response = await fetch(`https://moonmovement.onrender.com/api/posts/${post.id}`, {
+      const response = await fetch(`${API_BASE_URL}/posts/${post.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

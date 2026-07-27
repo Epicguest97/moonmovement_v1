@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,7 +24,7 @@ const Sidebar = () => {
   useEffect(() => {
     const fetchCommunities = async () => {
       try {
-        const response = await fetch('https://moonmovement.onrender.com/api/community');
+        const response = await fetch(`${API_BASE_URL}/community`);
         if (response.ok) {
           const data = await response.json();
           setCommunities(data.slice(0, 5)); // Show top 5 communities

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -96,7 +97,7 @@ const Profile = () => {
         // Fetch user activities
         if (token) {
           const userId = typeof user.id === 'number' ? user.id : parseInt(user.id?.toString() || '1');
-          const activitiesResponse = await fetch(`https://moonmovement.onrender.com/api/user-activity/${userId}`, {
+          const activitiesResponse = await fetch(`${API_BASE_URL}/user-activity/${userId}`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -108,7 +109,7 @@ const Profile = () => {
           }
 
           // Fetch joined communities
-          const communitiesResponse = await fetch('https://moonmovement.onrender.com/api/community', {
+          const communitiesResponse = await fetch(`${API_BASE_URL}/community`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -121,7 +122,7 @@ const Profile = () => {
         }
 
         // Fetch user posts
-        const postsResponse = await fetch('https://moonmovement.onrender.com/api/posts');
+        const postsResponse = await fetch(`${API_BASE_URL}/posts`);
         if (postsResponse.ok) {
           const posts = await postsResponse.json();
           const filteredPosts = posts.filter((post: any) => post.author.username === user.username);
@@ -179,7 +180,7 @@ const Profile = () => {
       
       // Save to backend
       const token = localStorage.getItem('token');
-      const response = await fetch('https://moonmovement.onrender.com/api/auth/profile', {
+      const response = await fetch(`${API_BASE_URL}/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -220,7 +221,7 @@ const Profile = () => {
       
       // Save to backend
       const token = localStorage.getItem('token');
-      const response = await fetch('https://moonmovement.onrender.com/api/auth/profile', {
+      const response = await fetch(`${API_BASE_URL}/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

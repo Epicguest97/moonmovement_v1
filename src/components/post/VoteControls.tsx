@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 
 import React, { useState } from 'react';
 import { ArrowUp, ArrowDown } from 'lucide-react';
@@ -21,7 +22,7 @@ const VoteControls = ({
 
   const handleVote = async (direction: 'up' | 'down') => {
     try {
-      const response = await fetch(`https://moonmovement.onrender.com/api/posts/${postId}/vote`, {
+      const response = await fetch(`${API_BASE_URL}/posts/${postId}/vote`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

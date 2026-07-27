@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -57,7 +58,7 @@ const UserManagement = ({ subreddit, canManageUsers }: UserManagementProps) => {
   const fetchBannedUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://moonmovement.onrender.com/api/moderation/${subreddit}/banned`, {
+      const response = await fetch(`${API_BASE_URL}/moderation/${subreddit}/banned`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -78,7 +79,7 @@ const UserManagement = ({ subreddit, canManageUsers }: UserManagementProps) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://moonmovement.onrender.com/api/moderation/${subreddit}/ban`, {
+      const response = await fetch(`${API_BASE_URL}/moderation/${subreddit}/ban`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -117,7 +118,7 @@ const UserManagement = ({ subreddit, canManageUsers }: UserManagementProps) => {
   const handleUnbanUser = async (userId: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://moonmovement.onrender.com/api/moderation/${subreddit}/ban/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/moderation/${subreddit}/ban/${userId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

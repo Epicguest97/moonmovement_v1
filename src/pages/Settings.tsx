@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 
 import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
@@ -38,7 +39,7 @@ const Settings = () => {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://moonmovement.onrender.com/api/auth/profile', {
+      const response = await fetch(`${API_BASE_URL}/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -77,7 +78,7 @@ const Settings = () => {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://moonmovement.onrender.com/api/auth/account', {
+      const response = await fetch(`${API_BASE_URL}/auth/account`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -134,7 +135,7 @@ const Settings = () => {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://moonmovement.onrender.com/api/auth/password', {
+      const response = await fetch(`${API_BASE_URL}/auth/password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

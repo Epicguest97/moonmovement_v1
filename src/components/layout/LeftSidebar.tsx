@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -94,7 +95,7 @@ const LeftSidebar = () => {
   const fetchEvents = async () => {
     try {
       setLoadingEvents(true);
-      const response = await fetch('https://moonmovement.onrender.com/api/events?upcoming=true');
+      const response = await fetch(`${API_BASE_URL}/events?upcoming=true`);
       if (response.ok) {
         const data = await response.json();
         // Get only upcoming events, max 5
@@ -113,7 +114,7 @@ const LeftSidebar = () => {
   const fetchNews = async () => {
     try {
       setLoadingNews(true);
-      const response = await fetch('https://moonmovement.onrender.com/api/news');
+      const response = await fetch(`${API_BASE_URL}/news`);
       if (response.ok) {
         const data = await response.json();
         // Get latest 5 news items
@@ -130,7 +131,7 @@ const LeftSidebar = () => {
   const fetchCommunities = async () => {
     try {
       setLoadingCommunities(true);
-      const response = await fetch('https://moonmovement.onrender.com/api/community');
+      const response = await fetch(`${API_BASE_URL}/community`);
       if (response.ok) {
         const data = await response.json();
         // Get top 5 communities by member count
@@ -149,7 +150,7 @@ const LeftSidebar = () => {
   const fetchCities = async () => {
     try {
       setLoadingCities(true);
-      const response = await fetch('https://moonmovement.onrender.com/api/districts');
+      const response = await fetch(`${API_BASE_URL}/districts`);
       if (response.ok) {
         const data = await response.json();
         setCities(data.slice(0, 5));

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, X, Minus } from 'lucide-react';
@@ -50,7 +51,7 @@ const FloatingChatWidget = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('https://moonmovement.onrender.com/api/chat/rooms', {
+      const response = await fetch(`${API_BASE_URL}/chat/rooms`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

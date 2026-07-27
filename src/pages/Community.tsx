@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -68,7 +69,7 @@ const Community = () => {
           // Still check membership as that's user-specific
           if (isLoggedIn && cachedData.id) {
             const token = localStorage.getItem('token');
-            const membershipResponse = await fetch(`https://moonmovement.onrender.com/api/community/${cachedData.id}/membership`, {
+            const membershipResponse = await fetch(`${API_BASE_URL}/community/${cachedData.id}/membership`, {
               headers: {
                 'Authorization': `Bearer ${token}`
               }
@@ -84,7 +85,7 @@ const Community = () => {
         }
         
         // First attempt: try to fetch specific community by name
-        const response = await fetch(`https://moonmovement.onrender.com/api/community/name/${communityName}`);
+        const response = await fetch(`${API_BASE_URL}/community/name/${communityName}`);
         
         let communityData;
         
@@ -94,7 +95,7 @@ const Community = () => {
           setCommunity(communityData);
         } else {
           // Fallback: fetch all communities and filter
-          const allCommunitiesResponse = await fetch('https://moonmovement.onrender.com/api/community');
+          const allCommunitiesResponse = await fetch(`${API_BASE_URL}/community`);
           if (!allCommunitiesResponse.ok) {
             throw new Error('Failed to fetch communities');
           }
@@ -113,7 +114,7 @@ const Community = () => {
         // Check membership if user is logged in - use the local variable
         if (isLoggedIn && communityData?.id) {
           const token = localStorage.getItem('token');
-          const membershipResponse = await fetch(`https://moonmovement.onrender.com/api/community/${communityData.id}/membership`, {
+          const membershipResponse = await fetch(`${API_BASE_URL}/community/${communityData.id}/membership`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -128,7 +129,7 @@ const Community = () => {
         // Check moderation status for the subreddit name
         if (isLoggedIn && communityName) {
           const token = localStorage.getItem('token');
-          const modResponse = await fetch(`https://moonmovement.onrender.com/api/moderation/${communityName}/check`, {
+          const modResponse = await fetch(`${API_BASE_URL}/moderation/${communityName}/check`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -160,7 +161,7 @@ const Community = () => {
       
       try {
         setPostsLoading(true);
-        const response = await fetch(`https://moonmovement.onrender.com/api/posts/community/${communityName}`);
+        const response = await fetch(`${API_BASE_URL}/posts/community/${communityName}`);
         
         if (response.ok) {
           const postsData = await response.json();
@@ -196,7 +197,7 @@ const Community = () => {
       const endpoint = isMember ? 'leave' : 'join';
       const method = isMember ? 'DELETE' : 'POST';
       
-      const response = await fetch(`https://moonmovement.onrender.com/api/community/${community.id}/${endpoint}`, {
+      const response = await fetch(`${API_BASE_URL}/community/${community.id}/${endpoint}`, {
         method,
         headers: {
           'Authorization': `Bearer ${token}`

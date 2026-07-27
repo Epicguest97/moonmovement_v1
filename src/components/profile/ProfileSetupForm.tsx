@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -55,7 +56,7 @@ const ProfileSetupForm = () => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Authentication token not found');
 
-      const res = await fetch('https://moonmovement.onrender.com/api/auth/profile', {
+      const res = await fetch(`${API_BASE_URL}/auth/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`

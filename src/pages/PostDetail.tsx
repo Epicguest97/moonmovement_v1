@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -62,7 +63,7 @@ const PostDetail = () => {
   const fetchPost = () => {
     if (id) {
       console.log('Fetching post with ID:', id);
-      fetch(`https://moonmovement.onrender.com/api/posts/${id}`)
+      fetch(`${API_BASE_URL}/posts/${id}`)
         .then(res => {
           if (!res.ok) {
             throw new Error('Post not found');
@@ -94,7 +95,7 @@ const PostDetail = () => {
 
   const fetchComments = () => {
     if (id) {
-      fetch(`https://moonmovement.onrender.com/api/comments/post/${id}`)
+      fetch(`${API_BASE_URL}/comments/post/${id}`)
         .then(res => res.json())
         .then(data => {
           console.log('Comments data:', data);
@@ -120,7 +121,7 @@ const PostDetail = () => {
     }
 
     try {
-      const res = await fetch(`https://moonmovement.onrender.com/api/posts/${post.id}/like`, {
+      const res = await fetch(`${API_BASE_URL}/posts/${post.id}/like`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username })
@@ -152,7 +153,7 @@ const PostDetail = () => {
     };
     
     try {
-      const res = await fetch('https://moonmovement.onrender.com/api/comments', {
+      const res = await fetch(`${API_BASE_URL}/comments`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -201,7 +202,7 @@ const PostDetail = () => {
     console.log('Submitting reply data:', replyData);
     
     try {
-      const res = await fetch('https://moonmovement.onrender.com/api/comments', {
+      const res = await fetch(`${API_BASE_URL}/comments`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -231,7 +232,7 @@ const PostDetail = () => {
     }
 
     try {
-      const response = await fetch(`https://moonmovement.onrender.com/api/posts/${post.id}`, {
+      const response = await fetch(`${API_BASE_URL}/posts/${post.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

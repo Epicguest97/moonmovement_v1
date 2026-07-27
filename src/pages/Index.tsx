@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -33,7 +34,7 @@ const Index = () => {
       
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`https://moonmovement.onrender.com/api/posts?page=${page}&limit=10`, {
+      const response = await fetch(`${API_BASE_URL}/posts?page=${page}&limit=10`, {
         headers: {
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         }

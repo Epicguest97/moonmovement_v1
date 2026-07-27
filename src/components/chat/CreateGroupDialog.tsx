@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -34,7 +35,7 @@ const CreateGroupDialog = ({ open, onClose, onCreateGroup }: CreateGroupDialogPr
   const fetchFriends = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://moonmovement.onrender.com/api/chat/friends', {
+      const response = await fetch(`${API_BASE_URL}/chat/friends`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

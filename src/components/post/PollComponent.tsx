@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -46,7 +47,7 @@ const PollComponent = ({ poll, postId }: PollComponentProps) => {
 
     setLoading(true);
     try {
-      const response = await fetch(`https://moonmovement.onrender.com/api/posts/${postId}/poll/vote`, {
+      const response = await fetch(`${API_BASE_URL}/posts/${postId}/poll/vote`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

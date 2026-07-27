@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -35,7 +36,7 @@ const UnicornsIndia = () => {
     const fetchStartups = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://moonmovement.onrender.com/api/startups');
+        const response = await fetch(`${API_BASE_URL}/startups`);
         if (!response.ok) {
           throw new Error('Failed to fetch startups');
         }

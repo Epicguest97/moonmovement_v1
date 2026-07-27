@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
@@ -35,7 +36,7 @@ const StartupDetail = () => {
 
       try {
         setLoading(true);
-        const response = await fetch(`https://moonmovement.onrender.com/api/startups/${startupId}`);
+        const response = await fetch(`${API_BASE_URL}/startups/${startupId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch startup');
         }

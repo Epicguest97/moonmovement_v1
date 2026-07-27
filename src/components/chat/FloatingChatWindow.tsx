@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Minus, Send, MoreVertical } from 'lucide-react';
@@ -59,7 +60,7 @@ const FloatingChatWindow = ({ room, currentUserId, onClose, onMessageSent }: Flo
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://moonmovement.onrender.com/api/chat/rooms/${room.id}/messages`, {
+      const response = await fetch(`${API_BASE_URL}/chat/rooms/${room.id}/messages`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -83,7 +84,7 @@ const FloatingChatWindow = ({ room, currentUserId, onClose, onMessageSent }: Flo
     try {
       setSending(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://moonmovement.onrender.com/api/chat/rooms/${room.id}/messages`, {
+      const response = await fetch(`${API_BASE_URL}/chat/rooms/${room.id}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

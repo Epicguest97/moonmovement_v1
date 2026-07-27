@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
@@ -60,7 +61,7 @@ const Search = () => {
     
     setLoading(true);
     try {
-      const baseUrl = 'https://moonmovement.onrender.com/api/search';
+      const baseUrl = `${API_BASE_URL}/search`;
       
       // Search users
       const usersResponse = await fetch(`${baseUrl}/users?q=${encodeURIComponent(searchQuery)}`);

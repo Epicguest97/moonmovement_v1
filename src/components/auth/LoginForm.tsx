@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -67,7 +68,7 @@ const LoginForm = ({ onSwitchToSignup }: LoginFormProps) => {
         throw new Error('No credential received from Google');
       }
       
-      const res = await fetch('https://moonmovement.onrender.com/api/auth/google', {
+      const res = await fetch(`${API_BASE_URL}/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -114,7 +115,7 @@ const LoginForm = ({ onSwitchToSignup }: LoginFormProps) => {
     setIsLoading(true);
     setError('');
     try {
-      const res = await fetch('https://moonmovement.onrender.com/api/auth/login', {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })

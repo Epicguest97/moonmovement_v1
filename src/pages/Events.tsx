@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 
 import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, Users, Clock, Plus, Search } from 'lucide-react';
@@ -47,7 +48,7 @@ const Events = () => {
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch(`https://moonmovement.onrender.com/api/events`);
+      const response = await fetch(`${API_BASE_URL}/events`);
       if (response.ok) {
         const data = await response.json();
         setEvents(data);
@@ -80,7 +81,7 @@ const Events = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://moonmovement.onrender.com/api/events/${eventId}/register`, {
+      const response = await fetch(`${API_BASE_URL}/events/${eventId}/register`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

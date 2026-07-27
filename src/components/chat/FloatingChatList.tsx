@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 
 import React, { useState } from 'react';
 import { X, Minus, Search, Plus, Users } from 'lucide-react';
@@ -79,7 +80,7 @@ const FloatingChatList = ({ rooms, loading, onChatSelect, onMinimize, currentUse
   const handleNewChat = async (username: string) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://moonmovement.onrender.com/api/chat/start', {
+      const response = await fetch(`${API_BASE_URL}/chat/start`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,7 +102,7 @@ const FloatingChatList = ({ rooms, loading, onChatSelect, onMinimize, currentUse
   const handleCreateGroup = async (name: string, userIds: number[]) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://moonmovement.onrender.com/api/chat/groups/create', {
+      const response = await fetch(`${API_BASE_URL}/chat/groups/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

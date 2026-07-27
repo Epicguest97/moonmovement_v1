@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -83,7 +84,7 @@ const Comment = ({ comment, depth = 0, postId, onReplySubmit, onCommentUpdate }:
     }
 
     try {
-      const response = await fetch(`https://moonmovement.onrender.com/api/comments/${comment.id}`, {
+      const response = await fetch(`${API_BASE_URL}/comments/${comment.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -46,7 +47,7 @@ const CreateCommunityForm = ({ onCommunityCreated }: CreateCommunityFormProps) =
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://moonmovement.onrender.com/api/community', {
+      const response = await fetch(`${API_BASE_URL}/community`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -36,7 +37,7 @@ const NewsDetail = () => {
       try {
         setLoading(true);
         // Changed to fetch from the news API instead of posts API
-        const response = await fetch('https://moonmovement.onrender.com/api/news');
+        const response = await fetch(`${API_BASE_URL}/news`);
         if (!response.ok) {
           throw new Error('Failed to fetch news');
         }

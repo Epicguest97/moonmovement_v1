@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
@@ -67,7 +68,7 @@ const Chat = () => {
   const fetchChatRooms = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://moonmovement.onrender.com/api/chat/rooms', {
+      const response = await fetch(`${API_BASE_URL}/chat/rooms`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -87,7 +88,7 @@ const Chat = () => {
   const updateOnlineStatus = async (isOnline: boolean) => {
     try {
       const token = localStorage.getItem('token');
-      await fetch('https://moonmovement.onrender.com/api/chat/status', {
+      await fetch(`${API_BASE_URL}/chat/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -111,7 +112,7 @@ const Chat = () => {
   const handleNewChat = async (username: string) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://moonmovement.onrender.com/api/chat/start', {
+      const response = await fetch(`${API_BASE_URL}/chat/start`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -134,7 +135,7 @@ const Chat = () => {
   const handleCreateGroup = async (name: string, userIds: number[]) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://moonmovement.onrender.com/api/chat/groups/create', {
+      const response = await fetch(`${API_BASE_URL}/chat/groups/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

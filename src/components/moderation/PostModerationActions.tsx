@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -34,7 +35,7 @@ const PostModerationActions = ({ postId, subreddit, canManagePosts, onPostRemove
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://moonmovement.onrender.com/api/moderation/${subreddit}/posts/${postId}`, {
+      const response = await fetch(`${API_BASE_URL}/moderation/${subreddit}/posts/${postId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +75,7 @@ const PostModerationActions = ({ postId, subreddit, canManagePosts, onPostRemove
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://moonmovement.onrender.com/api/moderation/${subreddit}/posts/${postId}/approve`, {
+      const response = await fetch(`${API_BASE_URL}/moderation/${subreddit}/posts/${postId}/approve`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

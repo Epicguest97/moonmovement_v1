@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -73,7 +74,7 @@ const UserProfile = () => {
         setLoading(true);
         setError(null);
         
-        const response = await fetch(`https://moonmovement.onrender.com/api/auth/user/${username}`);
+        const response = await fetch(`${API_BASE_URL}/auth/user/${username}`);
         
         if (response.ok) {
           const userData = await response.json();
@@ -111,7 +112,7 @@ const UserProfile = () => {
     try {
       setStartingChat(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('https://moonmovement.onrender.com/api/chat/start', {
+      const response = await fetch(`${API_BASE_URL}/chat/start`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -141,7 +142,7 @@ const UserProfile = () => {
     try {
       setAddingFriend(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('https://moonmovement.onrender.com/api/chat/friends/add', {
+      const response = await fetch(`${API_BASE_URL}/chat/friends/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

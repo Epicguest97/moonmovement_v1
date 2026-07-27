@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -48,7 +49,7 @@ const EventDetail = () => {
 
   const fetchEvent = async () => {
     try {
-      const response = await fetch(`https://moonmovement.onrender.com/api/events/${id}`);
+      const response = await fetch(`${API_BASE_URL}/events/${id}`);
       if (response.ok) {
         const data = await response.json();
         setEvent(data);
@@ -68,7 +69,7 @@ const EventDetail = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://moonmovement.onrender.com/api/events/${event.id}/register`, {
+      const response = await fetch(`${API_BASE_URL}/events/${event.id}/register`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
